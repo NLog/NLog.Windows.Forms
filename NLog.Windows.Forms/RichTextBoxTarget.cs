@@ -333,7 +333,7 @@ namespace NLog.Windows.Forms
                 {
                     rtbx.SelectionStart = 0;
                     rtbx.SelectionLength = rtbx.GetFirstCharIndexFromLine(1);
-                    rtbx.Text = rtbx.Text.Remove(rtbx.SelectionStart, rtbx.SelectionLength);
+                    rtbx.SelectedRtf = "{\\rtf1\\ansi}";
                     lineCount--;
                 }
             }
