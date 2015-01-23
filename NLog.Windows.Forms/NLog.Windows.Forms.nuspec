@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>NLog.Windows.Forms</id>
+    <version>$version$</version>
+    <title>NLog.Windows.Forms</title>
+    <authors>NLog</authors>
+    <owners>NLog</owners>
+    <licenseUrl>https://github.com/NLog/NLog-Contrib/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/NLog/NLog-Contrib</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Contains targets for Windows Forms applications.</description>
+    <releaseNotes>Community contributed custom target for NLog.</releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>nlog target forms</tags>
+  </metadata>
+</package>
