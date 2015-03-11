@@ -209,6 +209,12 @@ namespace NLog.Windows.Forms
         /// </summary>
         protected override void InitializeTarget()
         {
+			if (TargetRichTextBox != null && TargetForm != null) 
+			{
+				CreatedForm = false;
+				return;
+			}
+
             if (FormName == null)
             {
                 FormName = "NLogForm" + Guid.NewGuid().ToString("N");
