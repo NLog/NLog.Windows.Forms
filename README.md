@@ -1,4 +1,5 @@
 # NLog.Windows.Forms
+[![Version](https://img.shields.io/nuget/v/NLog.Windows.Forms.svg)](https://www.nuget.org/packages/NLog.Windows.Forms)
 NLog targets specific for Windows.Forms
 
 ##How to use
