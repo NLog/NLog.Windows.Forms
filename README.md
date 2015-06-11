@@ -1,5 +1,8 @@
 # NLog.Windows.Forms
 [![Version](https://img.shields.io/nuget/v/NLog.Windows.Forms.svg)](https://www.nuget.org/packages/NLog.Windows.Forms)
+
+Extensions to [NLog](https://github.com/NLog/NLog/).
+
 NLog targets specific for Windows.Forms
 
 ##How to use
