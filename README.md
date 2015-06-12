@@ -15,3 +15,8 @@ See https://github.com/Nlog/Nlog/wiki/How-to-write-a-Target#how-to-use-the-newly
 [MessageBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/MessageBoxTarget)
 
 [FormControlTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/FormControlTarget)
+
+License
+---
+NLog is open source software, licensed under the terms of BSD license. 
+See LICENSE.txt for details.
