@@ -15,3 +15,7 @@ targets specific for Windows.Forms
 
 ##How to use
 When installing with Nuget, no additional configuration is needed.
+
+
+##License
+BSD
