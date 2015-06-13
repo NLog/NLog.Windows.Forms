@@ -4,14 +4,14 @@
 
 Extensions to [NLog](https://github.com/NLog/NLog/).
 
-NLog targets specific for Windows.Forms
+This package contains 
+targets specific for Windows.Forms
+ 
+###Targets
+* [RichTextBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/RichTextBoxTarget)
+* [MessageBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/MessageBoxTarget)
+* [FormControlTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/FormControlTarget)
+
 
 ##How to use
-See https://github.com/Nlog/Nlog/wiki/How-to-write-a-Target#how-to-use-the-newly-created-target, for how to enable the target.
-
-##Documentation
-[RichTextBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/RichTextBoxTarget)
-
-[MessageBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/MessageBoxTarget)
-
-[FormControlTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/FormControlTarget)
+When installing with Nuget, no additional configuration is needed.
