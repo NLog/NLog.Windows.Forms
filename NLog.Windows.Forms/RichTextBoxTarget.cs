@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using NLog.Config;
@@ -59,8 +60,6 @@ namespace NLog.Windows.Forms
     [Target("RichTextBox")]
     public sealed class RichTextBoxTarget : TargetWithLayout
     {
-        private int lineCount;
-
         /// <summary>
         /// Initializes static members of the RichTextBoxTarget class.
         /// </summary>
@@ -328,13 +327,18 @@ namespace NLog.Windows.Forms
 
             if (MaxLines > 0)
             {
-                lineCount++;
-                if (lineCount > MaxLines)
+                var lastLineWithContent = rtbx.Lines.LastOrDefault(f => !string.IsNullOrEmpty(f));
+                if (lastLineWithContent != null)
                 {
-                    rtbx.SelectionStart = 0;
-                    rtbx.SelectionLength = rtbx.GetFirstCharIndexFromLine(1);
-                    rtbx.SelectedRtf = "{\\rtf1\\ansi}";
-                    lineCount--;
+                    char lastChar = lastLineWithContent.Last();
+                    var visibleLineCount = rtbx.GetLineFromCharIndex(rtbx.Text.LastIndexOf(lastChar));
+                    var tooManyLines = (visibleLineCount - MaxLines) + 1;
+                    if (tooManyLines > 0)
+                    {
+                        rtbx.SelectionStart = 0;
+                        rtbx.SelectionLength = rtbx.GetFirstCharIndexFromLine(tooManyLines);
+                        rtbx.SelectedRtf = "{\\rtf1\\ansi}";
+                    }
                 }
             }
 
