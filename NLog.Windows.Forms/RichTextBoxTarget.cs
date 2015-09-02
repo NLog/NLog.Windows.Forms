@@ -58,7 +58,7 @@ namespace NLog.Windows.Forms
     /// for WordColoring
     /// </example>
     [Target("RichTextBox")]
-    public class RichTextBoxTarget : TargetWithLayout
+    public sealed class RichTextBoxTarget : TargetWithLayout
     {
         /// <summary>
         /// Initializes static members of the RichTextBoxTarget class.
