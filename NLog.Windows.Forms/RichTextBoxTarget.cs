@@ -201,6 +201,9 @@ namespace NLog.Windows.Forms
         /// </summary>
         public RichTextBox TargetRichTextBox { get; set; }
 
+        /// <summary>
+        /// Form created (true) or used an existing (false). Set after <see cref="InitializeTarget"/>
+        /// </summary>
         public bool CreatedForm { get; set; }
 
         /// <summary>
