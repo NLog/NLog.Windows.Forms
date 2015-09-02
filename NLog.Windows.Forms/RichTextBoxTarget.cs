@@ -325,8 +325,10 @@ namespace NLog.Windows.Forms
                 }
             }
 
+            //remove some lines if there above the max
             if (MaxLines > 0)
             {
+                //find the last line by reading the textbox
                 var lastLineWithContent = textBox.Lines.LastOrDefault(f => !string.IsNullOrEmpty(f));
                 if (lastLineWithContent != null)
                 {
