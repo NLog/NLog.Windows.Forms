@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Windows.Forms;
 using NLog.Common;
@@ -62,7 +63,20 @@ namespace NLog.Windows.Forms
             Justification = "This is just debugging output.")]
         protected override void Write(LogEventInfo logEvent)
         {
-            MessageBox.Show(this.Layout.Render(logEvent), this.Caption.Render(logEvent));
+            try
+            {
+                MessageBox.Show(this.Layout.Render(logEvent), this.Caption.Render(logEvent));
+            }
+            catch (Exception ex)
+            {
+                InternalLogger.Warn(ex.ToString());
+
+                if (LogManager.ThrowExceptions)
+                {
+                    throw;
+                }
+            }
+       
         }
 
         /// <summary>
