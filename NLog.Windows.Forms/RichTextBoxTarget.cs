@@ -309,6 +309,13 @@ namespace NLog.Windows.Forms
                 TargetForm.BeginInvoke((FormCloseDelegate)TargetForm.Close);
                 TargetForm = null;
             }
+
+            RichTextBoxTarget target;
+            s_controlsToTargets.TryRemove(key, out target);
+            if (target != this)
+            {
+                throw new NLogConfigurationException("Two targets cannot refer to same control: " + key + ".");
+            }
         }
 
         /// <summary>
