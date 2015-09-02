@@ -19,6 +19,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 
@@ -208,34 +209,59 @@ namespace NLog.Windows.Forms
         /// </summary>
         protected override void InitializeTarget()
         {
+
             if (FormName == null)
             {
+                InternalLogger.Info("FormName not set, creating a new form");
                 FormName = "NLogForm" + Guid.NewGuid().ToString("N");
-            }
-
-            var openFormByName = Application.OpenForms[FormName];
-            if (openFormByName != null)
-            {
-                TargetForm = openFormByName;
-                if (string.IsNullOrEmpty(ControlName))
-                {
-                    throw new NLogConfigurationException("Rich text box control name must be specified for " + GetType().Name + ".");
-                }
-
-                CreatedForm = false;
-                TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
-
-                if (TargetRichTextBox == null)
-                {
-                    throw new NLogConfigurationException("Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'.");
-                }
             }
             else
             {
-                TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
-                TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
-                CreatedForm = true;
+
+                var openFormByName = Application.OpenForms[FormName];
+                if (openFormByName != null)
+                {
+                    bool error = false;
+                    TargetForm = openFormByName;
+                    if (string.IsNullOrEmpty(ControlName))
+                    {
+                        error = true;
+                        var message = "Rich text box control name must be specified for " + GetType().Name + ".";
+                        if (LogManager.ThrowExceptions)
+                        {
+                            throw new NLogConfigurationException(message);
+                        }
+
+                        InternalLogger.Error(message);
+                    }
+
+                    CreatedForm = false;
+                    TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
+
+
+                    if (TargetRichTextBox == null)
+                    {
+                        error = true;
+                        var message = "Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'.";
+                        if (LogManager.ThrowExceptions)
+                        {
+                            throw new NLogConfigurationException(message);
+                        }
+                        InternalLogger.Error(message);
+                    }
+                    if (!error)
+                        return;
+                }
+                else
+                {
+                    InternalLogger.Info("Form {0} not found, creating a new one", FormName);
+                }
             }
+            //not done yet
+
+            TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
+            TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
+            CreatedForm = true;
         }
 
         /// <summary>
@@ -245,7 +271,20 @@ namespace NLog.Windows.Forms
         {
             if (CreatedForm)
             {
-                TargetForm.BeginInvoke((FormCloseDelegate)TargetForm.Close);
+                try
+                {
+                    TargetForm.BeginInvoke((FormCloseDelegate)TargetForm.Close);
+                }
+                catch (Exception ex)
+                {
+                    InternalLogger.Warn(ex.ToString());
+
+                    if (LogManager.ThrowExceptions)
+                    {
+                        throw;
+                    }
+                }
+            
                 TargetForm = null;
             }
         }
@@ -260,7 +299,21 @@ namespace NLog.Windows.Forms
 
             string logMessage = Layout.Render(logEvent);
 
-            TargetRichTextBox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+            try
+            {
+                TargetRichTextBox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+            }
+            catch (Exception ex)
+            {
+
+                InternalLogger.Warn(ex.ToString());
+
+                if (LogManager.ThrowExceptions)
+                {
+                    throw;
+                }
+            }
+
         }
 
         /// <summary>
