@@ -256,37 +256,41 @@ namespace NLog.Windows.Forms
         /// <param name="logEvent">The logging event.</param>
         protected override void Write(LogEventInfo logEvent)
         {
-            RichTextBoxRowColoringRule matchingRule = null;
+            var matchingRule = FindMatchingRule(logEvent);
 
+            string logMessage = Layout.Render(logEvent);
+
+            TargetRichTextBox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+        }
+
+        /// <summary>
+        /// Find first matching rule
+        /// </summary>
+        /// <param name="logEvent"></param>
+        /// <returns></returns>
+        private RichTextBoxRowColoringRule FindMatchingRule(LogEventInfo logEvent)
+        {
+            //custom rules first
             foreach (RichTextBoxRowColoringRule coloringRule in RowColoringRules)
             {
                 if (coloringRule.CheckCondition(logEvent))
                 {
-                    matchingRule = coloringRule;
-                    break;
+                    return coloringRule;
                 }
             }
-
-            if (UseDefaultRowColoringRules && matchingRule == null)
+            
+            if (UseDefaultRowColoringRules)
             {
                 foreach (RichTextBoxRowColoringRule coloringRule in DefaultRowColoringRules)
                 {
                     if (coloringRule.CheckCondition(logEvent))
                     {
-                        matchingRule = coloringRule;
-                        break;
+                        return coloringRule;
                     }
                 }
             }
 
-            if (matchingRule == null)
-            {
-                matchingRule = RichTextBoxRowColoringRule.Default;
-            }
-
-            string logMessage = Layout.Render(logEvent);
-
-            TargetRichTextBox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+            return RichTextBoxRowColoringRule.Default;
         }
 
         private static Color GetColorFromString(string color, Color defaultColor)
