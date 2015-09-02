@@ -271,15 +271,18 @@ namespace NLog.Windows.Forms
         private RichTextBoxRowColoringRule FindMatchingRule(LogEventInfo logEvent)
         {
             //custom rules first
-            foreach (RichTextBoxRowColoringRule coloringRule in RowColoringRules)
+            if (RowColoringRules != null)
             {
-                if (coloringRule.CheckCondition(logEvent))
+                foreach (RichTextBoxRowColoringRule coloringRule in RowColoringRules)
                 {
-                    return coloringRule;
+                    if (coloringRule.CheckCondition(logEvent))
+                    {
+                        return coloringRule;
+                    }
                 }
             }
-            
-            if (UseDefaultRowColoringRules)
+
+            if (UseDefaultRowColoringRules && DefaultRowColoringRules != null)
             {
                 foreach (RichTextBoxRowColoringRule coloringRule in DefaultRowColoringRules)
                 {
