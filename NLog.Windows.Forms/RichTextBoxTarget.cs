@@ -258,22 +258,22 @@ namespace NLog.Windows.Forms
         {
             RichTextBoxRowColoringRule matchingRule = null;
 
-            foreach (RichTextBoxRowColoringRule rr in RowColoringRules)
+            foreach (RichTextBoxRowColoringRule coloringRule in RowColoringRules)
             {
-                if (rr.CheckCondition(logEvent))
+                if (coloringRule.CheckCondition(logEvent))
                 {
-                    matchingRule = rr;
+                    matchingRule = coloringRule;
                     break;
                 }
             }
 
             if (UseDefaultRowColoringRules && matchingRule == null)
             {
-                foreach (RichTextBoxRowColoringRule rr in DefaultRowColoringRules)
+                foreach (RichTextBoxRowColoringRule coloringRule in DefaultRowColoringRules)
                 {
-                    if (rr.CheckCondition(logEvent))
+                    if (coloringRule.CheckCondition(logEvent))
                     {
-                        matchingRule = rr;
+                        matchingRule = coloringRule;
                         break;
                     }
                 }
