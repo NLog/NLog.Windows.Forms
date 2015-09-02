@@ -301,51 +301,51 @@ namespace NLog.Windows.Forms
 
         private void SendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule)
         {
-            RichTextBox rtbx = TargetRichTextBox;
+            RichTextBox textBox = TargetRichTextBox;
 
-            int startIndex = rtbx.Text.Length;
-            rtbx.SelectionStart = startIndex;
-            rtbx.SelectionBackColor = GetColorFromString(rule.BackgroundColor, rtbx.BackColor);
-            rtbx.SelectionColor = GetColorFromString(rule.FontColor, rtbx.ForeColor);
-            rtbx.SelectionFont = new Font(rtbx.SelectionFont, rtbx.SelectionFont.Style ^ rule.Style);
-            rtbx.AppendText(logMessage + "\n");
-            rtbx.SelectionLength = rtbx.Text.Length - rtbx.SelectionStart;
+            int startIndex = textBox.Text.Length;
+            textBox.SelectionStart = startIndex;
+            textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor, textBox.BackColor);
+            textBox.SelectionColor = GetColorFromString(rule.FontColor, textBox.ForeColor);
+            textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
+            textBox.AppendText(logMessage + "\n");
+            textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
 
             // find word to color
             foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
             {
-                MatchCollection mc = wordRule.CompiledRegex.Matches(rtbx.Text, startIndex);
-                foreach (Match m in mc)
+                MatchCollection matches = wordRule.CompiledRegex.Matches(textBox.Text, startIndex);
+                foreach (Match match in matches)
                 {
-                    rtbx.SelectionStart = m.Index;
-                    rtbx.SelectionLength = m.Length;
-                    rtbx.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor, rtbx.BackColor);
-                    rtbx.SelectionColor = GetColorFromString(wordRule.FontColor, rtbx.ForeColor);
-                    rtbx.SelectionFont = new Font(rtbx.SelectionFont, rtbx.SelectionFont.Style ^ wordRule.Style);
+                    textBox.SelectionStart = match.Index;
+                    textBox.SelectionLength = match.Length;
+                    textBox.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor, textBox.BackColor);
+                    textBox.SelectionColor = GetColorFromString(wordRule.FontColor, textBox.ForeColor);
+                    textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ wordRule.Style);
                 }
             }
 
             if (MaxLines > 0)
             {
-                var lastLineWithContent = rtbx.Lines.LastOrDefault(f => !string.IsNullOrEmpty(f));
+                var lastLineWithContent = textBox.Lines.LastOrDefault(f => !string.IsNullOrEmpty(f));
                 if (lastLineWithContent != null)
                 {
                     char lastChar = lastLineWithContent.Last();
-                    var visibleLineCount = rtbx.GetLineFromCharIndex(rtbx.Text.LastIndexOf(lastChar));
+                    var visibleLineCount = textBox.GetLineFromCharIndex(textBox.Text.LastIndexOf(lastChar));
                     var tooManyLines = (visibleLineCount - MaxLines) + 1;
                     if (tooManyLines > 0)
                     {
-                        rtbx.SelectionStart = 0;
-                        rtbx.SelectionLength = rtbx.GetFirstCharIndexFromLine(tooManyLines);
-                        rtbx.SelectedRtf = "{\\rtf1\\ansi}";
+                        textBox.SelectionStart = 0;
+                        textBox.SelectionLength = textBox.GetFirstCharIndexFromLine(tooManyLines);
+                        textBox.SelectedRtf = "{\\rtf1\\ansi}";
                     }
                 }
             }
 
             if (AutoScroll)
             {
-                rtbx.Select(rtbx.TextLength, 0);
-                rtbx.ScrollToCaret();
+                textBox.Select(textBox.TextLength, 0);
+                textBox.ScrollToCaret();
             }
         }
     }
