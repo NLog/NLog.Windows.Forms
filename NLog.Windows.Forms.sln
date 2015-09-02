@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.Windows.Forms", "NLog.Windows.Forms\NLog.Windows.Forms.csproj", "{EB5C7E87-C5F4-43FC-AC71-BE0A22F5B932}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLog.Windows.Forms.Tests", "NLog.Windows.Forms.Tests\NLog.Windows.Forms.Tests.csproj", "{77ED37BE-37DD-4C16-B027-AD6B0EDE0B4F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "TestApplication\TestApplication.csproj", "{03D9D89A-B972-4446-AB4A-A430851243D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{77ED37BE-37DD-4C16-B027-AD6B0EDE0B4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77ED37BE-37DD-4C16-B027-AD6B0EDE0B4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77ED37BE-37DD-4C16-B027-AD6B0EDE0B4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03D9D89A-B972-4446-AB4A-A430851243D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03D9D89A-B972-4446-AB4A-A430851243D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03D9D89A-B972-4446-AB4A-A430851243D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03D9D89A-B972-4446-AB4A-A430851243D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
