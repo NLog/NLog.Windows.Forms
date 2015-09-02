@@ -20,6 +20,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using NLog.Config;
 using NLog.Targets;
+using System.Collections.Concurrent;
 
 namespace NLog.Windows.Forms
 {
@@ -57,10 +58,8 @@ namespace NLog.Windows.Forms
     /// for WordColoring
     /// </example>
     [Target("RichTextBox")]
-    public sealed class RichTextBoxTarget : TargetWithLayout
+    public class RichTextBoxTarget : TargetWithLayout
     {
-        private int lineCount;
-
         /// <summary>
         /// Initializes static members of the RichTextBoxTarget class.
         /// </summary>
@@ -82,6 +81,49 @@ namespace NLog.Windows.Forms
             DefaultRowColoringRules = rules.AsReadOnly();
         }
 
+        #region Explicit registration mode
+        private static string CreateKey(string formName, string controlName)
+        {
+            return formName + "." + controlName;
+        }
+
+        private static ConcurrentDictionary<string, RichTextBoxTarget> s_controlsToTargets = new ConcurrentDictionary<string, RichTextBoxTarget>();
+
+        public static void RegisterTextBox(RichTextBox tb)
+        {
+            Form parentForm = FormHelper.GetParentForm(tb);
+            if (parentForm == null)
+            {
+                throw new ArgumentException("Text box should be on a form!");
+            }
+            string key = CreateKey(parentForm.Name, tb.Name);
+            RichTextBoxTarget target;
+            if (s_controlsToTargets.TryGetValue(key, out target))
+            {
+                //here it's possible in theory to have the target in inconsistent state in case of parallel access
+                //but I doubt that this could be a real-world problem
+                target.TargetRichTextBox = tb;
+                target.TargetForm = parentForm;
+            }
+        }
+
+        public static void UnregisterTextBox(RichTextBox tb)
+        {
+            Form parentForm = FormHelper.GetParentForm(tb);
+            if (parentForm == null)
+            {
+                throw new ArgumentException("Text box should be on a form!");
+            }
+            string key = CreateKey(parentForm.Name, tb.Name);
+            RichTextBoxTarget target;
+            if (s_controlsToTargets.TryGetValue(key, out target))
+            {
+                target.TargetRichTextBox = null;
+                target.TargetForm = null;
+            }
+        }
+        #endregion
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
         /// </summary>
@@ -93,6 +135,7 @@ namespace NLog.Windows.Forms
             WordColoringRules = new List<RichTextBoxWordColoringRule>();
             RowColoringRules = new List<RichTextBoxRowColoringRule>();
             ToolWindow = true;
+            AllowCustomFormCreation = true;
         }
 
         private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule);
@@ -204,6 +247,20 @@ namespace NLog.Windows.Forms
         public bool CreatedForm { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to create custom form if the specified control was not found.
+        /// </summary>
+        /// <remarks>
+        /// If set to false and control was not found during target initialiation, the target would skip events until referenced control is assigned via RegisterTextBox() call
+        /// </remarks>
+        /// <docgen category='Form Options' order='10' />
+        [DefaultValue(true)]
+        public bool AllowCustomFormCreation { get; set; }
+
+        private int lineCount;
+
+        private string key;
+
+        /// <summary>
         /// Initializes the target. Can be used by inheriting classes
         /// to initialize logging.
         /// </summary>
@@ -213,25 +270,28 @@ namespace NLog.Windows.Forms
             {
                 FormName = "NLogForm" + Guid.NewGuid().ToString("N");
             }
+            if (string.IsNullOrEmpty(ControlName))
+            {
+                throw new NLogConfigurationException("Rich text box control name must be specified for " + GetType().Name + ".");
+            }
 
-            var openFormByName = Application.OpenForms[FormName];
+            this.key = CreateKey(FormName, ControlName);
+            if (!s_controlsToTargets.TryAdd(key, this))
+            {
+                //probably a breaking change, but I'm not sure if it refers to any real-world use-cases
+                //if not acceptable, could be checked only for cases when control is not found, but it would then cause different behavior for different targets.
+                throw new NLogConfigurationException("Two targets cannot refer to same control: " + key + ".");
+            } 
+
+            Form openFormByName = Application.OpenForms[FormName];
             if (openFormByName != null)
             {
                 TargetForm = openFormByName;
-                if (string.IsNullOrEmpty(ControlName))
-                {
-                    throw new NLogConfigurationException("Rich text box control name must be specified for " + GetType().Name + ".");
-                }
 
                 CreatedForm = false;
                 TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
-
-                if (TargetRichTextBox == null)
-                {
-                    throw new NLogConfigurationException("Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'.");
-                }
             }
-            else
+            else if (AllowCustomFormCreation)
             {
                 TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
                 TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
@@ -257,6 +317,12 @@ namespace NLog.Windows.Forms
         /// <param name="logEvent">The logging event.</param>
         protected override void Write(LogEventInfo logEvent)
         {
+            RichTextBox rtbx = TargetRichTextBox;
+            if (rtbx == null)
+            {
+                return;
+            }
+
             RichTextBoxRowColoringRule matchingRule = null;
 
             foreach (RichTextBoxRowColoringRule rr in RowColoringRules)
@@ -287,7 +353,7 @@ namespace NLog.Windows.Forms
 
             string logMessage = Layout.Render(logEvent);
 
-            TargetRichTextBox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+            rtbx.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
         }
 
         private static Color GetColorFromString(string color, Color defaultColor)

@@ -482,5 +482,70 @@ namespace NLog.Windows.Forms.Tests
                 }
             }
         }
+
+        [Fact]
+        public void ManualRegisterTest()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget()
+            {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${level} ${logger} ${message}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                AllowCustomFormCreation = false
+            };
+            config.AddTarget("target", target);
+            config.LoggingRules.Add(new LoggingRule("*", target));
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("No Control");
+            Application.DoEvents();
+
+            Assert.False(target.CreatedForm);
+            Assert.Null(target.TargetForm);
+            Assert.Null(target.TargetRichTextBox);
+
+            using (Form form = new Form())
+            {
+                form.Name = "MyForm1";
+                form.WindowState = FormWindowState.Minimized;
+                RichTextBox rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                form.Controls.Add(rtb);
+                form.Show();
+                form.Activate();
+
+                RichTextBoxTarget.RegisterTextBox(rtb);
+
+                logger.Trace("Has Control");
+
+                Application.DoEvents();
+
+                Assert.False(target.CreatedForm);
+                Assert.Same(form, target.TargetForm);
+                Assert.Same(rtb, target.TargetRichTextBox);
+
+                MemoryStream ms = new MemoryStream();
+                target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
+                string result = Encoding.UTF8.GetString(ms.GetBuffer());
+
+                Assert.True(result.Contains(@"Has Control"));
+
+
+                RichTextBoxTarget.UnregisterTextBox(rtb);
+
+                Assert.False(target.CreatedForm);
+                Assert.Null(target.TargetForm);
+                Assert.Null(target.TargetRichTextBox);
+
+                logger.Trace("No Control again");
+            }
+        }
     }
 }
