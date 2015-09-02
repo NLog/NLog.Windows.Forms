@@ -52,7 +52,7 @@ namespace NLog.Windows.Forms
             Append = true;
         }
 
-        private delegate void DelSendTheMessageToFormControl(Control ctrl, string logMessage);
+        private delegate void DelSendTheMessageToFormControl(Control control, string logMessage);
 
         /// <summary>
         /// Gets or sets the name of control to which NLog will log write log text.
