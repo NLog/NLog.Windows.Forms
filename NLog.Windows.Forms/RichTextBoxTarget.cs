@@ -20,7 +20,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using NLog.Config;
 using NLog.Targets;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace NLog.Windows.Forms
 {
@@ -87,7 +87,7 @@ namespace NLog.Windows.Forms
             return formName + "." + controlName;
         }
 
-        private static ConcurrentDictionary<string, RichTextBoxTarget> s_controlsToTargets = new ConcurrentDictionary<string, RichTextBoxTarget>();
+        private static Dictionary<string, RichTextBoxTarget> s_controlsToTargets = new Dictionary<string, RichTextBoxTarget>();
 
         public static void RegisterTextBox(RichTextBox tb)
         {
@@ -98,12 +98,15 @@ namespace NLog.Windows.Forms
             }
             string key = CreateKey(parentForm.Name, tb.Name);
             RichTextBoxTarget target;
-            if (s_controlsToTargets.TryGetValue(key, out target))
+            lock (s_controlsToTargets)
             {
-                //here it's possible in theory to have the target in inconsistent state in case of parallel access
-                //but I doubt that this could be a real-world problem
-                target.TargetRichTextBox = tb;
-                target.TargetForm = parentForm;
+                if (s_controlsToTargets.TryGetValue(key, out target))
+                {
+                    //here it's possible in theory to have the target in inconsistent state in case of parallel access
+                    //but I doubt that this could be a real-world problem
+                    target.TargetRichTextBox = tb;
+                    target.TargetForm = parentForm;
+                }
             }
         }
 
@@ -116,10 +119,13 @@ namespace NLog.Windows.Forms
             }
             string key = CreateKey(parentForm.Name, tb.Name);
             RichTextBoxTarget target;
-            if (s_controlsToTargets.TryGetValue(key, out target))
+            lock (s_controlsToTargets)
             {
-                target.TargetRichTextBox = null;
-                target.TargetForm = null;
+                if (s_controlsToTargets.TryGetValue(key, out target))
+                {
+                    target.TargetRichTextBox = null;
+                    target.TargetForm = null;
+                }
             }
         }
         #endregion
@@ -276,12 +282,16 @@ namespace NLog.Windows.Forms
             }
 
             this.key = CreateKey(FormName, ControlName);
-            if (!s_controlsToTargets.TryAdd(key, this))
+            lock (s_controlsToTargets)
             {
-                //probably a breaking change, but I'm not sure if it refers to any real-world use-cases
-                //if not acceptable, could be checked only for cases when control is not found, but it would then cause different behavior for different targets.
-                throw new NLogConfigurationException("Two targets cannot refer to same control: " + key + ".");
-            } 
+                if (s_controlsToTargets.ContainsKey(key))
+                {
+                    //probably a breaking change, but I'm not sure if it refers to any real-world use-cases
+                    //if not acceptable, could be checked only for cases when control is not found, but it would then cause different behavior for different targets.
+                    throw new NLogConfigurationException("Two targets cannot refer to same control: " + key + ".");
+                }
+                s_controlsToTargets.Add(key, this);
+            }
 
             Form openFormByName = Application.OpenForms[FormName];
             if (openFormByName != null)
@@ -310,11 +320,10 @@ namespace NLog.Windows.Forms
                 TargetForm = null;
             }
 
-            RichTextBoxTarget target;
-            s_controlsToTargets.TryRemove(key, out target);
-            if (target != this)
+            lock (s_controlsToTargets)
             {
-                throw new NLogConfigurationException("Two targets cannot refer to same control: " + key + ".");
+                //not sure if we need to check it here
+                s_controlsToTargets.Remove(key);
             }
         }
 
