@@ -212,7 +212,6 @@ namespace NLog.Windows.Forms
         /// </summary>
         protected override void InitializeTarget()
         {
-
             if (FormName == null)
             {
                 InternalLogger.Info("FormName not set, creating a new form");
@@ -220,7 +219,6 @@ namespace NLog.Windows.Forms
             }
             else
             {
-
                 var openFormByName = Application.OpenForms[FormName];
                 if (openFormByName != null)
                 {
@@ -241,7 +239,6 @@ namespace NLog.Windows.Forms
                     CreatedForm = false;
                     TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
 
-
                     if (TargetRichTextBox == null)
                     {
                         error = true;
@@ -260,8 +257,7 @@ namespace NLog.Windows.Forms
                     InternalLogger.Info("Form {0} not found, creating a new one", FormName);
                 }
             }
-           // no form found, create a new one.
-
+            // no form found, create a new one.
             TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
             TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
             CreatedForm = true;
@@ -308,7 +304,6 @@ namespace NLog.Windows.Forms
             }
             catch (Exception ex)
             {
-
                 InternalLogger.Warn(ex.ToString());
 
                 if (LogManager.ThrowExceptions)
@@ -316,7 +311,6 @@ namespace NLog.Windows.Forms
                     throw;
                 }
             }
-
         }
 
         /// <summary>
