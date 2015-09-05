@@ -20,7 +20,6 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using NLog.Config;
 using NLog.Targets;
-using System.Collections.Generic;
 
 namespace NLog.Windows.Forms
 {
@@ -82,13 +81,6 @@ namespace NLog.Windows.Forms
         }
 
         #region Explicit registration mode
-        private static string CreateKey(string formName, string controlName)
-        {
-            return formName + "." + controlName;
-        }
-
-        private static Dictionary<string, RichTextBoxTarget> s_controlsToTargets = new Dictionary<string, RichTextBoxTarget>();
-
         public static void RegisterTextBox(RichTextBox tb)
         {
             Form parentForm = FormHelper.GetParentForm(tb);
@@ -96,35 +88,36 @@ namespace NLog.Windows.Forms
             {
                 throw new ArgumentException("Text box should be on a form!");
             }
-            string key = CreateKey(parentForm.Name, tb.Name);
-            RichTextBoxTarget target;
-            lock (s_controlsToTargets)
+
+            foreach (Target target in LogManager.Configuration.AllTargets)
             {
-                if (s_controlsToTargets.TryGetValue(key, out target))
+                if (target is RichTextBoxTarget)
                 {
-                    //here it's possible in theory to have the target in inconsistent state in case of parallel access
-                    //but I doubt that this could be a real-world problem
-                    target.TargetRichTextBox = tb;
-                    target.TargetForm = parentForm;
+                    RichTextBoxTarget rtbt = (RichTextBoxTarget)target;
+                    if (rtbt.FormName == parentForm.Name
+                            && rtbt.ControlName == tb.Name
+                            && rtbt.TargetRichTextBox == null
+                        )
+                    {
+                        rtbt.TargetRichTextBox = tb;
+                        rtbt.TargetForm = parentForm;
+                    }
                 }
             }
         }
 
         public static void UnregisterTextBox(RichTextBox tb)
         {
-            Form parentForm = FormHelper.GetParentForm(tb);
-            if (parentForm == null)
+            foreach (Target target in LogManager.Configuration.AllTargets)
             {
-                throw new ArgumentException("Text box should be on a form!");
-            }
-            string key = CreateKey(parentForm.Name, tb.Name);
-            RichTextBoxTarget target;
-            lock (s_controlsToTargets)
-            {
-                if (s_controlsToTargets.TryGetValue(key, out target))
+                if (target is RichTextBoxTarget)
                 {
-                    target.TargetRichTextBox = null;
-                    target.TargetForm = null;
+                    RichTextBoxTarget rtbt = (RichTextBoxTarget)target;
+                    if (rtbt.TargetRichTextBox == tb)
+                    {
+                        rtbt.TargetRichTextBox = null;
+                        rtbt.TargetForm = null;
+                    }
                 }
             }
         }
@@ -264,8 +257,6 @@ namespace NLog.Windows.Forms
 
         private int lineCount;
 
-        private string key;
-
         /// <summary>
         /// Initializes the target. Can be used by inheriting classes
         /// to initialize logging.
@@ -279,18 +270,6 @@ namespace NLog.Windows.Forms
             if (string.IsNullOrEmpty(ControlName))
             {
                 throw new NLogConfigurationException("Rich text box control name must be specified for " + GetType().Name + ".");
-            }
-
-            this.key = CreateKey(FormName, ControlName);
-            lock (s_controlsToTargets)
-            {
-                if (s_controlsToTargets.ContainsKey(key))
-                {
-                    //probably a breaking change, but I'm not sure if it refers to any real-world use-cases
-                    //if not acceptable, could be checked only for cases when control is not found, but it would then cause different behavior for different targets.
-                    throw new NLogConfigurationException("Two targets cannot refer to same control: " + key + ".");
-                }
-                s_controlsToTargets.Add(key, this);
             }
 
             Form openFormByName = Application.OpenForms[FormName];
@@ -318,12 +297,6 @@ namespace NLog.Windows.Forms
             {
                 TargetForm.BeginInvoke((FormCloseDelegate)TargetForm.Close);
                 TargetForm = null;
-            }
-
-            lock (s_controlsToTargets)
-            {
-                //not sure if we need to check it here
-                s_controlsToTargets.Remove(key);
             }
         }
 
