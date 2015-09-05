@@ -260,7 +260,7 @@ namespace NLog.Windows.Forms
                     InternalLogger.Info("Form {0} not found, creating a new one", FormName);
                 }
             }
-            //not done yet
+           // no form found, create a new one.
 
             TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
             TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
