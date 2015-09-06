@@ -10,7 +10,7 @@ assembly_info:
 nuget:
   project_feed: true
 before_build:
-- ps: nuget restore
+- ps: nuget restore -DisableParallelProcessing
 build:
   publish_nuget: true
   publish_nuget_symbols: true
