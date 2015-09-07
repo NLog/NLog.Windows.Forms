@@ -520,7 +520,7 @@ namespace NLog.Windows.Forms.Tests
                 form.Show();
                 form.Activate();
 
-                RichTextBoxTarget.RegisterTextBox(rtb);
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
 
                 logger.Trace("Has Control");
 
@@ -536,8 +536,6 @@ namespace NLog.Windows.Forms.Tests
 
                 Assert.True(result.Contains(@"Has Control"));
 
-
-                RichTextBoxTarget.UnregisterTextBox(rtb);
 
                 Assert.False(target.CreatedForm);
                 Assert.Null(target.TargetForm);

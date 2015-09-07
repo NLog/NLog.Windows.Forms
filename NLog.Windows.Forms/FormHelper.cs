@@ -161,19 +161,5 @@ namespace NLog.Windows.Forms
                 return new Icon(stream);
             }
         }
-
-        internal static Form GetParentForm(Control control)
-        {
-            Form form = control as Form;
-            if (form != null)
-            {
-                return form;
-            }
-            if (control != null)
-            {
-                return GetParentForm(control.Parent);
-            }
-            return null;
-        }
     }
 }

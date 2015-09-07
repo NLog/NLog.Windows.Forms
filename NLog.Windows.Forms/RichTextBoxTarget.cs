@@ -81,42 +81,19 @@ namespace NLog.Windows.Forms
         }
 
         #region Explicit registration mode
-        public static void RegisterTextBox(RichTextBox tb)
-        {
-            Form parentForm = FormHelper.GetParentForm(tb);
-            if (parentForm == null)
-            {
-                throw new ArgumentException("Text box should be on a form!");
-            }
-
-            foreach (Target target in LogManager.Configuration.AllTargets)
-            {
-                if (target is RichTextBoxTarget)
-                {
-                    RichTextBoxTarget rtbt = (RichTextBoxTarget)target;
-                    if (rtbt.FormName == parentForm.Name
-                            && rtbt.ControlName == tb.Name
-                            && rtbt.TargetRichTextBox == null
-                        )
-                    {
-                        rtbt.TargetRichTextBox = tb;
-                        rtbt.TargetForm = parentForm;
-                    }
-                }
-            }
-        }
-
-        public static void UnregisterTextBox(RichTextBox tb)
+        public static void ReInitializeAllTextboxes(Form form)
         {
             foreach (Target target in LogManager.Configuration.AllTargets)
             {
-                if (target is RichTextBoxTarget)
+                RichTextBoxTarget rtbt = target as RichTextBoxTarget;
+                if (rtbt != null && rtbt.FormName == form.Name && rtbt.TargetRichTextBox == null)
                 {
-                    RichTextBoxTarget rtbt = (RichTextBoxTarget)target;
-                    if (rtbt.TargetRichTextBox == tb)
+                    //can't use InitializeTarget here as the Application.OpenForms would not work from Form's constructor
+                    RichTextBox rtb = FormHelper.FindControl<RichTextBox>(rtbt.ControlName, form);
+                    if (rtb != null)
                     {
-                        rtbt.TargetRichTextBox = null;
-                        rtbt.TargetForm = null;
+                        rtbt.TargetForm = form;
+                        rtbt.TargetRichTextBox = rtb;
                     }
                 }
             }
@@ -307,7 +284,7 @@ namespace NLog.Windows.Forms
         protected override void Write(LogEventInfo logEvent)
         {
             RichTextBox rtbx = TargetRichTextBox;
-            if (rtbx == null)
+            if (rtbx == null || rtbx.IsDisposed)
             {
                 return;
             }
