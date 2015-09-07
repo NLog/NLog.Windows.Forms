@@ -535,13 +535,6 @@ namespace NLog.Windows.Forms.Tests
                 string result = Encoding.UTF8.GetString(ms.GetBuffer());
 
                 Assert.True(result.Contains(@"Has Control"));
-
-
-                Assert.False(target.CreatedForm);
-                Assert.Null(target.TargetForm);
-                Assert.Null(target.TargetRichTextBox);
-
-                logger.Trace("No Control again");
             }
         }
     }
