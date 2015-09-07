@@ -11,8 +11,10 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
+using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 
@@ -50,7 +52,7 @@ namespace NLog.Windows.Forms
             Append = true;
         }
 
-        private delegate void DelSendTheMessageToFormControl(Control ctrl, string logMessage);
+        private delegate void DelSendTheMessageToFormControl(Control control, string logMessage);
 
         /// <summary>
         /// Gets or sets the name of control to which NLog will log write log text.
@@ -105,31 +107,47 @@ namespace NLog.Windows.Forms
 
             if (form == null)
             {
+                InternalLogger.Info("Form {0} not found", FormName);
                 return;
             }
 
-            Control ctrl = FormHelper.FindControl(ControlName, form);
+            Control control = FormHelper.FindControl(ControlName, form);
 
-            if (ctrl == null)
+            if (control == null)
             {
+                InternalLogger.Info("Control {0} on Form {1} not found", ControlName, FormName);
                 return;
             }
+            try
+            {
+                control.BeginInvoke(new DelSendTheMessageToFormControl(SendTheMessageToFormControl), control, logMessage);
+            }
+            catch (Exception ex)
+            {
+                InternalLogger.Warn(ex.ToString());
 
-            ctrl.BeginInvoke(new DelSendTheMessageToFormControl(SendTheMessageToFormControl), ctrl, logMessage);
+                if (LogManager.ThrowExceptions)
+                {
+                    throw;
+                }
+            }
+
         }
 
-        private void SendTheMessageToFormControl(Control ctrl, string logMessage)
+        private void SendTheMessageToFormControl(Control control, string logMessage)
         {
+            //append of replace?
             if (Append)
             {
+                //beginning or end?
                 if (ReverseOrder)
-                    ctrl.Text = logMessage + ctrl.Text;
+                    control.Text = logMessage + control.Text;
                 else
-                    ctrl.Text += logMessage;
+                    control.Text += logMessage;
             }
             else
             {
-                ctrl.Text = logMessage;
+                control.Text = logMessage;
             }
         }
     }

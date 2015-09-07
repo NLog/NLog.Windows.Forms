@@ -16,8 +16,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 
@@ -80,7 +82,6 @@ namespace NLog.Windows.Forms
             DefaultRowColoringRules = rules.AsReadOnly();
         }
 
-        #region Explicit registration mode
         public static void ReInitializeAllTextboxes(Form form)
         {
             foreach (Target target in LogManager.Configuration.AllTargets)
@@ -98,8 +99,6 @@ namespace NLog.Windows.Forms
                 }
             }
         }
-        #endregion
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
         /// </summary>
@@ -220,6 +219,9 @@ namespace NLog.Windows.Forms
         /// </summary>
         public RichTextBox TargetRichTextBox { get; set; }
 
+        /// <summary>
+        /// Form created (true) or used an existing (false). Set after <see cref="InitializeTarget"/>
+        /// </summary>
         public bool CreatedForm { get; set; }
 
         /// <summary>
@@ -231,9 +233,6 @@ namespace NLog.Windows.Forms
         /// <docgen category='Form Options' order='10' />
         [DefaultValue(true)]
         public bool AllowCustomFormCreation { get; set; }
-
-        private int lineCount;
-
         /// <summary>
         /// Initializes the target. Can be used by inheriting classes
         /// to initialize logging.
@@ -242,27 +241,67 @@ namespace NLog.Windows.Forms
         {
             if (FormName == null)
             {
+                InternalLogger.Info("FormName not set, creating a new form");
                 FormName = "NLogForm" + Guid.NewGuid().ToString("N");
+                InitWithNewForm();
+                return;
             }
+
             if (string.IsNullOrEmpty(ControlName))
             {
-                throw new NLogConfigurationException("Rich text box control name must be specified for " + GetType().Name + ".");
+                string message = "Rich text box control name must be specified for " + GetType().Name + ".";
+                if (LogManager.ThrowExceptions)
+                {
+                    throw new NLogConfigurationException(message);
+                }
+                InternalLogger.Error(message);
+                InitWithNewForm();
+                return;
             }
 
             Form openFormByName = Application.OpenForms[FormName];
-            if (openFormByName != null)
+            if (openFormByName == null)
             {
-                TargetForm = openFormByName;
+                if (AllowCustomFormCreation)
+                {
+                    InternalLogger.Info("Form {0} not found, creating a new one.", FormName);
+                    InitWithNewForm();
+                }
+                else
+                {
+                    InternalLogger.Info("Form {0} not found, waiting for ReInitializeAllTextboxes.", FormName);
+                }
+                return;
+            }
 
-                CreatedForm = false;
-                TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
-            }
-            else if (AllowCustomFormCreation)
+            TargetForm = openFormByName;
+            CreatedForm = false;
+            TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
+            if (TargetRichTextBox == null)
             {
-                TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
-                TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
-                CreatedForm = true;
+                string message = "Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'."; 
+                if (AllowCustomFormCreation)
+                {
+                    if (LogManager.ThrowExceptions)
+                    {
+                        throw new NLogConfigurationException(message);
+                    }
+                    InternalLogger.Error(message);
+                    InitWithNewForm();
+                    return;
+                }
+                else
+                {
+                    InternalLogger.Info(message + " Waiting for ReInitializeAllTextboxes.");
+                }
             }
+        }
+
+        private void InitWithNewForm()
+        {
+            TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
+            TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
+            CreatedForm = true;
         }
 
         /// <summary>
@@ -272,7 +311,20 @@ namespace NLog.Windows.Forms
         {
             if (CreatedForm)
             {
-                TargetForm.BeginInvoke((FormCloseDelegate)TargetForm.Close);
+                try
+                {
+                    TargetForm.BeginInvoke((FormCloseDelegate)TargetForm.Close);
+                }
+                catch (Exception ex)
+                {
+                    InternalLogger.Warn(ex.ToString());
+
+                    if (LogManager.ThrowExceptions)
+                    {
+                        throw;
+                    }
+                }
+            
                 TargetForm = null;
             }
         }
@@ -289,37 +341,56 @@ namespace NLog.Windows.Forms
                 return;
             }
 
-            RichTextBoxRowColoringRule matchingRule = null;
+            var matchingRule = FindMatchingRule(logEvent);
 
-            foreach (RichTextBoxRowColoringRule rr in RowColoringRules)
+            string logMessage = Layout.Render(logEvent);
+
+            try
             {
-                if (rr.CheckCondition(logEvent))
+                TargetRichTextBox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+            }
+            catch (Exception ex)
+            {
+                InternalLogger.Warn(ex.ToString());
+
+                if (LogManager.ThrowExceptions)
                 {
-                    matchingRule = rr;
-                    break;
+                    throw;
                 }
             }
+        }
 
-            if (UseDefaultRowColoringRules && matchingRule == null)
+        /// <summary>
+        /// Find first matching rule
+        /// </summary>
+        /// <param name="logEvent"></param>
+        /// <returns></returns>
+        private RichTextBoxRowColoringRule FindMatchingRule(LogEventInfo logEvent)
+        {
+            //custom rules first
+            if (RowColoringRules != null)
             {
-                foreach (RichTextBoxRowColoringRule rr in DefaultRowColoringRules)
+                foreach (RichTextBoxRowColoringRule coloringRule in RowColoringRules)
                 {
-                    if (rr.CheckCondition(logEvent))
+                    if (coloringRule.CheckCondition(logEvent))
                     {
-                        matchingRule = rr;
-                        break;
+                        return coloringRule;
                     }
                 }
             }
 
-            if (matchingRule == null)
+            if (UseDefaultRowColoringRules && DefaultRowColoringRules != null)
             {
-                matchingRule = RichTextBoxRowColoringRule.Default;
+                foreach (RichTextBoxRowColoringRule coloringRule in DefaultRowColoringRules)
+                {
+                    if (coloringRule.CheckCondition(logEvent))
+                    {
+                        return coloringRule;
+                    }
+                }
             }
 
-            string logMessage = Layout.Render(logEvent);
-
-            rtbx.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+            return RichTextBoxRowColoringRule.Default;
         }
 
         private static Color GetColorFromString(string color, Color defaultColor)
@@ -334,46 +405,53 @@ namespace NLog.Windows.Forms
 
         private void SendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule)
         {
-            RichTextBox rtbx = TargetRichTextBox;
+            RichTextBox textBox = TargetRichTextBox;
 
-            int startIndex = rtbx.Text.Length;
-            rtbx.SelectionStart = startIndex;
-            rtbx.SelectionBackColor = GetColorFromString(rule.BackgroundColor, rtbx.BackColor);
-            rtbx.SelectionColor = GetColorFromString(rule.FontColor, rtbx.ForeColor);
-            rtbx.SelectionFont = new Font(rtbx.SelectionFont, rtbx.SelectionFont.Style ^ rule.Style);
-            rtbx.AppendText(logMessage + "\n");
-            rtbx.SelectionLength = rtbx.Text.Length - rtbx.SelectionStart;
+            int startIndex = textBox.Text.Length;
+            textBox.SelectionStart = startIndex;
+            textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor, textBox.BackColor);
+            textBox.SelectionColor = GetColorFromString(rule.FontColor, textBox.ForeColor);
+            textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
+            textBox.AppendText(logMessage + "\n");
+            textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
 
             // find word to color
             foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
             {
-                MatchCollection mc = wordRule.CompiledRegex.Matches(rtbx.Text, startIndex);
-                foreach (Match m in mc)
+                MatchCollection matches = wordRule.CompiledRegex.Matches(textBox.Text, startIndex);
+                foreach (Match match in matches)
                 {
-                    rtbx.SelectionStart = m.Index;
-                    rtbx.SelectionLength = m.Length;
-                    rtbx.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor, rtbx.BackColor);
-                    rtbx.SelectionColor = GetColorFromString(wordRule.FontColor, rtbx.ForeColor);
-                    rtbx.SelectionFont = new Font(rtbx.SelectionFont, rtbx.SelectionFont.Style ^ wordRule.Style);
+                    textBox.SelectionStart = match.Index;
+                    textBox.SelectionLength = match.Length;
+                    textBox.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor, textBox.BackColor);
+                    textBox.SelectionColor = GetColorFromString(wordRule.FontColor, textBox.ForeColor);
+                    textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ wordRule.Style);
                 }
             }
 
+            //remove some lines if there above the max
             if (MaxLines > 0)
             {
-                lineCount++;
-                if (lineCount > MaxLines)
+                //find the last line by reading the textbox
+                var lastLineWithContent = textBox.Lines.LastOrDefault(f => !string.IsNullOrEmpty(f));
+                if (lastLineWithContent != null)
                 {
-                    rtbx.SelectionStart = 0;
-                    rtbx.SelectionLength = rtbx.GetFirstCharIndexFromLine(1);
-                    rtbx.SelectedRtf = "{\\rtf1\\ansi}";
-                    lineCount--;
+                    char lastChar = lastLineWithContent.Last();
+                    var visibleLineCount = textBox.GetLineFromCharIndex(textBox.Text.LastIndexOf(lastChar));
+                    var tooManyLines = (visibleLineCount - MaxLines) + 1;
+                    if (tooManyLines > 0)
+                    {
+                        textBox.SelectionStart = 0;
+                        textBox.SelectionLength = textBox.GetFirstCharIndexFromLine(tooManyLines);
+                        textBox.SelectedRtf = "{\\rtf1\\ansi}";
+                    }
                 }
             }
 
             if (AutoScroll)
             {
-                rtbx.Select(rtbx.TextLength, 0);
-                rtbx.ScrollToCaret();
+                textBox.Select(textBox.TextLength, 0);
+                textBox.ScrollToCaret();
             }
         }
     }
