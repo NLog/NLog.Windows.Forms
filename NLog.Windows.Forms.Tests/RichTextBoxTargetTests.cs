@@ -442,8 +442,7 @@ namespace NLog.Windows.Forms.Tests
                 try
                 {
                     new LogFactory(config);
-                    //Actually this should work for now, no problem in having the target waiting for the richtextbox to appear, right?
-                    //Assert.True(false, "Expected exception.");
+                    Assert.True(false, "Expected exception.");
                 }
                 catch (NLogConfigurationException ex)
                 {

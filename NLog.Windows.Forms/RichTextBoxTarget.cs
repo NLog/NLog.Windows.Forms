@@ -84,17 +84,19 @@ namespace NLog.Windows.Forms
 
         public static void ReInitializeAllTextboxes(Form form)
         {
+            InternalLogger.Info("Executing ReInitializeAllTextboxes for Form {0}", form);
             foreach (Target target in LogManager.Configuration.AllTargets)
             {
-                RichTextBoxTarget rtbt = target as RichTextBoxTarget;
-                if (rtbt != null && rtbt.FormName == form.Name && rtbt.TargetRichTextBox == null)
+                RichTextBoxTarget textboxTarget = target as RichTextBoxTarget;
+                if (textboxTarget != null && textboxTarget.FormName == form.Name && textboxTarget.TargetRichTextBox == null)
                 {
                     //can't use InitializeTarget here as the Application.OpenForms would not work from Form's constructor
-                    RichTextBox rtb = FormHelper.FindControl<RichTextBox>(rtbt.ControlName, form);
-                    if (rtb != null)
+                    RichTextBox textboxControl = FormHelper.FindControl<RichTextBox>(textboxTarget.ControlName, form);
+                    if (textboxControl != null)
                     {
-                        rtbt.TargetForm = form;
-                        rtbt.TargetRichTextBox = rtb;
+                        InternalLogger.Info("Attaching target {0} to textbox {1}", textboxTarget, textboxControl);
+                        textboxTarget.TargetForm = form;
+                        textboxTarget.TargetRichTextBox = textboxControl;
                     }
                 }
             }
@@ -110,7 +112,7 @@ namespace NLog.Windows.Forms
             WordColoringRules = new List<RichTextBoxWordColoringRule>();
             RowColoringRules = new List<RichTextBoxRowColoringRule>();
             ToolWindow = true;
-            AllowCustomFormCreation = true;
+            CreateFormIfNotFound = true;
         }
 
         private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule);
@@ -228,11 +230,12 @@ namespace NLog.Windows.Forms
         /// Gets or sets a value indicating whether to create custom form if the specified control was not found.
         /// </summary>
         /// <remarks>
-        /// If set to false and control was not found during target initialiation, the target would skip events until referenced control is assigned via RegisterTextBox() call
+        /// If set to false and the control was not found during target initialiation, the target would skip events until the control is found during ReInitializeAllTextboxes() call
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
         [DefaultValue(true)]
-        public bool AllowCustomFormCreation { get; set; }
+        public bool CreateFormIfNotFound { get; set; }
+
         /// <summary>
         /// Initializes the target. Can be used by inheriting classes
         /// to initialize logging.
@@ -241,20 +244,22 @@ namespace NLog.Windows.Forms
         {
             if (FormName == null)
             {
-                InternalLogger.Info("FormName not set, creating a new form");
-                FormName = "NLogForm" + Guid.NewGuid().ToString("N");
-                InitWithNewForm();
+                if (CreateFormIfNotFound)
+                {
+                    InternalLogger.Info("FormName not set, creating a new form");
+                    FormName = "NLogForm" + Guid.NewGuid().ToString("N");
+                    InitWithNewForm();
+                }
+                else
+                {
+                    DoException("FormName should be specified for " + GetType().Name + "." + this.Name);
+                }
                 return;
             }
 
             if (string.IsNullOrEmpty(ControlName))
             {
-                string message = "Rich text box control name must be specified for " + GetType().Name + ".";
-                if (LogManager.ThrowExceptions)
-                {
-                    throw new NLogConfigurationException(message);
-                }
-                InternalLogger.Error(message);
+                DoException("Rich text box control name must be specified for " + GetType().Name + "." + this.Name);
                 InitWithNewForm();
                 return;
             }
@@ -262,7 +267,7 @@ namespace NLog.Windows.Forms
             Form openFormByName = Application.OpenForms[FormName];
             if (openFormByName == null)
             {
-                if (AllowCustomFormCreation)
+                if (CreateFormIfNotFound)
                 {
                     InternalLogger.Info("Form {0} not found, creating a new one.", FormName);
                     InitWithNewForm();
@@ -280,13 +285,9 @@ namespace NLog.Windows.Forms
             if (TargetRichTextBox == null)
             {
                 string message = "Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'."; 
-                if (AllowCustomFormCreation)
+                if (CreateFormIfNotFound)
                 {
-                    if (LogManager.ThrowExceptions)
-                    {
-                        throw new NLogConfigurationException(message);
-                    }
-                    InternalLogger.Error(message);
+                    DoException(message);
                     InitWithNewForm();
                     return;
                 }
@@ -295,6 +296,15 @@ namespace NLog.Windows.Forms
                     InternalLogger.Info(message + " Waiting for ReInitializeAllTextboxes.");
                 }
             }
+        }
+
+        private void DoException(string message)
+        {
+            if (LogManager.ThrowExceptions)
+            {
+                throw new NLogConfigurationException(message);
+            }
+            InternalLogger.Error(message);
         }
 
         private void InitWithNewForm()
@@ -335,9 +345,15 @@ namespace NLog.Windows.Forms
         /// <param name="logEvent">The logging event.</param>
         protected override void Write(LogEventInfo logEvent)
         {
-            RichTextBox rtbx = TargetRichTextBox;
-            if (rtbx == null || rtbx.IsDisposed)
+            RichTextBox textbox = TargetRichTextBox;
+            if (textbox == null)
             {
+                InternalLogger.Debug("Textbox for target {0} is null, skipping logging", this.Name);
+                return;
+            }
+            if (textbox.IsDisposed)
+            {
+                InternalLogger.Debug("Textbox for target {0} is disposed, skipping logging", this.Name);
                 return;
             }
 
@@ -347,7 +363,7 @@ namespace NLog.Windows.Forms
 
             try
             {
-                TargetRichTextBox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+                textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
             }
             catch (Exception ex)
             {
