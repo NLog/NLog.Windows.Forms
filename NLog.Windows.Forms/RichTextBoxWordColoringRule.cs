@@ -12,7 +12,7 @@ namespace NLog.Windows.Forms
     [NLogConfigurationItem]
     public class RichTextBoxWordColoringRule
     {
-        private System.Text.RegularExpressions.Regex compiledRegex;
+        private Regex compiledRegex;
 
         /// <summary>
         /// Gets or sets the regular expression to be matched. You must specify either <c>text</c> or <c>regex</c>.
@@ -56,7 +56,7 @@ namespace NLog.Windows.Forms
         /// Gets the compiled regular expression that matches either Text or Regex property.
         /// 
         /// </summary>
-        public System.Text.RegularExpressions.Regex CompiledRegex
+        public Regex CompiledRegex
         {
             get
             {
@@ -72,7 +72,7 @@ namespace NLog.Windows.Forms
                     RegexOptions options = RegexOptions.Compiled;
                     if (this.IgnoreCase)
                         options |= RegexOptions.IgnoreCase;
-                    this.compiledRegex = new System.Text.RegularExpressions.Regex(pattern, options);
+                    this.compiledRegex = new Regex(pattern, options);
                 }
                 return this.compiledRegex;
             }
