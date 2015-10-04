@@ -8,6 +8,7 @@
     <owners>NLog</owners>
     <licenseUrl>https://raw.githubusercontent.com/NLog/NLog.Windows.Forms/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/NLog/NLog.Windows.Forms</projectUrl>
+    <iconUrl>http://nlog-project.org/N.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Contains targets for Windows Forms applications.</description>
     <releaseNotes>Community contributed custom target for NLog.</releaseNotes>
