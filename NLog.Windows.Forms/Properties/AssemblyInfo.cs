@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("NLog.Windows.Forms")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("NLog")]
 [assembly: AssemblyProduct("NLog.Windows.Forms")]
-[assembly: AssemblyCopyright("Copyright © Kim Christensen 2015")]
+[assembly: AssemblyCopyright("Copyright © NLog 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
