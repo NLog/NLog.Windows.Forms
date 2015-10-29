@@ -82,6 +82,14 @@ namespace NLog.Windows.Forms
             DefaultRowColoringRules = rules.AsReadOnly();
         }
 
+        /// <summary>
+        /// Attempts to attach existing targets that have yet no textboxes to controls that exist on specified form if appropriate
+        /// </summary>
+        /// <remarks>
+        /// Setting <see cref="AllowAccessoryFormCreation"/> to true (default) actually causes target to always have a textbox 
+        /// (after having <see cref="InitializeTarget"/> called), so such targets are not affected by this method.
+        /// </remarks>
+        /// <param name="form">a Form to check for RichTextBoxes</param>
         public static void ReInitializeAllTextboxes(Form form)
         {
             InternalLogger.Info("Executing ReInitializeAllTextboxes for Form {0}", form);
@@ -97,6 +105,7 @@ namespace NLog.Windows.Forms
                         InternalLogger.Info("Attaching target {0} to textbox {1}", textboxTarget, textboxControl);
                         textboxTarget.TargetForm = form;
                         textboxTarget.TargetRichTextBox = textboxControl;
+                        textboxTarget.CreatedForm = false;
                     }
                 }
             }
@@ -222,15 +231,15 @@ namespace NLog.Windows.Forms
         public RichTextBox TargetRichTextBox { get; set; }
 
         /// <summary>
-        /// Form created (true) or used an existing (false). Set after <see cref="InitializeTarget"/>
+        /// Form created (true) or used an existing (false). Set after <see cref="InitializeTarget"/>. Can be true only if <see cref="AllowAccessoryFormCreation"/> is set to true (default).
         /// </summary>
         public bool CreatedForm { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to create custom form if the specified control was not found.
+        /// Gets or sets a value indicating whether to create accessory form if the specified form/control combination was not found during target initialization.
         /// </summary>
         /// <remarks>
-        /// If set to false and the control was not found during target initialiation, the target would skip events until the control is found during ReInitializeAllTextboxes() call
+        /// If set to false and the control was not found during target initialiation, the target would skip events until the control is found during <see cref="ReInitializeAllTextboxes"/> call
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
         [DefaultValue(true)]
@@ -242,68 +251,89 @@ namespace NLog.Windows.Forms
         /// </summary>
         protected override void InitializeTarget()
         {
-            if (FormName == null)
+            if (TargetRichTextBox != null)
             {
-                if (AllowAccessoryFormCreation)
-                {
-                    InternalLogger.Info("FormName not set, creating a new form");
-                    CreateAccessoryForm();
-                }
-                else
-                {
-                    HandleError("FormName should be specified for " + GetType().Name + "." + this.Name);
-                }
+                //already initialized by ReInitializeAllTextboxes call
                 return;
             }
 
-            if (string.IsNullOrEmpty(ControlName))
+            if (AllowAccessoryFormCreation)
             {
-                if (AllowAccessoryFormCreation)
-                {
-                    InternalLogger.Info("Ñontrol name is not set, creating a new form");
-                    CreateAccessoryForm();
-                }
-                else
-                {
-                    HandleError("Rich text box control name must be specified for " + GetType().Name + "." + this.Name);
-                }
-                return;
-            }
+                //old behaviour which causes creation of accessory form in case specified control cannot be found on specified form
 
-            Form openFormByName = Application.OpenForms[FormName];
-            if (openFormByName == null)
-            {
-                if (AllowAccessoryFormCreation)
+                if (FormName == null)
                 {
-                    InternalLogger.Info("Form {0} not found, creating a new one.", FormName);
-                    CreateAccessoryForm();
-                }
-                else
-                {
-                    InternalLogger.Info("Form {0} not found, waiting for ReInitializeAllTextboxes.", FormName);
-                }
-                return;
-            }
-
-            TargetForm = openFormByName;
-            CreatedForm = false;
-            TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
-            if (TargetRichTextBox == null)
-            {
-                string message = "Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'."; 
-                if (AllowAccessoryFormCreation)
-                {
-                    HandleError(message);
+                    InternalLogger.Info("FormName not set, creating acceccory form");
                     CreateAccessoryForm();
                     return;
                 }
-                else
+
+                Form openFormByName = Application.OpenForms[FormName];
+                if (openFormByName == null)
                 {
-                    InternalLogger.Info(message + " Waiting for ReInitializeAllTextboxes.");
+                    InternalLogger.Info("Form {0} not found, creating accessory form", FormName);
+                    CreateAccessoryForm();
+                    return;
                 }
+
+                if (string.IsNullOrEmpty(ControlName))
+                {
+                    HandleError("Rich text box control name must be specified for " + GetType().Name + ".");
+                    CreateAccessoryForm();
+                    return;
+                }
+
+                TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, openFormByName);
+                if (TargetRichTextBox == null)
+                {
+                    HandleError("Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'.");
+                    CreateAccessoryForm();
+                    return;
+                }
+
+                //finally attached to proper control
+                TargetForm = openFormByName;
+                CreatedForm = false;
+            }
+            else
+            {
+                //new behaviour which postpones attaching to textbox if it's not yet available at the time,
+                CreatedForm = false; 
+
+                if (FormName == null)
+                {
+                    HandleError("FormName should be specified for " + GetType().Name + "." + this.Name);
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(ControlName))
+                {
+                    HandleError("Rich text box control name must be specified for " + GetType().Name + "." + this.Name);
+                    return;
+                }
+
+                TargetForm = Application.OpenForms[FormName];
+                if (TargetForm == null)
+                {
+                    InternalLogger.Info("Form {0} not found, waiting for ReInitializeAllTextboxes.", FormName);
+                    return;
+                }
+
+                TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
+                if (TargetRichTextBox == null)
+                {
+                    InternalLogger.Info("Rich text box control '{0}' cannot be found on form '{1}'. Waiting for ReInitializeAllTextboxes.", ControlName, FormName);
+                    return;
+                }
+
+                //actually attached to a target, all ok
             }
         }
 
+        /// <summary>
+        /// Called from constructor when error is detected. In case LogManager.ThrowExceptions is enabled, throws the exception, otherwise - logs the problem message
+        /// </summary>
+        /// <param name="message">exception/log text</param>
         private static void HandleError(string message)
         {
             if (LogManager.ThrowExceptions)
@@ -313,6 +343,9 @@ namespace NLog.Windows.Forms
             InternalLogger.Error(message);
         }
 
+        /// <summary>
+        /// Used to create accessory form with textbox in case specified form or control were not found during InitializeTarget() and AllowAccessoryFormCreation==true
+        /// </summary>
         private void CreateAccessoryForm()
         {
             if (FormName == null)
