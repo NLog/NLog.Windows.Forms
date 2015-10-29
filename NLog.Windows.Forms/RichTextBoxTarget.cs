@@ -96,7 +96,10 @@ namespace NLog.Windows.Forms
             foreach (Target target in LogManager.Configuration.AllTargets)
             {
                 RichTextBoxTarget textboxTarget = target as RichTextBoxTarget;
-                if (textboxTarget != null && textboxTarget.FormName == form.Name && textboxTarget.TargetRichTextBox == null)
+                if (textboxTarget != null 
+                        && textboxTarget.FormName == form.Name 
+                        && (textboxTarget.TargetRichTextBox == null || textboxTarget.TargetRichTextBox.IsDisposed)
+                    )
                 {
                     //can't use InitializeTarget here as the Application.OpenForms would not work from Form's constructor
                     RichTextBox textboxControl = FormHelper.FindControl<RichTextBox>(textboxTarget.ControlName, form);
