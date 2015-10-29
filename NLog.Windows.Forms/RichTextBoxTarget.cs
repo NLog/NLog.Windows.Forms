@@ -112,7 +112,7 @@ namespace NLog.Windows.Forms
             WordColoringRules = new List<RichTextBoxWordColoringRule>();
             RowColoringRules = new List<RichTextBoxRowColoringRule>();
             ToolWindow = true;
-            CreateFormIfNotFound = true;
+            AllowAccessoryFormCreation = true;
         }
 
         private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule);
@@ -234,7 +234,7 @@ namespace NLog.Windows.Forms
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
         [DefaultValue(true)]
-        public bool CreateFormIfNotFound { get; set; }
+        public bool AllowAccessoryFormCreation { get; set; }
 
         /// <summary>
         /// Initializes the target. Can be used by inheriting classes
@@ -244,33 +244,39 @@ namespace NLog.Windows.Forms
         {
             if (FormName == null)
             {
-                if (CreateFormIfNotFound)
+                if (AllowAccessoryFormCreation)
                 {
                     InternalLogger.Info("FormName not set, creating a new form");
-                    FormName = "NLogForm" + Guid.NewGuid().ToString("N");
-                    InitWithNewForm();
+                    CreateAccessoryForm();
                 }
                 else
                 {
-                    DoException("FormName should be specified for " + GetType().Name + "." + this.Name);
+                    HandleError("FormName should be specified for " + GetType().Name + "." + this.Name);
                 }
                 return;
             }
 
             if (string.IsNullOrEmpty(ControlName))
             {
-                DoException("Rich text box control name must be specified for " + GetType().Name + "." + this.Name);
-                InitWithNewForm();
+                if (AllowAccessoryFormCreation)
+                {
+                    InternalLogger.Info("Ñontrol name is not set, creating a new form");
+                    CreateAccessoryForm();
+                }
+                else
+                {
+                    HandleError("Rich text box control name must be specified for " + GetType().Name + "." + this.Name);
+                }
                 return;
             }
 
             Form openFormByName = Application.OpenForms[FormName];
             if (openFormByName == null)
             {
-                if (CreateFormIfNotFound)
+                if (AllowAccessoryFormCreation)
                 {
                     InternalLogger.Info("Form {0} not found, creating a new one.", FormName);
-                    InitWithNewForm();
+                    CreateAccessoryForm();
                 }
                 else
                 {
@@ -285,10 +291,10 @@ namespace NLog.Windows.Forms
             if (TargetRichTextBox == null)
             {
                 string message = "Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'."; 
-                if (CreateFormIfNotFound)
+                if (AllowAccessoryFormCreation)
                 {
-                    DoException(message);
-                    InitWithNewForm();
+                    HandleError(message);
+                    CreateAccessoryForm();
                     return;
                 }
                 else
@@ -298,7 +304,7 @@ namespace NLog.Windows.Forms
             }
         }
 
-        private void DoException(string message)
+        private static void HandleError(string message)
         {
             if (LogManager.ThrowExceptions)
             {
@@ -307,8 +313,12 @@ namespace NLog.Windows.Forms
             InternalLogger.Error(message);
         }
 
-        private void InitWithNewForm()
+        private void CreateAccessoryForm()
         {
+            if (FormName == null)
+            {
+                FormName = "NLogForm" + Guid.NewGuid().ToString("N");
+            }
             TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
             TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
             CreatedForm = true;
