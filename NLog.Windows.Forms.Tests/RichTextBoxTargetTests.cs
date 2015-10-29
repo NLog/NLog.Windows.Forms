@@ -496,7 +496,7 @@ namespace NLog.Windows.Forms.Tests
                 ToolWindow = false,
                 Width = 300,
                 Height = 200,
-                CreateFormIfNotFound = false
+                AllowAccessoryFormCreation = false
             };
             LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
