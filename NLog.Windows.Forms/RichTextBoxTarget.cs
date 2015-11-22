@@ -389,7 +389,8 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// Called from constructor when error is detected. In case LogManager.ThrowExceptions is enabled, throws the exception, otherwise - logs the problem message
         /// </summary>
-        /// <param name="message">exception/log text</param>
+        /// <param name="message">exception/log message format</param>
+        /// <param name="args">message format arguments</param>
         private static void HandleError(string message, params object[] args)
         {
             if (LogManager.ThrowExceptions)
@@ -456,7 +457,7 @@ namespace NLog.Windows.Forms
         }
 
         /// <summary>
-        /// if <see cref="CreatedForm"/> is true, then destroys created form. Resets <see cref="CreatedForm"/>, <see cref="TargetForm"> and <see cref="TargetRichTextBox"/> to default values
+        /// if <see cref="CreatedForm"/> is true, then destroys created form. Resets <see cref="CreatedForm"/>, <see cref="TargetForm"/> and <see cref="TargetRichTextBox"/> to default values
         /// </summary>
         private void DetachFromControl()
         {
