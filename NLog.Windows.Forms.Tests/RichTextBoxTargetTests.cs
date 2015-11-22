@@ -552,6 +552,7 @@ namespace NLog.Windows.Forms.Tests
                 Width = 300,
                 Height = 200,
                 AllowAccessoryFormCreation = false,
+                MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
             };
             LogManager.ThrowExceptions = true;

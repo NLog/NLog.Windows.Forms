@@ -279,7 +279,7 @@ namespace NLog.Windows.Forms
                         }
                         if (messageQueue == null)
                         {
-                            messageQueue = new Queue<MessageInfo>(MaxLines + 1);
+                            messageQueue = new Queue<MessageInfo>();    //no need to use MaxLine here, it could cause unnecessary memory allocation for huge limits
                         }
                     }
                 }
