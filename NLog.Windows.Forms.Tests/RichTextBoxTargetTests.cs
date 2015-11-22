@@ -568,7 +568,9 @@ namespace NLog.Windows.Forms.Tests
             using (Form form = new Form())
             {
                 form.Name = "MyForm1";
-                form.WindowState = FormWindowState.Minimized;
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
+                form.Width = 600;
                 RichTextBox rtb = new RichTextBox();
                 rtb.Dock = DockStyle.Fill;
                 rtb.Name = "Control1";
