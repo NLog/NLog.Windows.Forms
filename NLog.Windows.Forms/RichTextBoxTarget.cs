@@ -250,6 +250,58 @@ namespace NLog.Windows.Forms
         public bool AllowAccessoryFormCreation { get; set; }
 
         /// <summary>
+        /// gets or sets the 
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <docgen category='Form Options' order='10' />
+        [DefaultValue(RichTextBoxTargetMessageRetentionStrategy.None)]
+        public RichTextBoxTargetMessageRetentionStrategy MessageRetention 
+        { 
+            get { return messageRetention; } 
+            set 
+            {
+                lock (messageQueueLock)
+                {
+                    messageRetention = value;
+                    if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
+                    {
+                        if (messageQueue != null)
+                        {
+                            messageQueue = null;
+                        }
+                    }
+                    else
+                    {
+                        if (MaxLines <= 0)
+                        {
+                            HandleError("Forbidden usage of RetentionStrategy ({0}) when MaxLines is not set", value);
+                        }
+                        if (messageQueue == null)
+                        {
+                            messageQueue = new Queue<MessageInfo>(MaxLines + 1);
+                        }
+                    }
+                }
+            } 
+        }
+
+        /// <summary>
+        /// Actual value of the <see cref="MessageRetention"/>.
+        /// </summary>
+        private RichTextBoxTargetMessageRetentionStrategy messageRetention = RichTextBoxTargetMessageRetentionStrategy.None;
+
+        /// <summary>
+        /// a lock object used to synchronize access to <see cref="messageQueue"/>
+        /// </summary>
+        private readonly object messageQueueLock = new object();
+
+        /// <summary>
+        /// A queue used to store messages based on <see cref="MessageRetention"/>.
+        /// </summary>
+        private volatile Queue<MessageInfo> messageQueue = null;
+
+        /// <summary>
         /// Initializes the target. Can be used by inheriting classes
         /// to initialize logging.
         /// </summary>
@@ -374,7 +426,33 @@ namespace NLog.Windows.Forms
             this.TargetRichTextBox = textboxControl;
 
             //OnReattach?
-
+            switch (messageRetention)
+            {
+            case RichTextBoxTargetMessageRetentionStrategy.None:
+                break;
+            case RichTextBoxTargetMessageRetentionStrategy.All:
+                lock (messageQueueLock)
+                {
+                    foreach (MessageInfo messageInfo in messageQueue)
+                    {
+                        DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                    }
+                }
+                break;
+            case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
+                lock (messageQueueLock)
+                {
+                    while (messageQueue.Count > 0)
+                    {
+                        MessageInfo messageInfo = messageQueue.Dequeue();
+                        DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                    }
+                }
+                break;
+            default:
+                HandleError("Unexpected retention strategy {0}", messageRetention);
+                break;
+            }
         }
 
         /// <summary>
@@ -418,24 +496,57 @@ namespace NLog.Windows.Forms
         protected override void Write(LogEventInfo logEvent)
         {
             RichTextBox textbox = TargetRichTextBox;
-            if (textbox == null)
+            if (textbox == null && messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
             {
                 InternalLogger.Debug("Textbox for target {0} is null, skipping logging", this.Name);
                 return;
             }
-            if (textbox.IsDisposed)
+            if (textbox.IsDisposed && messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
             {
                 InternalLogger.Debug("Textbox for target {0} is disposed, skipping logging", this.Name);
                 return;
             }
 
-            var matchingRule = FindMatchingRule(logEvent);
-
             string logMessage = Layout.Render(logEvent);
+            RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
 
+            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule);
+
+            switch (messageRetention)
+            {
+            case RichTextBoxTargetMessageRetentionStrategy.None:
+                break;
+            case RichTextBoxTargetMessageRetentionStrategy.All:
+                StoreMessage(logMessage, matchingRule);
+                break;
+            case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
+                if (!messageSent)
+                {
+                    StoreMessage(logMessage, matchingRule);
+                }
+                break;
+            default:
+                HandleError("Unexpected retention strategy {0}", messageRetention);
+                break;
+            }
+        }
+
+        /// <summary>
+        /// Actually sends log message to <see cref="TargetRichTextBox"/>
+        /// </summary>
+        /// <param name="logMessage">a message to send</param>
+        /// <param name="rule">matching coloring rule</param>
+        /// <returns>true if the message was actually sent (i.e. <see cref="TargetRichTextBox"/> is not null and not disposed, and no exception happened during message send)</returns>
+        private bool DoSendMessageToTextbox(string logMessage, RichTextBoxRowColoringRule rule)
+        {
+            RichTextBox textbox = TargetRichTextBox;
             try
             {
-                textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+                if (textbox != null && !textbox.IsDisposed)
+                {
+                    textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule);
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -446,6 +557,7 @@ namespace NLog.Windows.Forms
                     throw;
                 }
             }
+            return false;
         }
 
         /// <summary>
@@ -542,5 +654,41 @@ namespace NLog.Windows.Forms
                 textBox.ScrollToCaret();
             }
         }
+
+        /// <summary>
+        /// Stores a new message in internal queue, if it exists. Removes overflowing messages.
+        /// </summary>
+        /// <param name="logMessage">a message to store</param>
+        /// <param name="rule">a corresponding coloring rule</param>
+        private void StoreMessage(string logMessage, RichTextBoxRowColoringRule rule)
+        {
+            lock (messageQueueLock)
+            {
+                if (messageQueue == null)
+                {
+                    return;
+                }
+                if (MaxLines > 0)
+                {
+                    while (messageQueue.Count >= MaxLines)
+                    {
+                        messageQueue.Dequeue();
+                    }
+                }
+                messageQueue.Enqueue(new MessageInfo(logMessage, rule));
+            }
+        }
+
+        private class MessageInfo
+        {
+            internal readonly string message;
+            internal readonly RichTextBoxRowColoringRule rule;
+            internal MessageInfo(string message, RichTextBoxRowColoringRule rule)
+            {
+                this.message = message;
+                this.rule = rule;
+            }
+        }
+
     }
 }
