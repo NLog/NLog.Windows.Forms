@@ -281,7 +281,7 @@ namespace NLog.Windows.Forms
 
                 if (string.IsNullOrEmpty(ControlName))
                 {
-                    HandleError("Rich text box control name must be specified for " + GetType().Name + ".");
+                    HandleError("Rich text box control name must be specified for {0}.", GetType().Name);
                     CreateAccessoryForm();
                     return;
                 }
@@ -289,7 +289,7 @@ namespace NLog.Windows.Forms
                 TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, openFormByName);
                 if (TargetRichTextBox == null)
                 {
-                    HandleError("Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'.");
+                    HandleError("Rich text box control '{0}' cannot be found on form '{1}'.", ControlName, FormName);
                     CreateAccessoryForm();
                     return;
                 }
@@ -305,13 +305,13 @@ namespace NLog.Windows.Forms
 
                 if (FormName == null)
                 {
-                    HandleError("FormName should be specified for " + GetType().Name + "." + this.Name);
+                    HandleError("FormName should be specified for {0}.{1}", GetType().Name, this.Name);
                     return;
                 }
 
                 if (string.IsNullOrEmpty(ControlName))
                 {
-                    HandleError("Rich text box control name must be specified for " + GetType().Name + "." + this.Name);
+                    HandleError("Rich text box control name must be specified for {0}.{1}", GetType().Name, this.Name);
                     return;
                 }
 
@@ -337,13 +337,13 @@ namespace NLog.Windows.Forms
         /// Called from constructor when error is detected. In case LogManager.ThrowExceptions is enabled, throws the exception, otherwise - logs the problem message
         /// </summary>
         /// <param name="message">exception/log text</param>
-        private static void HandleError(string message)
+        private static void HandleError(string message, params object[] args)
         {
             if (LogManager.ThrowExceptions)
             {
-                throw new NLogConfigurationException(message);
+                throw new NLogConfigurationException(String.Format(message, args));
             }
-            InternalLogger.Error(message);
+            InternalLogger.Error(message, args);
         }
 
         /// <summary>
