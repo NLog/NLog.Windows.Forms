@@ -96,23 +96,24 @@ namespace NLog.Windows.Forms
             foreach (Target target in LogManager.Configuration.AllTargets)
             {
                 RichTextBoxTarget textboxTarget = target as RichTextBoxTarget;
-                if (textboxTarget != null 
-                        && textboxTarget.FormName == form.Name 
-                        && (textboxTarget.TargetRichTextBox == null || textboxTarget.TargetRichTextBox.IsDisposed)
-                    )
+                if (textboxTarget != null && textboxTarget.FormName == form.Name)
                 {
                     //can't use InitializeTarget here as the Application.OpenForms would not work from Form's constructor
                     RichTextBox textboxControl = FormHelper.FindControl<RichTextBox>(textboxTarget.ControlName, form);
-                    if (textboxControl != null)
+                    if (textboxControl != null && !textboxControl.IsDisposed)
                     {
-                        InternalLogger.Info("Attaching target {0} to textbox {1}", textboxTarget, textboxControl);
-                        textboxTarget.TargetForm = form;
-                        textboxTarget.TargetRichTextBox = textboxControl;
-                        textboxTarget.CreatedForm = false;
+                        if ( textboxTarget.TargetRichTextBox == null
+                            || textboxTarget.TargetRichTextBox.IsDisposed
+                            || textboxTarget.TargetRichTextBox != textboxControl
+                        )
+                        {
+                            textboxTarget.AttachToControl(form, textboxControl);
+                        }
                     }
                 }
             }
         }
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
         /// </summary>
@@ -361,9 +362,25 @@ namespace NLog.Windows.Forms
         }
 
         /// <summary>
-        /// Closes the target and releases any unmanaged resources.
+        /// Used to (re)initialize target when attaching it to another RTB control
         /// </summary>
-        protected override void CloseTarget()
+        /// <param name="form">form owning textboxControl</param>
+        /// <param name="textboxControl">a new control to attach to</param>
+        private void AttachToControl(Form form, RichTextBox textboxControl)
+        {
+            InternalLogger.Info("Attaching target {0} to textbox {1}.{2}", this.Name, form.Name, textboxControl.Name);
+            DetachFromControl();
+            this.TargetForm = form;
+            this.TargetRichTextBox = textboxControl;
+
+            //OnReattach?
+
+        }
+
+        /// <summary>
+        /// if <see cref="CreatedForm"/> is true, then destroys created form. Resets <see cref="CreatedForm"/>, <see cref="TargetForm"> and <see cref="TargetRichTextBox"/> to default values
+        /// </summary>
+        private void DetachFromControl()
         {
             if (CreatedForm)
             {
@@ -380,9 +397,18 @@ namespace NLog.Windows.Forms
                         throw;
                     }
                 }
-            
-                TargetForm = null;
+                CreatedForm = false;
             }
+            TargetForm = null;
+            TargetRichTextBox = null;
+        }
+
+        /// <summary>
+        /// Closes the target and releases any unmanaged resources.
+        /// </summary>
+        protected override void CloseTarget()
+        {
+            DetachFromControl();
         }
 
         /// <summary>
