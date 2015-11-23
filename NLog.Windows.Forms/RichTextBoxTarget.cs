@@ -497,19 +497,15 @@ namespace NLog.Windows.Forms
         protected override void Write(LogEventInfo logEvent)
         {
             RichTextBox textbox = TargetRichTextBox;
-            if (textbox == null)
+            if (textbox == null || textbox.IsDisposed)
             {
-                if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
+                if (AllowAccessoryFormCreation)
                 {
-                    InternalLogger.Debug("Textbox for target {0} is null, skipping logging", this.Name);
-                    return;
+                    CreateAccessoryForm();
                 }
-            }
-            else if (textbox.IsDisposed)
-            {
-                if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
+                else if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
                 {
-                    InternalLogger.Debug("Textbox for target {0} is disposed, skipping logging", this.Name);
+                    InternalLogger.Trace("Textbox for target {0} is {1}, skipping logging", this.Name, textbox == null? "null" : "disposed");
                     return;
                 }
             }
