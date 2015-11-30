@@ -83,6 +83,38 @@ namespace NLog.Windows.Forms
         }
 
         /// <summary>
+        /// Attempts to attach existing targets that have yet no textboxes to controls that exist on specified form if appropriate
+        /// </summary>
+        /// <remarks>
+        /// Setting <see cref="AllowAccessoryFormCreation"/> to true (default) actually causes target to always have a textbox 
+        /// (after having <see cref="InitializeTarget"/> called), so such targets are not affected by this method.
+        /// </remarks>
+        /// <param name="form">a Form to check for RichTextBoxes</param>
+        public static void ReInitializeAllTextboxes(Form form)
+        {
+            InternalLogger.Info("Executing ReInitializeAllTextboxes for Form {0}", form);
+            foreach (Target target in LogManager.Configuration.AllTargets)
+            {
+                RichTextBoxTarget textboxTarget = target as RichTextBoxTarget;
+                if (textboxTarget != null && textboxTarget.FormName == form.Name)
+                {
+                    //can't use InitializeTarget here as the Application.OpenForms would not work from Form's constructor
+                    RichTextBox textboxControl = FormHelper.FindControl<RichTextBox>(textboxTarget.ControlName, form);
+                    if (textboxControl != null && !textboxControl.IsDisposed)
+                    {
+                        if ( textboxTarget.TargetRichTextBox == null
+                            || textboxTarget.TargetRichTextBox.IsDisposed
+                            || textboxTarget.TargetRichTextBox != textboxControl
+                        )
+                        {
+                            textboxTarget.AttachToControl(form, textboxControl);
+                        }
+                    }
+                }
+            }
+        }
+        
+        /// <summary>
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
         /// </summary>
         /// <remarks>
@@ -93,6 +125,7 @@ namespace NLog.Windows.Forms
             WordColoringRules = new List<RichTextBoxWordColoringRule>();
             RowColoringRules = new List<RichTextBoxRowColoringRule>();
             ToolWindow = true;
+            AllowAccessoryFormCreation = true;
         }
 
         private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule);
@@ -202,9 +235,68 @@ namespace NLog.Windows.Forms
         public RichTextBox TargetRichTextBox { get; set; }
 
         /// <summary>
-        /// Form created (true) or used an existing (false). Set after <see cref="InitializeTarget"/>
+        /// Form created (true) or used an existing (false). Set after <see cref="InitializeTarget"/>. Can be true only if <see cref="AllowAccessoryFormCreation"/> is set to true (default).
         /// </summary>
         public bool CreatedForm { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to create accessory form if the specified form/control combination was not found during target initialization.
+        /// </summary>
+        /// <remarks>
+        /// If set to false and the control was not found during target initialiation, the target would skip events until the control is found during <see cref="ReInitializeAllTextboxes"/> call
+        /// </remarks>
+        /// <docgen category='Form Options' order='10' />
+        [DefaultValue(true)]
+        public bool AllowAccessoryFormCreation { get; set; }
+
+        /// <summary>
+        /// gets or sets the message retention strategy which determines how the target handles messages when there's no control attached, or when switching between controls
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <docgen category='Form Options' order='10' />
+        [DefaultValue(RichTextBoxTargetMessageRetentionStrategy.None)]
+        public RichTextBoxTargetMessageRetentionStrategy MessageRetention 
+        { 
+            get { return messageRetention; } 
+            set 
+            {
+                lock (messageQueueLock)
+                {
+                    messageRetention = value;
+                    if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
+                    {
+                        messageQueue = null;
+                    }
+                    else
+                    {
+                        if (MaxLines <= 0)
+                        {
+                            HandleError("Forbidden usage of RetentionStrategy ({0}) when MaxLines is not set", value);
+                        }
+                        if (messageQueue == null)
+                        {
+                            messageQueue = new Queue<MessageInfo>();    //no need to use MaxLine here, it could cause unnecessary memory allocation for huge limits
+                        }
+                    }
+                }
+            } 
+        }
+
+        /// <summary>
+        /// Actual value of the <see cref="MessageRetention"/>.
+        /// </summary>
+        private RichTextBoxTargetMessageRetentionStrategy messageRetention = RichTextBoxTargetMessageRetentionStrategy.None;
+
+        /// <summary>
+        /// a lock object used to synchronize access to <see cref="messageQueue"/>
+        /// </summary>
+        private readonly object messageQueueLock = new object();
+
+        /// <summary>
+        /// A queue used to store messages based on <see cref="MessageRetention"/>.
+        /// </summary>
+        private volatile Queue<MessageInfo> messageQueue = null;
 
         /// <summary>
         /// Initializes the target. Can be used by inheriting classes
@@ -212,61 +304,159 @@ namespace NLog.Windows.Forms
         /// </summary>
         protected override void InitializeTarget()
         {
-            if (FormName == null)
+            if (TargetRichTextBox != null)
             {
-                InternalLogger.Info("FormName not set, creating a new form");
-                FormName = "NLogForm" + Guid.NewGuid().ToString("N");
+                //already initialized by ReInitializeAllTextboxes call
+                return;
+            }
+
+            if (AllowAccessoryFormCreation)
+            {
+                //old behaviour which causes creation of accessory form in case specified control cannot be found on specified form
+
+                if (FormName == null)
+                {
+                    InternalLogger.Info("FormName not set, creating acceccory form");
+                    CreateAccessoryForm();
+                    return;
+                }
+
+                Form openFormByName = Application.OpenForms[FormName];
+                if (openFormByName == null)
+                {
+                    InternalLogger.Info("Form {0} not found, creating accessory form", FormName);
+                    CreateAccessoryForm();
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(ControlName))
+                {
+                    HandleError("Rich text box control name must be specified for {0}.", GetType().Name);
+                    CreateAccessoryForm();
+                    return;
+                }
+
+                TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, openFormByName);
+                if (TargetRichTextBox == null)
+                {
+                    HandleError("Rich text box control '{0}' cannot be found on form '{1}'.", ControlName, FormName);
+                    CreateAccessoryForm();
+                    return;
+                }
+
+                //finally attached to proper control
+                TargetForm = openFormByName;
+                CreatedForm = false;
             }
             else
             {
-                var openFormByName = Application.OpenForms[FormName];
-                if (openFormByName != null)
+                //new behaviour which postpones attaching to textbox if it's not yet available at the time,
+                CreatedForm = false; 
+
+                if (FormName == null)
                 {
-                    bool error = false;
-                    TargetForm = openFormByName;
-                    if (string.IsNullOrEmpty(ControlName))
-                    {
-                        error = true;
-                        var message = "Rich text box control name must be specified for " + GetType().Name + ".";
-                        if (LogManager.ThrowExceptions)
-                        {
-                            throw new NLogConfigurationException(message);
-                        }
-
-                        InternalLogger.Error(message);
-                    }
-
-                    CreatedForm = false;
-                    TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
-
-                    if (TargetRichTextBox == null)
-                    {
-                        error = true;
-                        var message = "Rich text box control '" + ControlName + "' cannot be found on form '" + FormName + "'.";
-                        if (LogManager.ThrowExceptions)
-                        {
-                            throw new NLogConfigurationException(message);
-                        }
-                        InternalLogger.Error(message);
-                    }
-                    if (!error)
-                        return;
+                    HandleError("FormName should be specified for {0}.{1}", GetType().Name, this.Name);
+                    return;
                 }
-                else
+
+                if (string.IsNullOrEmpty(ControlName))
                 {
-                    InternalLogger.Info("Form {0} not found, creating a new one", FormName);
+                    HandleError("Rich text box control name must be specified for {0}.{1}", GetType().Name, this.Name);
+                    return;
                 }
+
+                TargetForm = Application.OpenForms[FormName];
+                if (TargetForm == null)
+                {
+                    InternalLogger.Info("Form {0} not found, waiting for ReInitializeAllTextboxes.", FormName);
+                    return;
+                }
+
+                TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
+                if (TargetRichTextBox == null)
+                {
+                    InternalLogger.Info("Rich text box control '{0}' cannot be found on form '{1}'. Waiting for ReInitializeAllTextboxes.", ControlName, FormName);
+                    return;
+                }
+
+                //actually attached to a target, all ok
             }
-            // no form found, create a new one.
+        }
+
+        /// <summary>
+        /// Called from constructor when error is detected. In case LogManager.ThrowExceptions is enabled, throws the exception, otherwise - logs the problem message
+        /// </summary>
+        /// <param name="message">exception/log message format</param>
+        /// <param name="args">message format arguments</param>
+        private static void HandleError(string message, params object[] args)
+        {
+            if (LogManager.ThrowExceptions)
+            {
+                throw new NLogConfigurationException(String.Format(message, args));
+            }
+            InternalLogger.Error(message, args);
+        }
+
+        /// <summary>
+        /// Used to create accessory form with textbox in case specified form or control were not found during InitializeTarget() and AllowAccessoryFormCreation==true
+        /// </summary>
+        private void CreateAccessoryForm()
+        {
+            if (FormName == null)
+            {
+                FormName = "NLogForm" + Guid.NewGuid().ToString("N");
+            }
             TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
             TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
             CreatedForm = true;
         }
 
         /// <summary>
-        /// Closes the target and releases any unmanaged resources.
+        /// Used to (re)initialize target when attaching it to another RTB control
         /// </summary>
-        protected override void CloseTarget()
+        /// <param name="form">form owning textboxControl</param>
+        /// <param name="textboxControl">a new control to attach to</param>
+        private void AttachToControl(Form form, RichTextBox textboxControl)
+        {
+            InternalLogger.Info("Attaching target {0} to textbox {1}.{2}", this.Name, form.Name, textboxControl.Name);
+            DetachFromControl();
+            this.TargetForm = form;
+            this.TargetRichTextBox = textboxControl;
+
+            //OnReattach?
+            switch (messageRetention)
+            {
+                case RichTextBoxTargetMessageRetentionStrategy.None:
+                    break;
+                case RichTextBoxTargetMessageRetentionStrategy.All:
+                    lock (messageQueueLock)
+                    {
+                        foreach (MessageInfo messageInfo in messageQueue)
+                        {
+                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                        }
+                    }
+                    break;
+                case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
+                    lock (messageQueueLock)
+                    {
+                        while (messageQueue.Count > 0)
+                        {
+                            MessageInfo messageInfo = messageQueue.Dequeue();
+                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                        }
+                    }
+                    break;
+                default:
+                    HandleError("Unexpected retention strategy {0}", messageRetention);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// if <see cref="CreatedForm"/> is true, then destroys created form. Resets <see cref="CreatedForm"/>, <see cref="TargetForm"/> and <see cref="TargetRichTextBox"/> to default values
+        /// </summary>
+        private void DetachFromControl()
         {
             if (CreatedForm)
             {
@@ -283,9 +473,18 @@ namespace NLog.Windows.Forms
                         throw;
                     }
                 }
-            
-                TargetForm = null;
+                CreatedForm = false;
             }
+            TargetForm = null;
+            TargetRichTextBox = null;
+        }
+
+        /// <summary>
+        /// Closes the target and releases any unmanaged resources.
+        /// </summary>
+        protected override void CloseTarget()
+        {
+            DetachFromControl();
         }
 
         /// <summary>
@@ -294,13 +493,60 @@ namespace NLog.Windows.Forms
         /// <param name="logEvent">The logging event.</param>
         protected override void Write(LogEventInfo logEvent)
         {
-            var matchingRule = FindMatchingRule(logEvent);
+            RichTextBox textbox = TargetRichTextBox;
+            if (textbox == null || textbox.IsDisposed)
+            {
+                if (AllowAccessoryFormCreation)
+                {
+                    CreateAccessoryForm();
+                }
+                else if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
+                {
+                    InternalLogger.Trace("Textbox for target {0} is {1}, skipping logging", this.Name, textbox == null? "null" : "disposed");
+                    return;
+                }
+            }
 
             string logMessage = Layout.Render(logEvent);
+            RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
 
+            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule);
+
+            switch (messageRetention)
+            {
+                case RichTextBoxTargetMessageRetentionStrategy.None:
+                    break;
+                case RichTextBoxTargetMessageRetentionStrategy.All:
+                    StoreMessage(logMessage, matchingRule);
+                    break;
+                case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
+                    if (!messageSent)
+                    {
+                        StoreMessage(logMessage, matchingRule);
+                    }
+                    break;
+                default:
+                    HandleError("Unexpected retention strategy {0}", messageRetention);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Actually sends log message to <see cref="TargetRichTextBox"/>
+        /// </summary>
+        /// <param name="logMessage">a message to send</param>
+        /// <param name="rule">matching coloring rule</param>
+        /// <returns>true if the message was actually sent (i.e. <see cref="TargetRichTextBox"/> is not null and not disposed, and no exception happened during message send)</returns>
+        private bool DoSendMessageToTextbox(string logMessage, RichTextBoxRowColoringRule rule)
+        {
+            RichTextBox textbox = TargetRichTextBox;
             try
             {
-                TargetRichTextBox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, matchingRule);
+                if (textbox != null && !textbox.IsDisposed)
+                {
+                    textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule);
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -311,6 +557,7 @@ namespace NLog.Windows.Forms
                     throw;
                 }
             }
+            return false;
         }
 
         /// <summary>
@@ -407,5 +654,41 @@ namespace NLog.Windows.Forms
                 textBox.ScrollToCaret();
             }
         }
+
+        /// <summary>
+        /// Stores a new message in internal queue, if it exists. Removes overflowing messages.
+        /// </summary>
+        /// <param name="logMessage">a message to store</param>
+        /// <param name="rule">a corresponding coloring rule</param>
+        private void StoreMessage(string logMessage, RichTextBoxRowColoringRule rule)
+        {
+            lock (messageQueueLock)
+            {
+                if (messageQueue == null)
+                {
+                    return;
+                }
+                if (MaxLines > 0)
+                {
+                    while (messageQueue.Count >= MaxLines)
+                    {
+                        messageQueue.Dequeue();
+                    }
+                }
+                messageQueue.Enqueue(new MessageInfo(logMessage, rule));
+            }
+        }
+
+        private class MessageInfo
+        {
+            internal string message { get; private set; }
+            internal RichTextBoxRowColoringRule rule { get; private set; }
+            internal MessageInfo(string message, RichTextBoxRowColoringRule rule)
+            {
+                this.message = message;
+                this.rule = rule;
+            }
+        }
+
     }
 }

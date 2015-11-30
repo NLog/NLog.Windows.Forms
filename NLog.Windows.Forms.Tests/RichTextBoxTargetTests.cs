@@ -482,5 +482,119 @@ namespace NLog.Windows.Forms.Tests
                 }
             }
         }
+
+        [Fact]
+        public void ManualRegisterTest()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget()
+            {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${level} ${logger} ${message}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                AllowAccessoryFormCreation = false
+            };
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("No Control");
+            Application.DoEvents();
+
+            Assert.False(target.CreatedForm);
+            Assert.Null(target.TargetForm);
+            Assert.Null(target.TargetRichTextBox);
+
+            using (Form form = new Form())
+            {
+                form.Name = "MyForm1";
+                form.WindowState = FormWindowState.Minimized;
+                RichTextBox rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                form.Controls.Add(rtb);
+                form.Show();
+                form.Activate();
+
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
+
+                logger.Trace("Has Control");
+
+                Application.DoEvents();
+
+                Assert.False(target.CreatedForm);
+                Assert.Same(form, target.TargetForm);
+                Assert.Same(rtb, target.TargetRichTextBox);
+
+                MemoryStream ms = new MemoryStream();
+                target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
+                string result = Encoding.UTF8.GetString(ms.GetBuffer());
+
+                Assert.False(result.Contains(@"No Control"));
+                Assert.True(result.Contains(@"Has Control"));
+            }
+        }
+
+        [Fact]
+        public void ManualRegisterTestWithRetention()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget()
+            {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${level} ${logger} ${message}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                AllowAccessoryFormCreation = false,
+                MaxLines = 10,
+                MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
+            };
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("No Control");
+            Application.DoEvents();
+
+            Assert.False(target.CreatedForm);
+            Assert.Null(target.TargetForm);
+            Assert.Null(target.TargetRichTextBox);
+
+            using (Form form = new Form())
+            {
+                form.Name = "MyForm1";
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
+                form.Width = 600;
+                RichTextBox rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                form.Controls.Add(rtb);
+                form.Show();
+                form.Activate();
+
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
+
+                logger.Trace("Has Control");
+
+                Application.DoEvents();
+
+                Assert.False(target.CreatedForm);
+                Assert.Same(form, target.TargetForm);
+                Assert.Same(rtb, target.TargetRichTextBox);
+
+                MemoryStream ms = new MemoryStream();
+                target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
+                string result = Encoding.UTF8.GetString(ms.GetBuffer());
+
+                Assert.True(result.Contains(@"No Control"));
+                Assert.True(result.Contains(@"Has Control"));
+            }
+        }
     }
 }
