@@ -250,7 +250,7 @@ namespace NLog.Windows.Forms
         public bool AllowAccessoryFormCreation { get; set; }
 
         /// <summary>
-        /// gets or sets the 
+        /// gets or sets the message retention strategy which determines how the target handles messages when there's no control attached, or when switching between controls
         /// </summary>
         /// <remarks>
         /// </remarks>
@@ -266,10 +266,7 @@ namespace NLog.Windows.Forms
                     messageRetention = value;
                     if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
                     {
-                        if (messageQueue != null)
-                        {
-                            messageQueue = null;
-                        }
+                        messageQueue = null;
                     }
                     else
                     {
@@ -429,30 +426,30 @@ namespace NLog.Windows.Forms
             //OnReattach?
             switch (messageRetention)
             {
-            case RichTextBoxTargetMessageRetentionStrategy.None:
-                break;
-            case RichTextBoxTargetMessageRetentionStrategy.All:
-                lock (messageQueueLock)
-                {
-                    foreach (MessageInfo messageInfo in messageQueue)
+                case RichTextBoxTargetMessageRetentionStrategy.None:
+                    break;
+                case RichTextBoxTargetMessageRetentionStrategy.All:
+                    lock (messageQueueLock)
                     {
-                        DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                        foreach (MessageInfo messageInfo in messageQueue)
+                        {
+                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                        }
                     }
-                }
-                break;
-            case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
-                lock (messageQueueLock)
-                {
-                    while (messageQueue.Count > 0)
+                    break;
+                case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
+                    lock (messageQueueLock)
                     {
-                        MessageInfo messageInfo = messageQueue.Dequeue();
-                        DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                        while (messageQueue.Count > 0)
+                        {
+                            MessageInfo messageInfo = messageQueue.Dequeue();
+                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                        }
                     }
-                }
-                break;
-            default:
-                HandleError("Unexpected retention strategy {0}", messageRetention);
-                break;
+                    break;
+                default:
+                    HandleError("Unexpected retention strategy {0}", messageRetention);
+                    break;
             }
         }
 
@@ -517,20 +514,20 @@ namespace NLog.Windows.Forms
 
             switch (messageRetention)
             {
-            case RichTextBoxTargetMessageRetentionStrategy.None:
-                break;
-            case RichTextBoxTargetMessageRetentionStrategy.All:
-                StoreMessage(logMessage, matchingRule);
-                break;
-            case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
-                if (!messageSent)
-                {
+                case RichTextBoxTargetMessageRetentionStrategy.None:
+                    break;
+                case RichTextBoxTargetMessageRetentionStrategy.All:
                     StoreMessage(logMessage, matchingRule);
-                }
-                break;
-            default:
-                HandleError("Unexpected retention strategy {0}", messageRetention);
-                break;
+                    break;
+                case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
+                    if (!messageSent)
+                    {
+                        StoreMessage(logMessage, matchingRule);
+                    }
+                    break;
+                default:
+                    HandleError("Unexpected retention strategy {0}", messageRetention);
+                    break;
             }
         }
 
@@ -684,8 +681,8 @@ namespace NLog.Windows.Forms
 
         private class MessageInfo
         {
-            internal readonly string message;
-            internal readonly RichTextBoxRowColoringRule rule;
+            internal string message { get; private set; }
+            internal RichTextBoxRowColoringRule rule { get; private set; }
             internal MessageInfo(string message, RichTextBoxRowColoringRule rule)
             {
                 this.message = message;
