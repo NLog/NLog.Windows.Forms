@@ -11,7 +11,9 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
+using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace NLog.Windows.Forms
@@ -161,5 +163,82 @@ namespace NLog.Windows.Forms
                 return new Icon(stream);
             }
         }
+
+#region Link support
+        internal static void ChangeSelectionToLink(RichTextBox textBox, string hyperlink)
+        {
+            string selectedText = textBox.SelectedText;
+            if (string.IsNullOrEmpty(selectedText))
+            {
+                throw new ArgumentException("No text selected");
+            }
+            int selectionStart = textBox.SelectionStart;
+            textBox.SelectedRtf = @"{\rtf1\ansi " + selectedText + @"\v #" + hyperlink + @"\v0}";
+            //textBox.Select(position, text.Length + hyperlink.Length + 1);
+            textBox.Select(selectionStart, selectedText.Length + hyperlink.Length + 1);
+            SetSelectionLink(textBox);
+            //textBox.Select(position + text.Length + hyperlink.Length + 1, 0);
+        }
+
+        internal static void SetSelectionLink(RichTextBox textBox)
+        {
+            SetSelectionStyle(textBox, CFM_LINK, CFE_LINK);
+        }
+
+        private static void SetSelectionStyle(RichTextBox textBox, UInt32 mask, UInt32 effect)
+        {
+            CHARFORMAT2_STRUCT cf = new CHARFORMAT2_STRUCT();
+            cf.cbSize = (UInt32)Marshal.SizeOf(cf);
+            cf.dwMask = mask;
+            cf.dwEffects = effect;
+
+            IntPtr wpar = new IntPtr(SCF_SELECTION);
+            IntPtr lpar = Marshal.AllocCoTaskMem(Marshal.SizeOf(cf));
+            Marshal.StructureToPtr(cf, lpar, false);
+
+            IntPtr res = SendMessage(textBox.Handle, EM_SETCHARFORMAT, wpar, lpar);
+
+            Marshal.FreeCoTaskMem(lpar);
+        }
+
+#region Interop-Defines
+        [StructLayout(LayoutKind.Sequential)]
+        private struct CHARFORMAT2_STRUCT
+        {
+            public UInt32 cbSize;
+            public UInt32 dwMask;
+            public UInt32 dwEffects;
+            public Int32 yHeight;
+            public Int32 yOffset;
+            public Int32 crTextColor;
+            public byte bCharSet;
+            public byte bPitchAndFamily;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public char[] szFaceName;
+            public UInt16 wWeight;
+            public UInt16 sSpacing;
+            public int crBackColor; // Color.ToArgb() -> int
+            public int lcid;
+            public int dwReserved;
+            public Int16 sStyle;
+            public Int16 wKerning;
+            public byte bUnderlineType;
+            public byte bAnimation;
+            public byte bRevAuthor;
+            public byte bReserved1;
+        }
+
+        private const int WM_USER = 0x0400;
+        private const int EM_SETCHARFORMAT = WM_USER + 68;
+        private const int SCF_SELECTION = 0x0001;
+        private const UInt32 CFE_LINK = 0x0020;
+        private const UInt32 CFM_LINK = 0x00000020;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+
+#endregion
+#endregion
     }
 }

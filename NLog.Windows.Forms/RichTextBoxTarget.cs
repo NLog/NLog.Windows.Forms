@@ -128,7 +128,7 @@ namespace NLog.Windows.Forms
             AllowAccessoryFormCreation = true;
         }
 
-        private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule);
+        private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent);
 
         private delegate void FormCloseDelegate();
 
@@ -249,6 +249,7 @@ namespace NLog.Windows.Forms
         [DefaultValue(true)]
         public bool AllowAccessoryFormCreation { get; set; }
 
+
         /// <summary>
         /// gets or sets the message retention strategy which determines how the target handles messages when there's no control attached, or when switching between controls
         /// </summary>
@@ -299,6 +300,36 @@ namespace NLog.Windows.Forms
         private volatile Queue<MessageInfo> messageQueue = null;
 
         /// <summary>
+        /// 
+        /// </summary>
+        [DefaultValue(false)]
+        public bool SupportLinks 
+        {
+            get { return supportLinks; }
+            set
+            {
+                supportLinks = value;
+                if (supportLinks)
+                {
+                    lock (linkedEventsLock)
+                    {
+                        if (linkedEvents == null)
+                        {
+                            linkedEvents = new Dictionary<int, LogEventInfo>();
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool supportLinks = false;
+
+        private readonly object linkedEventsLock = new object();
+
+        private Dictionary<int, LogEventInfo> linkedEvents;
+
+
+        /// <summary>
         /// Initializes the target. Can be used by inheriting classes
         /// to initialize logging.
         /// </summary>
@@ -309,6 +340,10 @@ namespace NLog.Windows.Forms
                 //already initialized by ReInitializeAllTextboxes call
                 return;
             }
+
+            CreatedForm = false;
+            Form openFormByName = null;
+            RichTextBox targetControl = null;
 
             if (AllowAccessoryFormCreation)
             {
@@ -321,7 +356,7 @@ namespace NLog.Windows.Forms
                     return;
                 }
 
-                Form openFormByName = Application.OpenForms[FormName];
+                openFormByName = Application.OpenForms[FormName];
                 if (openFormByName == null)
                 {
                     InternalLogger.Info("Form {0} not found, creating accessory form", FormName);
@@ -336,8 +371,8 @@ namespace NLog.Windows.Forms
                     return;
                 }
 
-                TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, openFormByName);
-                if (TargetRichTextBox == null)
+                targetControl = FormHelper.FindControl<RichTextBox>(ControlName, openFormByName);
+                if (targetControl == null)
                 {
                     HandleError("Rich text box control '{0}' cannot be found on form '{1}'.", ControlName, FormName);
                     CreateAccessoryForm();
@@ -345,13 +380,10 @@ namespace NLog.Windows.Forms
                 }
 
                 //finally attached to proper control
-                TargetForm = openFormByName;
-                CreatedForm = false;
             }
             else
             {
                 //new behaviour which postpones attaching to textbox if it's not yet available at the time,
-                CreatedForm = false; 
 
                 if (FormName == null)
                 {
@@ -365,14 +397,14 @@ namespace NLog.Windows.Forms
                     return;
                 }
 
-                TargetForm = Application.OpenForms[FormName];
-                if (TargetForm == null)
+                openFormByName = Application.OpenForms[FormName];
+                if (openFormByName == null)
                 {
                     InternalLogger.Info("Form {0} not found, waiting for ReInitializeAllTextboxes.", FormName);
                     return;
                 }
 
-                TargetRichTextBox = FormHelper.FindControl<RichTextBox>(ControlName, TargetForm);
+                targetControl = FormHelper.FindControl<RichTextBox>(ControlName, openFormByName);
                 if (TargetRichTextBox == null)
                 {
                     InternalLogger.Info("Rich text box control '{0}' cannot be found on form '{1}'. Waiting for ReInitializeAllTextboxes.", ControlName, FormName);
@@ -381,6 +413,8 @@ namespace NLog.Windows.Forms
 
                 //actually attached to a target, all ok
             }
+
+            AttachToControl(openFormByName, targetControl);
         }
 
         /// <summary>
@@ -406,8 +440,9 @@ namespace NLog.Windows.Forms
             {
                 FormName = "NLogForm" + Guid.NewGuid().ToString("N");
             }
-            TargetForm = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
-            TargetRichTextBox = FormHelper.CreateRichTextBox(ControlName, TargetForm);
+            Form form = FormHelper.CreateForm(FormName, Width, Height, true, ShowMinimized, ToolWindow);
+            RichTextBox control = FormHelper.CreateRichTextBox(ControlName, form);
+            AttachToControl(form, control);
             CreatedForm = true;
         }
 
@@ -423,6 +458,12 @@ namespace NLog.Windows.Forms
             this.TargetForm = form;
             this.TargetRichTextBox = textboxControl;
 
+            if (this.SupportLinks)
+            {
+                this.TargetRichTextBox.DetectUrls = false;
+                this.TargetRichTextBox.LinkClicked += TargetRichTextBox_LinkClicked;
+            }
+
             //OnReattach?
             switch (messageRetention)
             {
@@ -433,7 +474,7 @@ namespace NLog.Windows.Forms
                     {
                         foreach (MessageInfo messageInfo in messageQueue)
                         {
-                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule, messageInfo.logEvent);
                         }
                     }
                     break;
@@ -443,7 +484,7 @@ namespace NLog.Windows.Forms
                         while (messageQueue.Count > 0)
                         {
                             MessageInfo messageInfo = messageQueue.Dequeue();
-                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule);
+                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule, messageInfo.logEvent);
                         }
                     }
                     break;
@@ -451,6 +492,11 @@ namespace NLog.Windows.Forms
                     HandleError("Unexpected retention strategy {0}", messageRetention);
                     break;
             }
+        }
+
+        private void TargetRichTextBox_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -510,19 +556,19 @@ namespace NLog.Windows.Forms
             string logMessage = Layout.Render(logEvent);
             RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
 
-            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule);
+            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);  
 
             switch (messageRetention)
             {
                 case RichTextBoxTargetMessageRetentionStrategy.None:
                     break;
                 case RichTextBoxTargetMessageRetentionStrategy.All:
-                    StoreMessage(logMessage, matchingRule);
+                    StoreMessage(logMessage, matchingRule, logEvent);
                     break;
                 case RichTextBoxTargetMessageRetentionStrategy.OnlyMissed:
                     if (!messageSent)
                     {
-                        StoreMessage(logMessage, matchingRule);
+                        StoreMessage(logMessage, matchingRule, logEvent);
                     }
                     break;
                 default:
@@ -536,15 +582,16 @@ namespace NLog.Windows.Forms
         /// </summary>
         /// <param name="logMessage">a message to send</param>
         /// <param name="rule">matching coloring rule</param>
+        /// <param name="logEvent">original logEvent</param>
         /// <returns>true if the message was actually sent (i.e. <see cref="TargetRichTextBox"/> is not null and not disposed, and no exception happened during message send)</returns>
-        private bool DoSendMessageToTextbox(string logMessage, RichTextBoxRowColoringRule rule)
+        private bool DoSendMessageToTextbox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
         {
             RichTextBox textbox = TargetRichTextBox;
             try
             {
                 if (textbox != null && !textbox.IsDisposed)
                 {
-                    textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule);
+                    textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule, logEvent);
                     return true;
                 }
             }
@@ -603,7 +650,7 @@ namespace NLog.Windows.Forms
             return Color.FromName(color);
         }
 
-        private void SendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule)
+        private void SendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
         {
             RichTextBox textBox = TargetRichTextBox;
 
@@ -626,6 +673,18 @@ namespace NLog.Windows.Forms
                     textBox.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor, textBox.BackColor);
                     textBox.SelectionColor = GetColorFromString(wordRule.FontColor, textBox.ForeColor);
                     textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ wordRule.Style);
+                }
+            }
+
+            if (SupportLinks)
+            {
+                object linkInfoObj;
+                if (logEvent.Properties.TryGetValue(RichTextBoxLinkLayoutRenderer.LinkInfo.PropertyName, out linkInfoObj))
+                {
+                    RichTextBoxLinkLayoutRenderer.LinkInfo linkInfo = (RichTextBoxLinkLayoutRenderer.LinkInfo)linkInfoObj;
+                    textBox.SelectionStart = startIndex + linkInfo.offset;
+                    textBox.SelectionLength = linkInfo.length;
+                    FormHelper.ChangeSelectionToLink(textBox, "link");
                 }
             }
 
@@ -660,7 +719,8 @@ namespace NLog.Windows.Forms
         /// </summary>
         /// <param name="logMessage">a message to store</param>
         /// <param name="rule">a corresponding coloring rule</param>
-        private void StoreMessage(string logMessage, RichTextBoxRowColoringRule rule)
+        /// <param name="logEvent">original LogEvent</param>
+        private void StoreMessage(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
         {
             lock (messageQueueLock)
             {
@@ -675,7 +735,7 @@ namespace NLog.Windows.Forms
                         messageQueue.Dequeue();
                     }
                 }
-                messageQueue.Enqueue(new MessageInfo(logMessage, rule));
+                messageQueue.Enqueue(new MessageInfo(logMessage, rule, logEvent));
             }
         }
 
@@ -683,12 +743,13 @@ namespace NLog.Windows.Forms
         {
             internal string message { get; private set; }
             internal RichTextBoxRowColoringRule rule { get; private set; }
-            internal MessageInfo(string message, RichTextBoxRowColoringRule rule)
+            internal LogEventInfo logEvent { get; private set; }
+            internal MessageInfo(string message, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
             {
                 this.message = message;
                 this.rule = rule;
+                this.logEvent = logEvent;
             }
         }
-
     }
 }
