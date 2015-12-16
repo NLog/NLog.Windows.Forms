@@ -27,12 +27,10 @@ namespace TestApplication
 
             var thread = new Thread(() =>
             {
-
                 for (int i = 0; i < 1000; i++)
                 {
                     Logger.Debug("{0}: a line with some length\n a new line", i);
                     Thread.Sleep(200);
-
                 }
                 Logger.Info("Done");
             });

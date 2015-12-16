@@ -362,6 +362,7 @@ namespace NLog.Windows.Forms
         private const string LINK_PREFIX = "link";
 
         private readonly Regex linkRegex = new Regex(@"(.*)#" + LINK_PREFIX + @"(\d+)", RegexOptions.Compiled);
+        private readonly Regex linkRtfRegex = new Regex(@"\\v #" + LINK_PREFIX + @"(\d+)\\v0", RegexOptions.Compiled);
 
 
         /// <summary>
@@ -772,6 +773,21 @@ namespace NLog.Windows.Forms
                     {
                         textBox.SelectionStart = 0;
                         textBox.SelectionLength = textBox.GetFirstCharIndexFromLine(tooManyLines);
+                        if (supportLinks)
+                        {
+                            string selectedRtf = textBox.SelectedRtf;
+                            foreach (Match match in linkRtfRegex.Matches(selectedRtf))
+                            {
+                                int id;
+                                if (Int32.TryParse(match.Groups[1].Value, out id))
+                                {
+                                    lock (linkedEventsLock)
+                                    {
+                                        linkedEvents.Remove(id);
+                                    }
+                                }
+                            }
+                        }
                         textBox.SelectedRtf = "{\\rtf1\\ansi}";
                     }
                 }
