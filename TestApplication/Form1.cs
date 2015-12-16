@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NLog;
+using NLog.Windows.Forms;
 
 namespace TestApplication
 {
@@ -22,6 +23,7 @@ namespace TestApplication
 
             NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
             Logger.Info("Init");
+            
 
             var thread = new Thread(() =>
             {
@@ -37,8 +39,19 @@ namespace TestApplication
             Logger.Info("start thread");
             thread.Start();
 
-            
-
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            RichTextBoxTarget.ReInitializeAllTextboxes(this);
+            RichTextBoxTarget.GetTargetByControl(richTextBox1).LinkClicked += Form1_LinkClicked;
+        }
+
+        void Form1_LinkClicked(string linkText, LogEventInfo logEvent)
+        {
+            MessageBox.Show("Clicked link '" + linkText + "' for event\n" + logEvent);
+        }
+
+        
     }
 }

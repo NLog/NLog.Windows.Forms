@@ -113,6 +113,24 @@ namespace NLog.Windows.Forms
                 }
             }
         }
+
+        /// <summary>
+        /// Returns a target attached to a given RichTextBox control
+        /// </summary>
+        /// <param name="control">a RichTextBox control for which the target is to be returned</param>
+        /// <returns>A RichTextBoxTarget attached to a given control or <code>null</code> if no target is attached</returns>
+        public static RichTextBoxTarget GetTargetByControl(RichTextBox control)
+        {
+            foreach (Target target in LogManager.Configuration.AllTargets)
+            {
+                RichTextBoxTarget textboxTarget = target as RichTextBoxTarget;
+                if (textboxTarget != null && textboxTarget.TargetRichTextBox == control)
+                {
+                    return textboxTarget;
+                }
+            }
+            return null;
+        }
         
         /// <summary>
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
@@ -322,11 +340,28 @@ namespace NLog.Windows.Forms
             }
         }
 
+        /// <summary>
+        /// Type of delegate for <see cref="LinkClicked"/> event.
+        /// </summary>
+        /// <param name="linkText">Visible text of the link being clicked</param>
+        /// <param name="logEvent">Original log event that caused a line with the link</param>
+        public delegate void DelLinkClicked(string linkText, LogEventInfo logEvent);
+
+        /// <summary>
+        /// Event fired when the user clicks on a link in the control created by the "rtb-link" renderer (<see cref="RichTextBoxLinkLayoutRenderer"/>).
+        /// <seealso cref="DelLinkClicked"/>
+        /// </summary>
+        public event DelLinkClicked LinkClicked;
+
         private bool supportLinks = false;
 
         private readonly object linkedEventsLock = new object();
 
         private Dictionary<int, LogEventInfo> linkedEvents;
+
+        private const string LINK_PREFIX = "link";
+
+        private readonly Regex linkRegex = new Regex(@"(.*)#" + LINK_PREFIX + @"(\d+)", RegexOptions.Compiled);
 
 
         /// <summary>
@@ -496,7 +531,38 @@ namespace NLog.Windows.Forms
 
         private void TargetRichTextBox_LinkClicked(object sender, LinkClickedEventArgs e)
         {
-            throw new NotImplementedException();
+            Match match = linkRegex.Match(e.LinkText);
+            if (!match.Success)
+            {
+                //could be a link inserted by another RTB control user
+                InternalLogger.Warn("Unexpected link format '{0}', skipping", e.LinkText);
+                return;
+            }
+
+            int id;
+            if (!Int32.TryParse(match.Groups[2].Value, out id))
+            {
+                //still could be a link inserted by another RTB control user
+                InternalLogger.Warn("Unexpected link format '{0}', skipping", e.LinkText);
+                return;
+            }
+
+            LogEventInfo logEvent;
+            lock (linkedEventsLock)
+            {
+                linkedEvents.TryGetValue(id, out logEvent);
+            }
+            if (logEvent == null)
+            {
+                HandleError("Missing link id {0}", id);
+                return;
+            }
+
+            DelLinkClicked linkClickEvent = LinkClicked;
+            if (linkClickEvent != null)
+            {
+                linkClickEvent(match.Groups[1].Value, logEvent);
+            }
         }
 
         /// <summary>
@@ -684,7 +750,11 @@ namespace NLog.Windows.Forms
                     RichTextBoxLinkLayoutRenderer.LinkInfo linkInfo = (RichTextBoxLinkLayoutRenderer.LinkInfo)linkInfoObj;
                     textBox.SelectionStart = startIndex + linkInfo.offset;
                     textBox.SelectionLength = linkInfo.length;
-                    FormHelper.ChangeSelectionToLink(textBox, "link");
+                    FormHelper.ChangeSelectionToLink(textBox, LINK_PREFIX + linkInfo.id);
+                    lock (linkedEventsLock)
+                    {
+                        linkedEvents[linkInfo.id] = logEvent;
+                    }
                 }
             }
 
