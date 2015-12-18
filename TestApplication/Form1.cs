@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NLog;
 using NLog.Windows.Forms;
+using System.Globalization;
 
 namespace TestApplication
 {
@@ -25,11 +26,18 @@ namespace TestApplication
             Logger.Info("Init");
             
 
+
             var thread = new Thread(() =>
             {
-                for (int i = 0; i < 1000; i++)
+                Random rnd = new Random();
+                for (int i = 0; i < 10; i++)
                 {
-                    Logger.Debug("{0}: a line with some length\n a new line", i);
+                    LogEventInfo theEvent = new LogEventInfo(LogLevel.Debug, "", i + ": a line with some length\n a new line");
+                    if (rnd.NextDouble() > 0.1)
+                    {
+                        theEvent.Properties["ShowLink"] = "details";
+                    }
+                    Logger.Log(theEvent);
                     Thread.Sleep(200);
                 }
                 Logger.Info("Done");
