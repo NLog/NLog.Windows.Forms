@@ -45,7 +45,7 @@ namespace TestApplication
             RichTextBoxTarget.GetTargetByControl(richTextBox1).LinkClicked += Form1_LinkClicked;
         }
 
-        void Form1_LinkClicked(string linkText, LogEventInfo logEvent)
+        void Form1_LinkClicked(RichTextBoxTarget sender, string linkText, LogEventInfo logEvent)
         {
             MessageBox.Show("Clicked link '" + linkText + "' for event\n" + logEvent);
         }

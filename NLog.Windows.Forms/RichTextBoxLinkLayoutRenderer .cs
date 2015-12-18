@@ -10,7 +10,7 @@ using System.Threading;
 namespace NLog.Windows.Forms
 {
     /// <summary>
-    /// 
+    /// Strings rendered with this rendrer would convert to links in the control. <see cref="RichTextBoxTarget.SupportLinks"/>
     /// </summary>
     [LayoutRenderer("rtb-link")]
     public sealed class RichTextBoxLinkLayoutRenderer : LayoutRenderer
@@ -18,13 +18,13 @@ namespace NLog.Windows.Forms
         private static int s_id = 0;
 
         /// <summary>
-        /// 
+        /// Inner layout that actually provides text
         /// </summary>
         [DefaultParameter]
         public Layout Inner { get; set; }
 
         /// <summary>
-        /// 
+        /// Implementation of a <see cref="LayoutRenderer.Append"/>
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="logEvent"></param>
@@ -44,6 +44,9 @@ namespace NLog.Windows.Forms
             builder.Append(msg);
         }
 
+        /// <summary>
+        /// Inernal class storing the captured link info, used by <see cref="RichTextBoxTarget.SendTheMessageToRichTextBox"/> to convert the text to link and then identify the logEvent
+        /// </summary>
         internal sealed class LinkInfo
         {
             internal const string PropertyName = "NLog.Windows.Forms.RichTextBoxLinkLayoutRenderer.LinkInfo";

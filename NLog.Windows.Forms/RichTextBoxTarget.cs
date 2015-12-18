@@ -318,7 +318,8 @@ namespace NLog.Windows.Forms
         private volatile Queue<MessageInfo> messageQueue = null;
 
         /// <summary>
-        /// 
+        /// If set to true, using "rtb-link" renderer (<see cref="RichTextBoxLinkLayoutRenderer"/>) would create clickable links in the control.
+        /// <seealso cref="LinkClicked"/>
         /// </summary>
         [DefaultValue(false)]
         public bool SupportLinks 
@@ -343,9 +344,10 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// Type of delegate for <see cref="LinkClicked"/> event.
         /// </summary>
+        /// <param name="sender">The target that caused the event</param>
         /// <param name="linkText">Visible text of the link being clicked</param>
         /// <param name="logEvent">Original log event that caused a line with the link</param>
-        public delegate void DelLinkClicked(string linkText, LogEventInfo logEvent);
+        public delegate void DelLinkClicked(RichTextBoxTarget sender, string linkText, LogEventInfo logEvent);
 
         /// <summary>
         /// Event fired when the user clicks on a link in the control created by the "rtb-link" renderer (<see cref="RichTextBoxLinkLayoutRenderer"/>).
@@ -353,15 +355,34 @@ namespace NLog.Windows.Forms
         /// </summary>
         public event DelLinkClicked LinkClicked;
 
+        /// <summary>
+        /// Actual value of the <see cref="LinkClicked"/> property
+        /// </summary>
         private bool supportLinks = false;
 
+        /// <summary>
+        /// Lock for <see cref="linkedEvents"/> dictionary access
+        /// </summary>
         private readonly object linkedEventsLock = new object();
 
+        /// <summary>
+        /// A map from link id to a corresponding log event
+        /// </summary>
         private Dictionary<int, LogEventInfo> linkedEvents;
 
+        /// <summary>
+        /// Internal prefix that is added to the link id in RTF
+        /// </summary>
         private const string LINK_PREFIX = "link";
 
+        /// <summary>
+        /// Used to parse links in <see cref="TargetRichTextBox_LinkClicked"/>
+        /// </summary>
         private readonly Regex linkRegex = new Regex(@"(.*)#" + LINK_PREFIX + @"(\d+)", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Used to parse RTF with links when removing excess lines in <see cref="SendTheMessageToRichTextBox"/>
+        /// </summary>
         private readonly Regex linkRtfRegex = new Regex(@"\\v #" + LINK_PREFIX + @"(\d+)\\v0", RegexOptions.Compiled);
 
 
@@ -530,6 +551,11 @@ namespace NLog.Windows.Forms
             }
         }
 
+        /// <summary>
+        /// Attached to RTB-control's LinkClicked event to convert link text to logEvent
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TargetRichTextBox_LinkClicked(object sender, LinkClickedEventArgs e)
         {
             Match match = linkRegex.Match(e.LinkText);
@@ -562,7 +588,7 @@ namespace NLog.Windows.Forms
             DelLinkClicked linkClickEvent = LinkClicked;
             if (linkClickEvent != null)
             {
-                linkClickEvent(match.Groups[1].Value, logEvent);
+                linkClickEvent(this, match.Groups[1].Value, logEvent);
             }
         }
 

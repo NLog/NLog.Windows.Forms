@@ -165,6 +165,11 @@ namespace NLog.Windows.Forms
         }
 
 #region Link support
+        /// <summary>
+        /// Converts currently selected text in the RTB control to a link
+        /// </summary>
+        /// <param name="textBox">target control</param>
+        /// <param name="hyperlink">value of the new link</param>
         internal static void ChangeSelectionToLink(RichTextBox textBox, string hyperlink)
         {
             string selectedText = textBox.SelectedText;
@@ -176,13 +181,8 @@ namespace NLog.Windows.Forms
             textBox.SelectedRtf = @"{\rtf1\ansi " + selectedText + @"\v #" + hyperlink + @"\v0}";
             //textBox.Select(position, text.Length + hyperlink.Length + 1);
             textBox.Select(selectionStart, selectedText.Length + hyperlink.Length + 1);
-            SetSelectionLink(textBox);
-            //textBox.Select(position + text.Length + hyperlink.Length + 1, 0);
-        }
-
-        internal static void SetSelectionLink(RichTextBox textBox)
-        {
             SetSelectionStyle(textBox, CFM_LINK, CFE_LINK);
+            //textBox.Select(position + text.Length + hyperlink.Length + 1, 0);
         }
 
         private static void SetSelectionStyle(RichTextBox textBox, UInt32 mask, UInt32 effect)
@@ -201,7 +201,6 @@ namespace NLog.Windows.Forms
             Marshal.FreeCoTaskMem(lpar);
         }
 
-#region Interop-Defines
         [StructLayout(LayoutKind.Sequential)]
         private struct CHARFORMAT2_STRUCT
         {
@@ -236,9 +235,6 @@ namespace NLog.Windows.Forms
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
-
-
-#endregion
 #endregion
     }
 }
