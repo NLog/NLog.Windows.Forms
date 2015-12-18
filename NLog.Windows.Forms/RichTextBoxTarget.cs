@@ -375,15 +375,21 @@ namespace NLog.Windows.Forms
         /// </summary>
         private const string LINK_PREFIX = "link";
 
+
+        /// <summary>
+        /// Used to capture link placeholders in <see cref="SendTheMessageToRichTextBox"/>
+        /// </summary>
+        private readonly Regex linkAddRegex = new Regex(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", RegexOptions.Compiled);
+
         /// <summary>
         /// Used to parse links in <see cref="TargetRichTextBox_LinkClicked"/>
         /// </summary>
-        private readonly Regex linkRegex = new Regex(@"(.*)#" + LINK_PREFIX + @"(\d+)", RegexOptions.Compiled);
+        private readonly Regex linkClickRegex = new Regex(@"(.*)#" + LINK_PREFIX + @"(\d+)", RegexOptions.Compiled);
 
         /// <summary>
         /// Used to parse RTF with links when removing excess lines in <see cref="SendTheMessageToRichTextBox"/>
         /// </summary>
-        private readonly Regex linkRtfRegex = new Regex(@"\\v #" + LINK_PREFIX + @"(\d+)\\v0", RegexOptions.Compiled);
+        private readonly Regex linkRemoveRtfRegex = new Regex(@"\\v #" + LINK_PREFIX + @"(\d+)\\v0", RegexOptions.Compiled);
 
 
         /// <summary>
@@ -558,7 +564,7 @@ namespace NLog.Windows.Forms
         /// <param name="e"></param>
         private void TargetRichTextBox_LinkClicked(object sender, LinkClickedEventArgs e)
         {
-            Match match = linkRegex.Match(e.LinkText);
+            Match match = linkClickRegex.Match(e.LinkText);
             if (!match.Success)
             {
                 //could be a link inserted by another RTB control user
@@ -775,12 +781,28 @@ namespace NLog.Windows.Forms
                 if (logEvent.Properties.TryGetValue(RichTextBoxLinkLayoutRenderer.LinkInfo.PropertyName, out linkInfoObj))
                 {
                     RichTextBoxLinkLayoutRenderer.LinkInfo linkInfo = (RichTextBoxLinkLayoutRenderer.LinkInfo)linkInfoObj;
-                    textBox.SelectionStart = startIndex + linkInfo.offset;
-                    textBox.SelectionLength = linkInfo.length;
-                    FormHelper.ChangeSelectionToLink(textBox, LINK_PREFIX + linkInfo.id);
-                    lock (linkedEventsLock)
+
+                    bool linksAdded = false;
+
+                    textBox.SelectionStart = startIndex;
+                    textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
+                    string addedText = textBox.SelectedText;
+                    MatchCollection matches = linkAddRegex.Matches(addedText);
+                    for (int i = matches.Count - 1; i >= 0; --i)    //backwards order, so the string positions are not affected
                     {
-                        linkedEvents[linkInfo.id] = logEvent;
+                        Match match = matches[i];
+                        string linkText = linkInfo.GetValue(match.Value);
+                        if (linkText != null)
+                        {
+                            textBox.SelectionStart = startIndex + match.Index;
+                            textBox.SelectionLength = match.Length;
+                            FormHelper.ChangeSelectionToLink(textBox, linkText, LINK_PREFIX + logEvent.SequenceID);
+                            linksAdded = true;
+                        }
+                    }
+                    if (linksAdded)
+                    {
+                        linkedEvents[logEvent.SequenceID] = logEvent;
                     }
                 }
             }
@@ -802,7 +824,7 @@ namespace NLog.Windows.Forms
                         if (supportLinks)
                         {
                             string selectedRtf = textBox.SelectedRtf;
-                            foreach (Match match in linkRtfRegex.Matches(selectedRtf))
+                            foreach (Match match in linkRemoveRtfRegex.Matches(selectedRtf))
                             {
                                 int id;
                                 if (Int32.TryParse(match.Groups[1].Value, out id))

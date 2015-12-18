@@ -15,8 +15,6 @@ namespace NLog.Windows.Forms
     [LayoutRenderer("rtb-link")]
     public sealed class RichTextBoxLinkLayoutRenderer : LayoutRenderer
     {
-        private static int s_id = 0;
-
         /// <summary>
         /// Inner layout that actually provides text
         /// </summary>
@@ -33,15 +31,24 @@ namespace NLog.Windows.Forms
             string msg = this.Inner.Render(logEvent);
 
             //store new linkInfo to be retreived by RichTextBox
-            int id = Interlocked.Increment(ref s_id);
-            LinkInfo linkInfo = new LinkInfo() {
-                id = id,
-                offset = builder.Length,
-                length = msg.Length
-            };
-            logEvent.Properties[LinkInfo.PropertyName] = linkInfo;
 
-            builder.Append(msg);
+            //TODO: should we synchronize access to logEvent.Properties??
+            LinkInfo linkInfo;
+            object linkInfoObj;
+            if (logEvent.Properties.TryGetValue(LinkInfo.PropertyName, out linkInfoObj))
+            {
+                linkInfo = (LinkInfo)linkInfoObj;
+            }
+            else
+            {
+                linkInfo = new LinkInfo();
+                logEvent.Properties.Add(LinkInfo.PropertyName, linkInfo);
+            }
+
+            string guid = Guid.NewGuid().ToString("P"); //(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+            linkInfo.Add(guid, msg);
+
+            builder.Append(guid);
         }
 
         /// <summary>
@@ -51,9 +58,26 @@ namespace NLog.Windows.Forms
         {
             internal const string PropertyName = "NLog.Windows.Forms.RichTextBoxLinkLayoutRenderer.LinkInfo";
 
-            internal int id { get; set; }
-            internal int offset { get; set; }
-            internal int length { get; set; }
+            private readonly object m_lock = new object();
+            private readonly Dictionary<string, string> m_guidToLinkText = new Dictionary<string, string>();
+
+            internal void Add(string guid, string linkText)
+            {
+                lock (m_lock)
+                {
+                    m_guidToLinkText.Add(guid, linkText);
+                }
+            }
+
+            internal string GetValue(string guid)
+            {
+                string result = null;
+                lock (m_lock)
+                {
+                    m_guidToLinkText.TryGetValue(guid, out result);
+                }
+                return result;
+            }
         }
     }
 }

@@ -166,21 +166,17 @@ namespace NLog.Windows.Forms
 
 #region Link support
         /// <summary>
-        /// Converts currently selected text in the RTB control to a link
+        /// Replaces currently selected text in the RTB control with a link
         /// </summary>
         /// <param name="textBox">target control</param>
+        /// <param name="text">visible text of the new link</param>
         /// <param name="hyperlink">value of the new link</param>
-        internal static void ChangeSelectionToLink(RichTextBox textBox, string hyperlink)
+        internal static void ChangeSelectionToLink(RichTextBox textBox, string text, string hyperlink)
         {
-            string selectedText = textBox.SelectedText;
-            if (string.IsNullOrEmpty(selectedText))
-            {
-                throw new ArgumentException("No text selected");
-            }
             int selectionStart = textBox.SelectionStart;
-            textBox.SelectedRtf = @"{\rtf1\ansi " + selectedText + @"\v #" + hyperlink + @"\v0}";
+            textBox.SelectedRtf = @"{\rtf1\ansi " + text + @"\v #" + hyperlink + @"\v0}";
             //textBox.Select(position, text.Length + hyperlink.Length + 1);
-            textBox.Select(selectionStart, selectedText.Length + hyperlink.Length + 1);
+            textBox.Select(selectionStart, text.Length + hyperlink.Length + 1);
             SetSelectionStyle(textBox, CFM_LINK, CFE_LINK);
             //textBox.Select(position + text.Length + hyperlink.Length + 1, 0);
         }

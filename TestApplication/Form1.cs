@@ -35,7 +35,11 @@ namespace TestApplication
                     LogEventInfo theEvent = new LogEventInfo(LogLevel.Debug, "", i + ": a line with some length\n a new line");
                     if (rnd.NextDouble() > 0.1)
                     {
-                        theEvent.Properties["ShowLink"] = "details";
+                        theEvent.Properties["ShowLink"] = "link via property";
+                    }
+                    if (rnd.NextDouble() > 0.5)
+                    {
+                        theEvent.Properties["ShowLink2"] = "Another link";
                     }
                     Logger.Log(theEvent);
                     Thread.Sleep(200);
@@ -51,13 +55,24 @@ namespace TestApplication
         {
             RichTextBoxTarget.ReInitializeAllTextboxes(this);
             RichTextBoxTarget.GetTargetByControl(richTextBox1).LinkClicked += Form1_LinkClicked;
+            RichTextBoxTarget.GetTargetByControl(richTextBox2).LinkClicked += Form1_LinkClicked;
         }
 
-        void Form1_LinkClicked(RichTextBoxTarget sender, string linkText, LogEventInfo logEvent)
+        private void Form1_LinkClicked(RichTextBoxTarget sender, string linkText, LogEventInfo logEvent)
         {
-            MessageBox.Show("Clicked link '" + linkText + "' for event\n" + logEvent);
+            //COM HRESULT E_FAIL happens when not used BeginInvoke and links are clicked while spinning
+            BeginInvokeLambda(this,
+                () => { MessageBox.Show("Clicked link '" + linkText + "' for event\n" + logEvent, sender.Name); }
+            );
         }
 
-        
+        private static IAsyncResult BeginInvokeLambda(Control control, Action action)
+        {
+            if (!control.IsDisposed)
+            {
+                return control.BeginInvoke(action, null);
+            }
+            return null;
+        }
     }
 }
