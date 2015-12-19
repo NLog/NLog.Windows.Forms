@@ -778,7 +778,11 @@ namespace NLog.Windows.Forms
             if (SupportLinks)
             {
                 object linkInfoObj;
-                if (logEvent.Properties.TryGetValue(RichTextBoxLinkLayoutRenderer.LinkInfo.PropertyName, out linkInfoObj))
+                lock (logEvent.Properties)
+                {
+                    logEvent.Properties.TryGetValue(RichTextBoxLinkLayoutRenderer.LinkInfo.PropertyName, out linkInfoObj);
+                }
+                if (linkInfoObj != null)
                 {
                     RichTextBoxLinkLayoutRenderer.LinkInfo linkInfo = (RichTextBoxLinkLayoutRenderer.LinkInfo)linkInfoObj;
 

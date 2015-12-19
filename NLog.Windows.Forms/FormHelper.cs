@@ -170,17 +170,32 @@ namespace NLog.Windows.Forms
         /// </summary>
         /// <param name="textBox">target control</param>
         /// <param name="text">visible text of the new link</param>
-        /// <param name="hyperlink">value of the new link</param>
+        /// <param name="hyperlink">hidden part of the new link</param>
+        /// <remarks>
+        /// Based on http://www.codeproject.com/info/cpol10.aspx
+        /// </remarks>
         internal static void ChangeSelectionToLink(RichTextBox textBox, string text, string hyperlink)
         {
             int selectionStart = textBox.SelectionStart;
-            textBox.SelectedRtf = @"{\rtf1\ansi " + text + @"\v #" + hyperlink + @"\v0}";
-            //textBox.Select(position, text.Length + hyperlink.Length + 1);
-            textBox.Select(selectionStart, text.Length + hyperlink.Length + 1);
-            SetSelectionStyle(textBox, CFM_LINK, CFE_LINK);
-            //textBox.Select(position + text.Length + hyperlink.Length + 1, 0);
+
+            //using \v tag to hide hyperlink part of the text, and \v0 to end hiding. See http://stackoverflow.com/a/14339531/376066
+            //so in the control the link would consist only of "<text>", but in link clicked event we would get "<text>#<hyperlink>"
+            textBox.SelectedRtf = @"{\rtf1\ansi " + text + @"\v #" + hyperlink + @"\v0}";   
+
+            textBox.Select(selectionStart, text.Length + 1 + hyperlink.Length); //now select both visible and invisible part
+            SetSelectionStyle(textBox, CFM_LINK, CFE_LINK);                     //and turn into a link
         }
 
+        /// <summary>
+        /// Sets selection style for RichTextBox
+        /// https://msdn.microsoft.com/en-us/library/windows/desktop/bb787883(v=vs.85).aspx
+        /// </summary>
+        /// <param name="textBox">target control</param>
+        /// <param name="mask">Specifies the parts of the CHARFORMAT2 structure that contain valid information.</param>
+        /// <param name="effect">A set of bit flags that specify character effects.</param>
+        /// <remarks>
+        /// Based on http://www.codeproject.com/info/cpol10.aspx
+        /// </remarks>
         private static void SetSelectionStyle(RichTextBox textBox, UInt32 mask, UInt32 effect)
         {
             CHARFORMAT2_STRUCT cf = new CHARFORMAT2_STRUCT();
@@ -197,6 +212,10 @@ namespace NLog.Windows.Forms
             Marshal.FreeCoTaskMem(lpar);
         }
 
+        /// <summary>
+        /// CHARFORMAT2 structure, contains information about character formatting in a rich edit control.
+        /// </summary>
+        /// see https://msdn.microsoft.com/en-us/library/windows/desktop/bb787883(v=vs.85).aspx
         [StructLayout(LayoutKind.Sequential)]
         private struct CHARFORMAT2_STRUCT
         {
@@ -224,10 +243,10 @@ namespace NLog.Windows.Forms
         }
 
         private const int WM_USER = 0x0400;
-        private const int EM_SETCHARFORMAT = WM_USER + 68;
-        private const int SCF_SELECTION = 0x0001;
-        private const UInt32 CFE_LINK = 0x0020;
-        private const UInt32 CFM_LINK = 0x00000020;
+        private const int EM_SETCHARFORMAT = WM_USER + 68;  //EM_SETCHARFORMAT message - Sets character formatting in a rich edit control. https://msdn.microsoft.com/en-us/library/windows/desktop/bb774230(v=vs.85).aspx
+        private const int SCF_SELECTION = 0x0001;       //Applies the formatting to the current selection. https://msdn.microsoft.com/en-us/library/windows/desktop/bb774230(v=vs.85).aspx
+        private const UInt32 CFE_LINK = 0x0020;         //link effect https://msdn.microsoft.com/en-us/library/windows/desktop/bb787970(v=vs.85).aspx
+        private const UInt32 CFM_LINK = 0x00000020;     //mask for CFE_LINK, see https://msdn.microsoft.com/en-us/library/windows/desktop/bb787883(v=vs.85).aspx
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
