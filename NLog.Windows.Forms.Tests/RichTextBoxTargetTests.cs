@@ -19,6 +19,9 @@ using NLog.Config;
 using NLog.Targets;
 using Xunit;
 using System.Text.RegularExpressions;
+using System;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace NLog.Windows.Forms.Tests
 {
@@ -724,12 +727,89 @@ namespace NLog.Windows.Forms.Tests
             Assert.True(target.LinkedEventsCount == target.MaxLines); //storing 5, not 100 events
         }
 
+        [Fact]
+        public void LinkClickTest()
+        {
+            RichTextBoxTarget target = new RichTextBoxTarget()
+            {
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${rtb-link:inner=link}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                SupportLinks = true
+            };
+
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            logger.Info("Test");
+
+            Application.DoEvents();
+
+            Assert.Same(target, RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox));
+            Assert.True(target.TargetRichTextBox.Text.Contains("link"));
+
+            bool linkClicked = false;
+
+            RichTextBoxTarget.DelLinkClicked clickHandler = (RichTextBoxTarget sender, string linkText, LogEventInfo logEvent) => {
+                linkClicked = true;
+                target.TargetForm.Close();
+            };
+
+            RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox).LinkClicked += clickHandler;
+
+            //simulate clicking on a link
+            Task.Run(() => {
+                for (int i = 0; i < 3; ++i) //needs a number of clicks. Probably - to make application focused, form focused, and finally link clicked.
+                {
+                    InvokeLambda(target.TargetRichTextBox, () =>
+                    {
+                        Point scrPoint = target.TargetRichTextBox.PointToScreen(new Point(5, 5));
+                        LeftMouseClick(scrPoint.X, scrPoint.Y);
+                    });
+                }
+            });
+
+            //in case link does not click, this would hang up infinitely;
+            Application.Run(target.TargetForm);
+
+            Assert.True(linkClicked); //check that we have actually clicked on a link, not just missed anything
+        }
+
+
+        #region mouse click smulation
+        //http://stackoverflow.com/a/8273118/376066
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetCursorPos(int x, int y);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+
+        private const int MOUSEEVENTF_ABSOLUTE = 0x8000;
+        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
+        private const int MOUSEEVENTF_LEFTUP = 0x04;
+
+        //This simulates a left mouse click
+        private static void LeftMouseClick(int xpos, int ypos)
+        {
+            SetCursorPos(xpos, ypos);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN, xpos, ypos, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP, xpos, ypos, 0, 0);
+        }
+        #endregion
+
         private static string ExtractRtf(RichTextBox conrol)
         {
             MemoryStream ms = new MemoryStream();
             conrol.SaveFile(ms, RichTextBoxStreamType.RichText);
             string resultRtf = Encoding.UTF8.GetString(ms.GetBuffer());
             return resultRtf;
+        }
+
+        private static void InvokeLambda(Control control, Action action)
+        {
+            control.Invoke(action);
         }
     }
 }
