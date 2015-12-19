@@ -371,6 +371,25 @@ namespace NLog.Windows.Forms
         private Dictionary<int, LogEventInfo> linkedEvents;
 
         /// <summary>
+        /// Returns number of events stored for active links in the control. 
+        /// Used only in tests to check that non needed events are removed.
+        /// </summary>
+        internal int? LinkedEventsCount
+        {
+            get
+            {
+                lock (linkedEventsLock)
+                {
+                    if (linkedEvents == null)
+                    {
+                        return null;
+                    }
+                    return linkedEvents.Count;
+                }
+            }
+        }
+
+        /// <summary>
         /// Internal prefix that is added to the link id in RTF
         /// </summary>
         private const string LINK_PREFIX = "link";

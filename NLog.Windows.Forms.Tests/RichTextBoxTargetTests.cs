@@ -688,6 +688,42 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
+        [Fact]
+        public void LinkTestExcessLinksRemoved()
+        {
+            RichTextBoxTarget target = new RichTextBoxTarget()
+            {
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${level} ${logger} ${message} ${rtb-link:inner=${event-properties:item=LinkIndex}}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                SupportLinks = true,
+                MaxLines = 5
+            };
+
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            Assert.Same(target, RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox));
+
+            for (int i = 0; i < 100; ++i)
+            {
+                LogEventInfo info = new LogEventInfo(LogLevel.Info, "", "Test");
+                info.Properties["LinkIndex"] = i;
+                logger.Log(info);
+            }
+            Application.DoEvents();
+
+            string resultText = target.TargetRichTextBox.Text;
+            string resultRtf = ExtractRtf(target.TargetRichTextBox);
+            //cant check for specific ids here because of the possible parallel execution
+            Assert.True(resultText.Contains("#link"));  //some links exist
+            Assert.True(resultRtf.Contains(@"\v #link"));  //some links exist
+
+            Assert.True(target.LinkedEventsCount == target.MaxLines); //storing 5, not 100 events
+        }
+
         private static string ExtractRtf(RichTextBox conrol)
         {
             MemoryStream ms = new MemoryStream();
