@@ -18,6 +18,7 @@ using System.Windows.Forms;
 using NLog.Config;
 using NLog.Targets;
 using Xunit;
+using System.Text.RegularExpressions;
 
 namespace NLog.Windows.Forms.Tests
 {
@@ -57,9 +58,7 @@ namespace NLog.Windows.Forms.Tests
             Assert.Equal(300, form.Width);
             Assert.Equal(200, form.Height);
 
-            MemoryStream ms = new MemoryStream();
-            target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
-            string rtfText = Encoding.UTF8.GetString(ms.GetBuffer());
+            string rtfText = ExtractRtf(target.TargetRichTextBox);
 
             Assert.True(target.CreatedForm);
 
@@ -105,9 +104,7 @@ namespace NLog.Windows.Forms.Tests
 
                 var form = target.TargetForm;
 
-                MemoryStream ms = new MemoryStream();
-                target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
-                string rtfText = Encoding.UTF8.GetString(ms.GetBuffer());
+                string rtfText = ExtractRtf(target.TargetRichTextBox);
 
                 Assert.True(target.CreatedForm);
 
@@ -157,9 +154,7 @@ namespace NLog.Windows.Forms.Tests
 
                 var form = target.TargetForm;
 
-                MemoryStream ms = new MemoryStream();
-                target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
-                string rtfText = Encoding.UTF8.GetString(ms.GetBuffer());
+                string rtfText = ExtractRtf(target.TargetRichTextBox);
 
                 Assert.True(target.CreatedForm);
 
@@ -210,9 +205,7 @@ namespace NLog.Windows.Forms.Tests
 
                 var form = target.TargetForm;
 
-                MemoryStream ms = new MemoryStream();
-                target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
-                string rtfText = Encoding.UTF8.GetString(ms.GetBuffer());
+                string rtfText = ExtractRtf(target.TargetRichTextBox);
 
                 Assert.True(target.CreatedForm);
 
@@ -529,9 +522,7 @@ namespace NLog.Windows.Forms.Tests
                 Assert.Same(form, target.TargetForm);
                 Assert.Same(rtb, target.TargetRichTextBox);
 
-                MemoryStream ms = new MemoryStream();
-                target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
-                string result = Encoding.UTF8.GetString(ms.GetBuffer());
+                string result = ExtractRtf(target.TargetRichTextBox);
 
                 Assert.False(result.Contains(@"No Control"));
                 Assert.True(result.Contains(@"Has Control"));
@@ -588,13 +579,121 @@ namespace NLog.Windows.Forms.Tests
                 Assert.Same(form, target.TargetForm);
                 Assert.Same(rtb, target.TargetRichTextBox);
 
-                MemoryStream ms = new MemoryStream();
-                target.TargetRichTextBox.SaveFile(ms, RichTextBoxStreamType.RichText);
-                string result = Encoding.UTF8.GetString(ms.GetBuffer());
+                string result = ExtractRtf(target.TargetRichTextBox);
 
                 Assert.True(result.Contains(@"No Control"));
                 Assert.True(result.Contains(@"Has Control"));
             }
+        }
+
+        [Fact]
+        public void LinkLayoutTestDisabledLinks()
+        {
+            RichTextBoxTarget target = new RichTextBoxTarget()
+            {
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${level} ${logger} ${message} ${rtb-link:inner=descr}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                SupportLinks = false
+            };
+
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            logger.Info("Test");
+
+            Application.DoEvents();
+
+            string result = ExtractRtf(target.TargetRichTextBox);
+            Assert.True(Regex.IsMatch(result, @"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))"));  //the placeholder GUID was not replaced by was not replaced because of SupportLinks set to false
+        }
+
+        [Fact]
+        public void LinkTest()
+        {
+            RichTextBoxTarget target = new RichTextBoxTarget()
+            {
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${level} ${logger} ${message} ${rtb-link:inner=descr}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                SupportLinks = true
+            };
+
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            logger.Info("Test");
+
+            Application.DoEvents();
+
+            Assert.Same(target, RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox));
+
+            string resultRtf = ExtractRtf(target.TargetRichTextBox);
+            string resultText = target.TargetRichTextBox.Text;
+            Assert.False(Regex.IsMatch(resultRtf, @"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))"));  //the placeholder GUID was replaced
+            //cant check for specific ids here because of the possible parallel execution
+            Assert.True(resultText.Contains("descr#link"));  //text contains visible and invisible parts
+            Assert.True(resultRtf.Contains(@"descr\v #link"));  //RTF contains everything
+        }
+
+        [Fact]
+        public void LinkTestConditional()
+        {
+            RichTextBoxTarget target = new RichTextBoxTarget()
+            {
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${level} ${logger} ${message} ${rtb-link:inner=${event-properties:item=ShowLink}}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                SupportLinks = true
+            };
+
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Info("TestNoLink");
+            Application.DoEvents();
+
+            Assert.Same(target, RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox));
+
+            //check first event
+            {
+                string resultText = target.TargetRichTextBox.Text;
+                string resultRtf = ExtractRtf(target.TargetRichTextBox);
+                //cant check for specific ids here because of the possible parallel execution
+                Assert.True(resultText.Contains("TestNoLink"));
+                Assert.False(resultText.Contains("#link"));  //no link for first event
+                Assert.False(resultRtf.Contains(@"\v #link"));  //no link for first event
+            }
+
+
+            //log next event
+            {
+                LogEventInfo info = new LogEventInfo(LogLevel.Info, "", "TestWithLink");
+                info.Properties["ShowLink"] = "marker_text";
+                logger.Log(info);
+            }
+            Application.DoEvents();
+
+            //check second event
+            {
+                string resultText = target.TargetRichTextBox.Text;
+                string resultRtf = ExtractRtf(target.TargetRichTextBox);
+                //cant check for specific ids here because of the possible parallel execution
+                Assert.True(resultText.Contains("TestWithLink marker_text#link"));  //link for a second event
+                Assert.True(resultRtf.Contains(@"marker_text\v #link"));  //link for a second event
+            }
+        }
+
+        private static string ExtractRtf(RichTextBox conrol)
+        {
+            MemoryStream ms = new MemoryStream();
+            conrol.SaveFile(ms, RichTextBoxStreamType.RichText);
+            string resultRtf = Encoding.UTF8.GetString(ms.GetBuffer());
+            return resultRtf;
         }
     }
 }
