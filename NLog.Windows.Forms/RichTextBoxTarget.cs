@@ -592,7 +592,7 @@ namespace NLog.Windows.Forms
             }
 
             int id;
-            if (!Int32.TryParse(match.Groups[2].Value, out id))
+            if (!int.TryParse(match.Groups[2].Value, out id))
             {
                 //still could be a link inserted by another RTB control user
                 InternalLogger.Warn("Unexpected link format '{0}', skipping", e.LinkText);
@@ -850,7 +850,7 @@ namespace NLog.Windows.Forms
                             foreach (Match match in linkRemoveRtfRegex.Matches(selectedRtf))
                             {
                                 int id;
-                                if (Int32.TryParse(match.Groups[1].Value, out id))
+                                if (int.TryParse(match.Groups[1].Value, out id))
                                 {
                                     lock (linkedEventsLock)
                                     {
