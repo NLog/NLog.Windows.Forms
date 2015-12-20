@@ -636,7 +636,6 @@ namespace NLog.Windows.Forms.Tests
             string resultRtf = ExtractRtf(target.TargetRichTextBox);
             string resultText = target.TargetRichTextBox.Text;
             Assert.False(Regex.IsMatch(resultRtf, @"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))"));  //the placeholder GUID was replaced
-            //cant check for specific ids here because of the possible parallel execution
             Assert.True(resultText.Contains("descr#link"));  //text contains visible and invisible parts
             Assert.True(resultRtf.Contains(@"descr\v #link"));  //RTF contains everything
         }
@@ -666,7 +665,6 @@ namespace NLog.Windows.Forms.Tests
             {
                 string resultText = target.TargetRichTextBox.Text;
                 string resultRtf = ExtractRtf(target.TargetRichTextBox);
-                //cant check for specific ids here because of the possible parallel execution
                 Assert.True(resultText.Contains("TestNoLink"));
                 Assert.False(resultText.Contains("#link"));  //no link for first event
                 Assert.False(resultRtf.Contains(@"\v #link"));  //no link for first event
@@ -685,7 +683,6 @@ namespace NLog.Windows.Forms.Tests
             {
                 string resultText = target.TargetRichTextBox.Text;
                 string resultRtf = ExtractRtf(target.TargetRichTextBox);
-                //cant check for specific ids here because of the possible parallel execution
                 Assert.True(resultText.Contains("TestWithLink marker_text#link"));  //link for a second event
                 Assert.True(resultRtf.Contains(@"marker_text\v #link"));  //link for a second event
             }
@@ -720,7 +717,6 @@ namespace NLog.Windows.Forms.Tests
 
             string resultText = target.TargetRichTextBox.Text;
             string resultRtf = ExtractRtf(target.TargetRichTextBox);
-            //cant check for specific ids here because of the possible parallel execution
             Assert.True(resultText.Contains("#link"));  //some links exist
             Assert.True(resultRtf.Contains(@"\v #link"));  //some links exist
 

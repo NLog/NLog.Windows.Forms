@@ -330,6 +330,14 @@ namespace NLog.Windows.Forms
                 supportLinks = value;
                 if (supportLinks)
                 {
+                    lock (linkRegexLock)
+                    {
+                        if (linkAddRegex == null)
+                        {
+                            linkAddRegex = new Regex(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", RegexOptions.Compiled);
+                            linkRemoveRtfRegex = new Regex(@"\\v #" + LinkPrefix + @"(\d+)\\v0", RegexOptions.Compiled);
+                        }
+                    }
                     lock (linkedEventsLock)
                     {
                         if (linkedEvents == null)
@@ -392,23 +400,22 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// Internal prefix that is added to the link id in RTF
         /// </summary>
-        private const string LINK_PREFIX = "link";
+        private const string LinkPrefix = "link";
 
+        /// <summary>
+        /// Used to synchronize lazy initialization of <see cref="linkAddRegex"/> and <see cref="linkRemoveRtfRegex"/> in <see cref="SupportLinks"/>.set
+        /// </summary>
+        private static readonly object linkRegexLock = new object();
 
         /// <summary>
         /// Used to capture link placeholders in <see cref="SendTheMessageToRichTextBox"/>
         /// </summary>
-        private readonly Regex linkAddRegex = new Regex(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", RegexOptions.Compiled);
-
-        /// <summary>
-        /// Used to parse links in <see cref="TargetRichTextBox_LinkClicked"/>
-        /// </summary>
-        private readonly Regex linkClickRegex = new Regex(@"(.*)#" + LINK_PREFIX + @"(\d+)", RegexOptions.Compiled);
+        private static Regex linkAddRegex = null;
 
         /// <summary>
         /// Used to parse RTF with links when removing excess lines in <see cref="SendTheMessageToRichTextBox"/>
         /// </summary>
-        private readonly Regex linkRemoveRtfRegex = new Regex(@"\\v #" + LINK_PREFIX + @"(\d+)\\v0", RegexOptions.Compiled);
+        private static Regex linkRemoveRtfRegex = null;
 
 
         /// <summary>
@@ -583,7 +590,7 @@ namespace NLog.Windows.Forms
         /// <param name="e"></param>
         private void TargetRichTextBox_LinkClicked(object sender, LinkClickedEventArgs e)
         {
-            Match match = linkClickRegex.Match(e.LinkText);
+            Match match = Regex.Match(e.LinkText, "#" + LinkPrefix + @"(\d+)");
             if (!match.Success)
             {
                 //could be a link inserted by another RTB control user
@@ -592,7 +599,7 @@ namespace NLog.Windows.Forms
             }
 
             int id;
-            if (!int.TryParse(match.Groups[2].Value, out id))
+            if (!int.TryParse(match.Groups[1].Value, out id))
             {
                 //still could be a link inserted by another RTB control user
                 InternalLogger.Warn("Unexpected link format '{0}', skipping", e.LinkText);
@@ -613,6 +620,7 @@ namespace NLog.Windows.Forms
             DelLinkClicked linkClickEvent = LinkClicked;
             if (linkClickEvent != null)
             {
+                string linkText = e.LinkText.Substring(0, match.Index);
                 linkClickEvent(this, match.Groups[1].Value, logEvent);
             }
         }
@@ -819,7 +827,7 @@ namespace NLog.Windows.Forms
                         {
                             textBox.SelectionStart = startIndex + match.Index;
                             textBox.SelectionLength = match.Length;
-                            FormHelper.ChangeSelectionToLink(textBox, linkText, LINK_PREFIX + logEvent.SequenceID);
+                            FormHelper.ChangeSelectionToLink(textBox, linkText, LinkPrefix + logEvent.SequenceID);
                             linksAdded = true;
                         }
                     }
