@@ -563,7 +563,7 @@ namespace NLog.Windows.Forms
                     {
                         foreach (MessageInfo messageInfo in messageQueue)
                         {
-                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule, messageInfo.logEvent);
+                            DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent);
                         }
                     }
                     break;
@@ -573,7 +573,7 @@ namespace NLog.Windows.Forms
                         while (messageQueue.Count > 0)
                         {
                             MessageInfo messageInfo = messageQueue.Dequeue();
-                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule, messageInfo.logEvent);
+                            DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent);
                         }
                     }
                     break;
@@ -906,14 +906,14 @@ namespace NLog.Windows.Forms
 
         private class MessageInfo
         {
-            internal string message { get; private set; }
-            internal RichTextBoxRowColoringRule rule { get; private set; }
-            internal LogEventInfo logEvent { get; private set; }
+            internal string Message { get; private set; }
+            internal RichTextBoxRowColoringRule Rule { get; private set; }
+            internal LogEventInfo LogEvent { get; private set; }
             internal MessageInfo(string message, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
             {
-                this.message = message;
-                this.rule = rule;
-                this.logEvent = logEvent;
+                this.Message = message;
+                this.Rule = rule;
+                this.LogEvent = logEvent;
             }
         }
     }
