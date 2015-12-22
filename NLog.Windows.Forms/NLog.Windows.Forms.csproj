@@ -56,6 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RichTextBoxLinkLayoutRenderer .cs" />
     <Compile Include="RichTextBoxWordColoringRule.cs" />
     <Compile Include="RichTextBoxRowColoringRule.cs" />
     <Compile Include="FormControlTarget.cs" />
