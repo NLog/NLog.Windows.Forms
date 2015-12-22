@@ -315,7 +315,7 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// A queue used to store messages based on <see cref="MessageRetention"/>.
         /// </summary>
-        private volatile Queue<MessageInfo> messageQueue = null;
+        private volatile Queue<MessageInfo> messageQueue;
 
         /// <summary>
         /// If set to true, using "rtb-link" renderer (<see cref="RichTextBoxLinkLayoutRenderer"/>) would create clickable links in the control.
@@ -366,7 +366,7 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// Actual value of the <see cref="LinkClicked"/> property
         /// </summary>
-        private bool supportLinks = false;
+        private bool supportLinks;
 
         /// <summary>
         /// Lock for <see cref="linkedEvents"/> dictionary access
@@ -410,12 +410,12 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// Used to capture link placeholders in <see cref="SendTheMessageToRichTextBox"/>
         /// </summary>
-        private static Regex linkAddRegex = null;
+        private static Regex linkAddRegex;
 
         /// <summary>
         /// Used to parse RTF with links when removing excess lines in <see cref="SendTheMessageToRichTextBox"/>
         /// </summary>
-        private static Regex linkRemoveRtfRegex = null;
+        private static Regex linkRemoveRtfRegex;
 
 
         /// <summary>
@@ -431,8 +431,8 @@ namespace NLog.Windows.Forms
             }
 
             CreatedForm = false;
-            Form openFormByName = null;
-            RichTextBox targetControl = null;
+            Form openFormByName;
+            RichTextBox targetControl;
 
             if (AllowAccessoryFormCreation)
             {
@@ -563,7 +563,7 @@ namespace NLog.Windows.Forms
                     {
                         foreach (MessageInfo messageInfo in messageQueue)
                         {
-                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule, messageInfo.logEvent);
+                            DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent);
                         }
                     }
                     break;
@@ -573,7 +573,7 @@ namespace NLog.Windows.Forms
                         while (messageQueue.Count > 0)
                         {
                             MessageInfo messageInfo = messageQueue.Dequeue();
-                            DoSendMessageToTextbox(messageInfo.message, messageInfo.rule, messageInfo.logEvent);
+                            DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent);
                         }
                     }
                     break;
@@ -906,14 +906,14 @@ namespace NLog.Windows.Forms
 
         private class MessageInfo
         {
-            internal string message { get; private set; }
-            internal RichTextBoxRowColoringRule rule { get; private set; }
-            internal LogEventInfo logEvent { get; private set; }
+            internal string Message { get; private set; }
+            internal RichTextBoxRowColoringRule Rule { get; private set; }
+            internal LogEventInfo LogEvent { get; private set; }
             internal MessageInfo(string message, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
             {
-                this.message = message;
-                this.rule = rule;
-                this.logEvent = logEvent;
+                this.Message = message;
+                this.Rule = rule;
+                this.LogEvent = logEvent;
             }
         }
     }
