@@ -621,7 +621,7 @@ namespace NLog.Windows.Forms
             if (linkClickEvent != null)
             {
                 string linkText = e.LinkText.Substring(0, match.Index);
-                linkClickEvent(this, match.Groups[1].Value, logEvent);
+                linkClickEvent(this, linkText, logEvent);
             }
         }
 

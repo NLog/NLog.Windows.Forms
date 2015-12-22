@@ -745,10 +745,15 @@ namespace NLog.Windows.Forms.Tests
             Assert.Same(target, RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox));
             Assert.True(target.TargetRichTextBox.Text.Contains("link"));
 
-            bool linkClicked = false;
+            bool linkClickedFromHandler = false;
+            string linkTextFromHandler = null;
+            LogEventInfo logEventFromHandler = null;
 
             RichTextBoxTarget.DelLinkClicked clickHandler = (RichTextBoxTarget sender, string linkText, LogEventInfo logEvent) => {
-                linkClicked = true;
+                //actual checks moved to main code to make exceptions caught by the test runner.
+                linkClickedFromHandler = true;
+                linkTextFromHandler = linkText;
+                logEventFromHandler = logEvent;
                 target.TargetForm.Close();
             };
 
@@ -769,7 +774,9 @@ namespace NLog.Windows.Forms.Tests
             //in case link does not click, this would hang up infinitely;
             Application.Run(target.TargetForm);
 
-            Assert.True(linkClicked); //check that we have actually clicked on a link, not just missed anything
+            Assert.True(linkClickedFromHandler); //check that we have actually clicked on a link, not just missed anything
+            Assert.True("link" == linkTextFromHandler);
+            Assert.True("Test" == logEventFromHandler.Message);
         }
 
 
