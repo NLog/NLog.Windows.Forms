@@ -327,8 +327,7 @@ namespace NLog.Windows.Forms
             get { return supportLinks; }
             set
             {
-                supportLinks = value;
-                if (supportLinks)
+                if (value)
                 {
                     lock (linkRegexLock)
                     {
@@ -346,6 +345,8 @@ namespace NLog.Windows.Forms
                         }
                     }
                 }
+                //update the field value after regex initialization to prevent concurrent access to not-initialized fields.
+                supportLinks = value;
             }
         }
 
@@ -409,11 +410,13 @@ namespace NLog.Windows.Forms
 
         /// <summary>
         /// Used to capture link placeholders in <see cref="SendTheMessageToRichTextBox"/>
+        /// Lazily initialized in <see cref="SupportLinks"/>.set(true). Assure checking <see cref="SupportLinks"/> before accessing the field 
         /// </summary>
         private static Regex linkAddRegex;
 
         /// <summary>
         /// Used to parse RTF with links when removing excess lines in <see cref="SendTheMessageToRichTextBox"/>
+        /// Lazily initialized in <see cref="SupportLinks"/>.set(true). Assure checking <see cref="SupportLinks"/> before accessing the field
         /// </summary>
         private static Regex linkRemoveRtfRegex;
 
@@ -818,7 +821,7 @@ namespace NLog.Windows.Forms
                     textBox.SelectionStart = startIndex;
                     textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
                     string addedText = textBox.SelectedText;
-                    MatchCollection matches = linkAddRegex.Matches(addedText);
+                    MatchCollection matches = linkAddRegex.Matches(addedText); //only access regex after checking SupportLinks, as it assures the initialization
                     for (int i = matches.Count - 1; i >= 0; --i)    //backwards order, so the string positions are not affected
                     {
                         Match match = matches[i];
@@ -852,9 +855,10 @@ namespace NLog.Windows.Forms
                     {
                         textBox.SelectionStart = 0;
                         textBox.SelectionLength = textBox.GetFirstCharIndexFromLine(tooManyLines);
-                        if (supportLinks)
+                        if (SupportLinks)
                         {
                             string selectedRtf = textBox.SelectedRtf;
+                            //only access regex after checking SupportLinks, as it assures the initialization
                             foreach (Match match in linkRemoveRtfRegex.Matches(selectedRtf))
                             {
                                 int id;
