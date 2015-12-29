@@ -783,11 +783,6 @@ namespace NLog.Windows.Forms
         {
             RichTextBox textBox = TargetRichTextBox;
 
-            if (textBox == null)
-            {
-                return;
-            }
-
             int startIndex = textBox.Text.Length;
             textBox.SelectionStart = startIndex;
             textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor, textBox.BackColor);
