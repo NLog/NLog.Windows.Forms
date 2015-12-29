@@ -497,7 +497,7 @@ namespace NLog.Windows.Forms
                 }
 
                 targetControl = FormHelper.FindControl<RichTextBox>(ControlName, openFormByName);
-                if (TargetRichTextBox == null)
+                if (targetControl == null)
                 {
                     InternalLogger.Info("Rich text box control '{0}' cannot be found on form '{1}'. Waiting for ReInitializeAllTextboxes.", ControlName, FormName);
                     return;
@@ -782,6 +782,11 @@ namespace NLog.Windows.Forms
         private void SendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
         {
             RichTextBox textBox = TargetRichTextBox;
+
+            if (textBox == null)
+            {
+                return;
+            }
 
             int startIndex = textBox.Text.Length;
             textBox.SelectionStart = startIndex;
