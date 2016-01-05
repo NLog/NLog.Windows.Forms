@@ -480,7 +480,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
-        public void ManualRegisterTest()
+        public void ManualRegisterTestNoRetention()
         {
             var config = new LoggingConfiguration();
             var target = new RichTextBoxTarget()
@@ -488,16 +488,14 @@ namespace NLog.Windows.Forms.Tests
                 FormName = "MyForm1",
                 ControlName = "Control1",
                 UseDefaultRowColoringRules = true,
-                Layout = "${level} ${logger} ${message}",
-                ToolWindow = false,
-                Width = 300,
-                Height = 200,
+                Layout = "${message}",
                 AllowAccessoryFormCreation = false
+                //default MessageRetention = RichTextBoxTargetMessageRetentionStrategy.None
             };
             LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
-            logger.Trace("No Control");
+            logger.Trace("Accessory Form");
             Application.DoEvents();
 
             Assert.False(target.CreatedForm);
@@ -507,7 +505,8 @@ namespace NLog.Windows.Forms.Tests
             using (Form form = new Form())
             {
                 form.Name = "MyForm1";
-                form.WindowState = FormWindowState.Minimized;
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
                 RichTextBox rtb = new RichTextBox();
                 rtb.Dock = DockStyle.Fill;
                 rtb.Name = "Control1";
@@ -517,7 +516,7 @@ namespace NLog.Windows.Forms.Tests
 
                 RichTextBoxTarget.ReInitializeAllTextboxes(form);
 
-                logger.Trace("Has Control");
+                logger.Trace("Normal Form");
 
                 Application.DoEvents();
 
@@ -527,13 +526,13 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.False(result.Contains(@"No Control"));
-                Assert.True(result.Contains(@"Has Control"));
+                Assert.False(result.Contains(@"Accessory Form"));
+                Assert.True(result.Contains(@"Normal Form"));
             }
         }
 
         [Fact]
-        public void ManualRegisterTestWithRetention()
+        public void ManualRegisterTestNoRetentionAndAccessoryForm()
         {
             var config = new LoggingConfiguration();
             var target = new RichTextBoxTarget()
@@ -541,13 +540,329 @@ namespace NLog.Windows.Forms.Tests
                 FormName = "MyForm1",
                 ControlName = "Control1",
                 UseDefaultRowColoringRules = true,
-                Layout = "${level} ${logger} ${message}",
+                Layout = "${message}",
                 ToolWindow = false,
                 Width = 300,
                 Height = 200,
+                AllowAccessoryFormCreation = true,
+                //default MessageRetention = RichTextBoxTargetMessageRetentionStrategy.None
+            };
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("Accessory Form");
+            Application.DoEvents();
+
+            //message logged to accessory form
+            {
+                Assert.True(target.CreatedForm);
+                Assert.NotNull(target.TargetForm);
+                Assert.NotNull(target.TargetRichTextBox);
+
+                string result = ExtractRtf(target.TargetRichTextBox);
+
+                Assert.True(result.Contains(@"Accessory Form"));
+            }
+            Form accessoryForm = target.TargetForm;
+
+            using (Form form = new Form())
+            {
+                form.Name = "MyForm1";
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
+                RichTextBox rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                form.Controls.Add(rtb);
+                form.Show();
+                form.Activate();
+
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
+
+                logger.Trace("Normal Form");
+
+                Application.DoEvents();
+
+                Assert.True(accessoryForm.IsDisposed);
+
+                Assert.False(target.CreatedForm);
+                Assert.Same(form, target.TargetForm);
+                Assert.Same(rtb, target.TargetRichTextBox);
+
+                string result = ExtractRtf(target.TargetRichTextBox);
+
+                Assert.False(result.Contains(@"Accessory Form"));
+                Assert.True(result.Contains(@"Normal Form"));
+            }
+        }
+
+        [Fact]
+        public void ManualRegisterTestWithRetentionOnlyMissed()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget()
+            {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${message}",
                 AllowAccessoryFormCreation = false,
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
+            };
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("Accessory Form");
+            Application.DoEvents();
+
+            Assert.False(target.CreatedForm);
+            Assert.Null(target.TargetForm);
+            Assert.Null(target.TargetRichTextBox);
+
+            using (Form form = new Form())
+            {
+                form.Name = "MyForm1";
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
+                form.Width = 600;
+                RichTextBox rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                form.Controls.Add(rtb);
+                form.Show();
+                form.Activate();
+
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
+
+                logger.Trace("Normal Form");
+
+                Application.DoEvents();
+
+                Assert.False(target.CreatedForm);
+                Assert.Same(form, target.TargetForm);
+                Assert.Same(rtb, target.TargetRichTextBox);
+
+                string result = ExtractRtf(target.TargetRichTextBox);
+
+                Assert.True(result.Contains(@"Accessory Form"));
+                Assert.True(result.Contains(@"Normal Form"));
+            }
+        }
+
+        [Fact]
+        public void ManualRegisterTestWithRetentionOnlyMissedAndAccessoryForm()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget()
+            {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${message}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                AllowAccessoryFormCreation = true,
+                MaxLines = 10,
+                MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
+            };
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("Accessory Form");
+            Application.DoEvents();
+
+            //message logged to accessory form
+            {
+                Assert.True(target.CreatedForm);
+                Assert.NotNull(target.TargetForm);
+                Assert.NotNull(target.TargetRichTextBox);
+
+                string result = ExtractRtf(target.TargetRichTextBox);
+
+                Assert.True(result.Contains(@"Accessory Form"));
+            }
+            Form accessoryForm = target.TargetForm;
+
+            using (Form form = new Form())
+            {
+                form.Name = "MyForm1";
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
+                form.Width = 600;
+                RichTextBox rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                form.Controls.Add(rtb);
+                form.Show();
+                form.Activate();
+
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
+
+                logger.Trace("Normal Form");
+
+                Application.DoEvents();
+
+                Assert.True(accessoryForm.IsDisposed);
+
+                Assert.False(target.CreatedForm);
+                Assert.Same(form, target.TargetForm);
+                Assert.Same(rtb, target.TargetRichTextBox);
+
+                string result = ExtractRtf(target.TargetRichTextBox);
+
+                Assert.False(result.Contains(@"Accessory Form"));
+                Assert.True(result.Contains(@"Normal Form"));
+            }
+        }
+
+        [Fact]
+        public void ManualRegisterTestWithRetentionOnlyMissedDelayedControlCreation()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget()
+            {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${message}",
+                AllowAccessoryFormCreation = false,
+                MaxLines = 10,
+                MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
+            };
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("Accessory Form");
+            Application.DoEvents();
+
+            Assert.False(target.CreatedForm);
+            Assert.Null(target.TargetForm);
+            Assert.Null(target.TargetRichTextBox);
+
+            using (Form form = new Form())
+            {
+                form.Name = "MyForm1";
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
+                form.Width = 600;
+                form.Show();
+                form.Activate();
+
+                //first test, has form, but no RTB created yet
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
+                logger.Trace("Form without Control");
+                Application.DoEvents();
+
+                Assert.False(target.CreatedForm);
+                Assert.Null(target.TargetForm);
+                Assert.Null(target.TargetRichTextBox);
+
+                //second test, actually created a control
+                RichTextBox rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                form.Controls.Add(rtb);
+
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
+
+                logger.Trace("Form with Control");
+
+                Application.DoEvents();
+
+                Assert.False(target.CreatedForm);
+                Assert.Same(form, target.TargetForm);
+                Assert.Same(rtb, target.TargetRichTextBox);
+
+                string result = ExtractRtf(target.TargetRichTextBox);
+
+                Assert.True(result.Contains(@"Accessory Form"));
+                Assert.True(result.Contains(@"Form without Control"));
+                Assert.True(result.Contains(@"Form with Control"));
+                Assert.Equal(3 + 1, rtb.Lines.Length);  //3 lines + 1 empty
+            }
+        }
+
+        [Fact]
+        public void ManualRegisterTestWithRetentionAndAccessoryForm()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget()
+            {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${message}",
+                ToolWindow = false,
+                Width = 300,
+                Height = 200,
+                AllowAccessoryFormCreation = true,  //allowing custom form
+                MaxLines = 10,
+                MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
+            };
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("Accessory Form");
+            Application.DoEvents();
+
+            { 
+                Assert.True(target.CreatedForm);
+                Assert.NotNull(target.TargetForm);
+                Assert.NotNull(target.TargetRichTextBox);
+                string result = ExtractRtf(target.TargetRichTextBox);
+                Assert.True(result.Contains(@"Accessory Form"));
+            }
+            Form accessoryForm = target.TargetForm;
+
+
+            using (Form form = new Form())
+            {
+                form.Name = "MyForm1";
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
+                form.Width = 600;
+                RichTextBox rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                form.Controls.Add(rtb);
+                form.Show();
+                form.Activate();
+
+                RichTextBoxTarget.ReInitializeAllTextboxes(form);
+                logger.Trace("Normal Form");
+                Application.DoEvents();
+
+                Assert.True(accessoryForm.IsDisposed);
+
+                Assert.False(target.CreatedForm);
+                Assert.Same(form, target.TargetForm);
+                Assert.Same(rtb, target.TargetRichTextBox);
+
+                string result = ExtractRtf(target.TargetRichTextBox);
+
+                Assert.True(result.Contains(@"Accessory Form"));
+                Assert.True(result.Contains(@"Normal Form"));
+                Assert.Equal(2 + 1, rtb.Lines.Length);  //2 lines + 1 empty
+            }
+        }
+
+        
+
+        [Fact]
+        public void ManualRegisterTestWithRetentionConfigReload()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget()
+            {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${message}",
+                AllowAccessoryFormCreation = false,
+                MaxLines = 10,
+                MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
             };
             LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
@@ -572,20 +887,39 @@ namespace NLog.Windows.Forms.Tests
                 form.Show();
                 form.Activate();
 
+                //first test, has form and control
                 RichTextBoxTarget.ReInitializeAllTextboxes(form);
-
                 logger.Trace("Has Control");
-
                 Application.DoEvents();
+                {
+                    Assert.False(target.CreatedForm);
+                    Assert.Same(form, target.TargetForm);
+                    Assert.Same(rtb, target.TargetRichTextBox);
 
-                Assert.False(target.CreatedForm);
-                Assert.Same(form, target.TargetForm);
-                Assert.Same(rtb, target.TargetRichTextBox);
+                    string result = ExtractRtf(target.TargetRichTextBox);
 
-                string result = ExtractRtf(target.TargetRichTextBox);
+                    Assert.True(result.Contains(@"No Control"));
+                    Assert.True(result.Contains(@"Has Control"));
+                    Assert.Equal(2 + 1, rtb.Lines.Length);  //2 lines + 1 empty
+                }
 
-                Assert.True(result.Contains(@"No Control"));
-                Assert.True(result.Contains(@"Has Control"));
+                //force LogManager.Configuration.Set and re-initialization of targets
+                LoggingConfiguration loadedConfig = LogManager.Configuration;
+                LogManager.Configuration = loadedConfig;
+                Application.DoEvents();
+                {
+                    Assert.False(target.CreatedForm);
+                    Assert.Same(form, target.TargetForm);
+                    Assert.Same(rtb, target.TargetRichTextBox);
+
+                    string result = ExtractRtf(target.TargetRichTextBox);
+
+                    Assert.True(result.Contains(@"No Control"));
+                    Assert.True(result.Contains(@"Has Control"));
+
+                    //currently fails because RichTextBoxTargetMessageRetentionStrategy.All causes re-issuing of all messages
+                    Assert.Equal(2 + 1, rtb.Lines.Length);  //should be 2 lines + 1 empty, actually - 4 lines + 1 empty
+                }
             }
         }
 
