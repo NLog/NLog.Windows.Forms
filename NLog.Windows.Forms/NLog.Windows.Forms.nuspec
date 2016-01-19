@@ -10,9 +10,9 @@
     <projectUrl>https://github.com/NLog/NLog.Windows.Forms</projectUrl>
     <iconUrl>http://nlog-project.org/N.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Contains targets for Windows Forms applications.</description>
+    <description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </description>
     <releaseNotes></releaseNotes>
-    <copyright>Copyright 2014-2015</copyright>
-    <tags>nlog target forms</tags>
+    <copyright>Copyright 2014-2016</copyright>
+    <tags>nlog target forms windows richtextbox</tags>
   </metadata>
 </package>
