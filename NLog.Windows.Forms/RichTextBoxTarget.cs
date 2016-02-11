@@ -308,6 +308,12 @@ namespace NLog.Windows.Forms
         private RichTextBoxTargetMessageRetentionStrategy messageRetention = RichTextBoxTargetMessageRetentionStrategy.None;
 
         /// <summary>
+        /// A textbox to which we have logged last time. Used to prevent duplicating messages in the same textbox in case of config reload and RichTextBoxTargetMessageRetentionStrategy.All
+        /// see https://github.com/NLog/NLog.Windows.Forms/pull/22
+        /// </summary>
+        private RichTextBox lastLoggedTextBoxControl;
+
+        /// <summary>
         /// a lock object used to synchronize access to <see cref="messageQueue"/>
         /// </summary>
         private readonly object messageQueueLock = new object();
@@ -562,11 +568,14 @@ namespace NLog.Windows.Forms
                 case RichTextBoxTargetMessageRetentionStrategy.None:
                     break;
                 case RichTextBoxTargetMessageRetentionStrategy.All:
-                    lock (messageQueueLock)
+                    if (lastLoggedTextBoxControl != textboxControl) //don't log to same RTB as befre, because it already has everything. Happens in case of config reload, see https://github.com/NLog/NLog.Windows.Forms/pull/22
                     {
-                        foreach (MessageInfo messageInfo in messageQueue)
+                        lock (messageQueueLock)
                         {
-                            DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent);
+                            foreach (MessageInfo messageInfo in messageQueue)
+                            {
+                                DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent);
+                            }
                         }
                     }
                     break;
@@ -671,6 +680,8 @@ namespace NLog.Windows.Forms
             RichTextBox textbox = TargetRichTextBox;
             if (textbox == null || textbox.IsDisposed)
             {
+                //no last logged textbox
+                lastLoggedTextBoxControl = null;
                 if (AllowAccessoryFormCreation)
                 {
                     CreateAccessoryForm();
@@ -686,6 +697,12 @@ namespace NLog.Windows.Forms
             RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
 
             bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);  
+
+            if (messageSent)
+            {
+                //remember last logged text box
+                lastLoggedTextBoxControl = textbox;
+            }
 
             switch (messageRetention)
             {
