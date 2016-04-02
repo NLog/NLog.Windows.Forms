@@ -24,8 +24,8 @@ namespace TestApplication
 
             NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
             Logger.Info("Init");
-            
 
+            RichTextBoxTarget.ReInitializeAllTextboxes(this);
 
             var thread = new Thread(() =>
             {
@@ -48,12 +48,10 @@ namespace TestApplication
             });
             Logger.Info("start thread");
             thread.Start();
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            RichTextBoxTarget.ReInitializeAllTextboxes(this);
             RichTextBoxTarget.GetTargetByControl(richTextBox1).LinkClicked += Form1_LinkClicked;
             RichTextBoxTarget.GetTargetByControl(richTextBox2).LinkClicked += Form1_LinkClicked;
         }
