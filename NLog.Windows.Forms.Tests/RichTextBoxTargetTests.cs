@@ -29,6 +29,9 @@ namespace NLog.Windows.Forms.Tests
     {
         private Logger logger = LogManager.GetLogger("NLog.UnitTests.Targets.RichTextBoxTargetTests");
 
+        /// <remarks>
+        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
+        /// </remarks>
         [Fact]
         public void SimpleRichTextBoxTargetTest()
         {
@@ -82,6 +85,9 @@ namespace NLog.Windows.Forms.Tests
             Assert.True(form.IsDisposed);
         }
 
+        /// <remarks>
+        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
+        /// </remarks>
         [Fact]
         public void NoColoringTest()
         {
@@ -128,6 +134,9 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
+        /// <remarks>
+        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
+        /// </remarks>
         [Fact]
         public void CustomRowColoringTest()
         {
@@ -178,6 +187,9 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
+        /// <remarks>
+        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
+        /// </remarks>
         [Fact]
         public void CustomWordRowColoringTest()
         {
@@ -848,7 +860,71 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
-        
+        private sealed class TestForm : Form
+        {
+            internal readonly RichTextBox rtb;
+            internal TestForm()
+            {
+                this.Name = "MyForm1";
+                //with minimized forms textbox is created with width of 0, so texts get trimmed and result.Contains() fails
+                //form.WindowState = FormWindowState.Minimized; 
+                this.Width = 600;
+                this.rtb = new RichTextBox();
+                rtb.Dock = DockStyle.Fill;
+                rtb.Name = "Control1";
+                this.Controls.Add(rtb);
+
+                RichTextBoxTarget.ReInitializeAllTextboxes(this);
+            }
+        }
+
+        /// <summary>
+        /// a test for <a href="https://github.com/NLog/NLog.Windows.Forms/issues/24">#24</a>
+        /// </summary>
+        [Fact]
+        public void CustomFormReinitializeInConstructor()
+        {
+            var config = new LoggingConfiguration();
+            var target = new RichTextBoxTarget() {
+                FormName = "MyForm1",
+                ControlName = "Control1",
+                UseDefaultRowColoringRules = true,
+                Layout = "${message}",
+                AllowAccessoryFormCreation = false,
+                MaxLines = 10,
+                MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
+            };
+            LogManager.ThrowExceptions = true;
+            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+
+            logger.Trace("No Control");
+            Application.DoEvents();
+
+            Assert.False(target.CreatedForm);
+            Assert.Null(target.TargetForm);
+            Assert.Null(target.TargetRichTextBox);
+
+            using (TestForm form = new TestForm())
+            {
+                
+                form.Show();
+                form.Activate();
+
+                logger.Trace("Has Control");
+                Application.DoEvents();
+                {
+                    Assert.False(target.CreatedForm);
+                    Assert.Same(form, target.TargetForm);
+                    Assert.Same(form.rtb, target.TargetRichTextBox);
+
+                    string result = ExtractRtf(target.TargetRichTextBox);
+
+                    Assert.True(result.Contains(@"No Control"));
+                    Assert.True(result.Contains(@"Has Control"));
+                    Assert.Equal(2 + 1, form.rtb.Lines.Length);  //2 lines + 1 empty
+                }
+            }
+        }
 
         [Fact]
         public void ManualRegisterTestWithRetentionConfigReload()

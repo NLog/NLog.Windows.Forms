@@ -737,7 +737,14 @@ namespace NLog.Windows.Forms
             {
                 if (textbox != null && !textbox.IsDisposed)
                 {
-                    textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule, logEvent);
+                    if (textbox.InvokeRequired)
+                    {
+                        textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule, logEvent);
+                    }
+                    else
+                    {
+                        SendTheMessageToRichTextBox(logMessage, rule, logEvent);
+                    }
                     return true;
                 }
             }
