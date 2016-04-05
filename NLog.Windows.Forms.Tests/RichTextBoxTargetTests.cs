@@ -29,7 +29,9 @@ namespace NLog.Windows.Forms.Tests
     {
         private Logger logger = LogManager.GetLogger("NLog.UnitTests.Targets.RichTextBoxTargetTests");
 
-        //Fails locally, see #21
+        /// <remarks>
+        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
+        /// </remarks>
         [Fact]
         public void SimpleRichTextBoxTargetTest()
         {
@@ -83,7 +85,9 @@ namespace NLog.Windows.Forms.Tests
             Assert.True(form.IsDisposed);
         }
 
-        //Fails locally, see #21
+        /// <remarks>
+        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
+        /// </remarks>
         [Fact]
         public void NoColoringTest()
         {
@@ -130,7 +134,9 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
-        //Fails locally, see #21
+        /// <remarks>
+        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
+        /// </remarks>
         [Fact]
         public void CustomRowColoringTest()
         {
@@ -181,7 +187,9 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
-        //Fails locally, see #21
+        /// <remarks>
+        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
+        /// </remarks>
         [Fact]
         public void CustomWordRowColoringTest()
         {
@@ -870,7 +878,9 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
-        //test for #24
+        /// <summary>
+        /// a test for <a href="https://github.com/NLog/NLog.Windows.Forms/issues/24">#24</a>
+        /// </summary>
         [Fact]
         public void CustomFormReinitializeInConstructor()
         {
