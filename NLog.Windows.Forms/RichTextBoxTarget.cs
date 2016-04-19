@@ -433,6 +433,8 @@ namespace NLog.Windows.Forms
         /// </summary>
         protected override void InitializeTarget()
         {
+            base.InitializeTarget();
+
             if (TargetRichTextBox != null)
             {
                 //already initialized by ReInitializeAllTextboxes call
