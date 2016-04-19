@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NLog")]
 [assembly: AssemblyProduct("NLog.Windows.Forms")]
-[assembly: AssemblyCopyright("Copyright © NLog 2015")]
+[assembly: AssemblyCopyright("Copyright © Jaroslaw Kowalski, Kim Christensen, Julian Verdurmen 2015-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

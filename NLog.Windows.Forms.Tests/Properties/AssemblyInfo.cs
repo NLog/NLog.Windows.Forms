@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
 [assembly: AssemblyProduct("NLog.Windows.Forms.Tests")]
-[assembly: AssemblyCopyright("Copyright © Kim Christensen 2015")]
+[assembly: AssemblyCopyright("Copyright © Jaroslaw Kowalski, Kim Christensen, Julian Verdurmen 2015-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
