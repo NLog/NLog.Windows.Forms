@@ -635,7 +635,17 @@ namespace NLog.Windows.Forms
             {
                 try
                 {
-                    TargetForm.BeginInvoke((FormCloseDelegate)TargetForm.Close);
+                    if (!TargetForm.IsDisposed)
+                    {
+                        if (TargetForm.InvokeRequired)
+                        {
+                            TargetForm.BeginInvoke((FormCloseDelegate)TargetForm.Close);
+                        }
+                        else
+                        {
+                            TargetForm.Close();
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
