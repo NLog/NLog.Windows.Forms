@@ -8,15 +8,15 @@ This package is an extension to [NLog](https://github.com/NLog/NLog/).
 This package contains 
 targets specific for Windows.Forms
  
-###Targets
+### Targets
 * [RichTextBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/RichTextBoxTarget)
 * [MessageBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/MessageBoxTarget)
 * [FormControlTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/FormControlTarget)
 
 
-##How to use
+## How to use
 When installing with Nuget, no additional configuration is needed.
 
 
-##License
+## License
 BSD
