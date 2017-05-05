@@ -130,10 +130,13 @@ namespace NLog.Windows.Forms
                 if (ReverseOrder)
                     control.Text = logMessage + control.Text;
                 else                
-                    if (control is TextBoxBase)
-                        (control as TextBoxBase).AppendText(logMessage);                   
+                {
+                    var textBoxControl = control as TextBoxBase;
+                    if (textBoxControl != null)
+                        textBoxControl.AppendText(logMessage);                   
                     else
-                        control.Text += logMessage;                                   
+                        control.Text += logMessage; 
+                }                                  
             }
             else
             {
