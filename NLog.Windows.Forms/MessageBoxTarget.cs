@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using NLog.Common;
@@ -86,15 +87,15 @@ namespace NLog.Windows.Forms
         /// <param name="logEvents">The array of logging events.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions",
             Justification = "This is just debugging output.")]
-        protected override void Write(AsyncLogEventInfo[] logEvents)
+        protected override void Write(IList<AsyncLogEventInfo> logEvents)
         {
-            if (logEvents.Length == 0)
+            if (logEvents.Count == 0)
             {
                 return;
             }
 
             var sb = new StringBuilder();
-            var lastLogEvent = logEvents[logEvents.Length - 1];
+            var lastLogEvent = logEvents[logEvents.Count - 1];
             foreach (var ev in logEvents)
             {
                 sb.Append(this.Layout.Render(ev.LogEvent));
@@ -103,7 +104,7 @@ namespace NLog.Windows.Forms
 
             MessageBox.Show(sb.ToString(), this.Caption.Render(lastLogEvent.LogEvent));
 
-            for (int i = 0; i < logEvents.Length; ++i)
+            for (int i = 0; i < logEvents.Count; ++i)
             {
                 logEvents[i].Continuation(null);
             }
