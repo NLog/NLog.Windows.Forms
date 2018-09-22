@@ -13,6 +13,8 @@ targets specific for Windows.Forms
 * [MessageBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/MessageBoxTarget)
 * [FormControlTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/FormControlTarget)
 
+See [list](https://nlog-project.org/config/?tab=targets&search=package:nlog.windows.forms)
+
 
 ## How to use
 When installing with Nuget, no additional configuration is needed.
