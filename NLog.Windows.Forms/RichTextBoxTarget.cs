@@ -89,7 +89,7 @@ namespace NLog.Windows.Forms
                     RichTextBox textboxControl = FormHelper.FindControl<RichTextBox>(textboxTarget.ControlName, form);
                     if (textboxControl != null && !textboxControl.IsDisposed)
                     {
-                        if ( textboxTarget.TargetRichTextBox == null
+                        if (textboxTarget.TargetRichTextBox == null
                             || textboxTarget.TargetRichTextBox.IsDisposed
                             || textboxTarget.TargetRichTextBox != textboxControl
                         )
@@ -118,7 +118,7 @@ namespace NLog.Windows.Forms
             }
             return null;
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
         /// </summary>
@@ -262,10 +262,10 @@ namespace NLog.Windows.Forms
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
         [DefaultValue(RichTextBoxTargetMessageRetentionStrategy.None)]
-        public RichTextBoxTargetMessageRetentionStrategy MessageRetention 
-        { 
-            get { return messageRetention; } 
-            set 
+        public RichTextBoxTargetMessageRetentionStrategy MessageRetention
+        {
+            get { return messageRetention; }
+            set
             {
                 lock (messageQueueLock)
                 {
@@ -286,7 +286,7 @@ namespace NLog.Windows.Forms
                         }
                     }
                 }
-            } 
+            }
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace NLog.Windows.Forms
         /// <seealso cref="LinkClicked"/>
         /// </summary>
         [DefaultValue(false)]
-        public bool SupportLinks 
+        public bool SupportLinks
         {
             get { return supportLinks; }
             set
@@ -687,7 +687,7 @@ namespace NLog.Windows.Forms
                 }
                 else if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
                 {
-                    InternalLogger.Trace("Textbox for target {0} is {1}, skipping logging", this.Name, textbox == null? "null" : "disposed");
+                    InternalLogger.Trace("Textbox for target {0} is {1}, skipping logging", this.Name, textbox == null ? "null" : "disposed");
                     return;
                 }
             }
@@ -695,7 +695,7 @@ namespace NLog.Windows.Forms
             string logMessage = Layout.Render(logEvent);
             RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
 
-            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);  
+            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);
 
             if (messageSent)
             {
@@ -812,7 +812,9 @@ namespace NLog.Windows.Forms
             textBox.SelectionColor = GetColorFromString(rule.FontColor, textBox.ForeColor);
             textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
             textBox.AppendText(logMessage + "\n");
-            textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
+            var textBoxSelectionLength = textBox.Text.Length - textBox.SelectionStart;
+            if (textBoxSelectionLength >= 0)
+                textBox.SelectionLength = textBoxSelectionLength;
 
             // find word to color
             foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
@@ -842,7 +844,7 @@ namespace NLog.Windows.Forms
                     bool linksAdded = false;
 
                     textBox.SelectionStart = startIndex;
-                    textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
+                    textBox.SelectionLength = textBoxSelectionLength;
                     string addedText = textBox.SelectedText;
                     MatchCollection matches = linkAddRegex.Matches(addedText); //only access regex after checking SupportLinks, as it assures the initialization
                     for (int i = matches.Count - 1; i >= 0; --i)    //backwards order, so the string positions are not affected

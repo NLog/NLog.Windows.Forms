@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFrameworks>net35;netcoreapp3.0</TargetFrameworks>
     <AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
     <Company>NLog</Company>
     <Product>NLog.Windows.Forms</Product>
     <Description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </Description>
     <Copyright>Copyright 2014-2019</Copyright>
-    <Version>4.3.0</Version>
+    <Version>4.4-beta1</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Authors>NLog</Authors>
     <PackageIconUrl>https://nlog-project.org/N.png</PackageIconUrl>
