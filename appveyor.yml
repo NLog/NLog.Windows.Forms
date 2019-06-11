@@ -10,6 +10,7 @@ dotnet_csproj:
   file_version: '{version}'
   package_version: '4.3.0'
   informational_version: '4.3.0'
+  version: '4.3.0'
 skip_tags: true
 build_script:	
   - ps: msbuild /t:restore,build /p:Configuration=Release /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg /maxcpucount /v:m
