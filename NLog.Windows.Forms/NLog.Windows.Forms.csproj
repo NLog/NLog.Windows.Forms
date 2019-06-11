@@ -29,7 +29,7 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageLicenseExpression>BSD-3</PackageLicenseExpression>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/NLog/NLog.Windows.Forms</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
