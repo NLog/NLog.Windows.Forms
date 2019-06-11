@@ -1,28 +1,33 @@
-version: 4.2.3.{build}
-clone_folder: c:\projects\nlogweb
+version: 4.3.0.{build}
+image: Visual Studio 2019
+clone_folder: c:\projects\nlog
 configuration: Release
 platform: Any CPU
-assembly_info:
+dotnet_csproj:
   patch: true
-  file: '**\AssemblyInfo.*'
-  assembly_version: '4.0.0'
-  assembly_file_version: '{version}'
-  assembly_informational_version: '4.2.3'
-nuget:
-  project_feed: true
-before_build:
-  - ps: nuget restore -DisableParallelProcessing
-matrix:
-  fast_finish: true
-build:
-  publish_nuget: true
-  publish_nuget_symbols: true
-  verbosity: quiet
-deploy: off
-after_test:
+  file: '**\*.csproj'
+  assembly_version: '4.0.0.0'
+  file_version: '{version}'
+  package_version: '4.3.0'
+  informational_version: '4.3.0'
+  version: '4.3.0'
+skip_tags: true
+build_script:	
+  - ps: msbuild /t:restore,build /p:Configuration=Release /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg /maxcpucount /v:m
+test_script:
   - nuget.exe install OpenCover -ExcludeVersion
-  - OpenCover\tools\OpenCover.Console.exe -register:user -target:"%xunit20%\xunit.console.x86.exe" -targetargs:"\"c:\projects\nlogweb\NLog.Windows.Forms.Tests\bin\Release\NLog.Windows.Forms.Tests.dll\" -appveyor -noshadow"  -returntargetcode -filter:"+[NLog.Windows.Forms]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -hideskipped:All -output:coverage.xml
+  - OpenCover\tools\OpenCover.Console.exe -register:user -target:"%xunit20%\xunit.console.x86.exe" -targetargs:"\"c:\projects\nlog\NLog.Windows.Forms.Tests\bin\Release\net45\NLog.Windows.Forms.Tests.dll\" -appveyor -noshadow"  -returntargetcode -filter:"+[NLog.Windows.Forms]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -hideskipped:All -output:coverage.xml
   - "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
   - pip install codecov
   - codecov -f "coverage.xml"
  
+artifacts:
+  - path: '**\NLog.*.nupkg'
+  - path: '**\NLog.*.snupkg'
+
+# deploy:
+# - provider: NuGet
+#   api_key:
+#     secure: DtVDH1ZfIR8E2oDLeSPxfn0WFXw3MCv4WhLkkQQl9LfEHswb5sdxdCYodNKhrKik
+#   on:
+#     branch: master
