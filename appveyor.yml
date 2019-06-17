@@ -16,7 +16,7 @@ build_script:
   - ps: msbuild /t:restore,build /p:Configuration=Release /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg /maxcpucount /v:m
 test_script:
   - nuget.exe install OpenCover -ExcludeVersion
-  - OpenCover\tools\OpenCover.Console.exe -register:user -target:"%xunit20%\xunit.console.x86.exe" -targetargs:"\"c:\projects\nlog\NLog.Windows.Forms.Tests\bin\Release\net45\NLog.Windows.Forms.Tests.dll\" -appveyor -noshadow"  -returntargetcode -filter:"+[NLog.Windows.Forms]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -hideskipped:All -output:coverage.xml
+  - OpenCover\tools\OpenCover.Console.exe -register:user -target:"%xunit20%\xunit.console.x86.exe" -targetargs:"\"c:\projects\nlog\NLog.Windows.Forms.Tests\bin\Release\net452\NLog.Windows.Forms.Tests.dll\" -appveyor -noshadow"  -returntargetcode -filter:"+[NLog.Windows.Forms]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -hideskipped:All -output:coverage.xml
   - "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
   - pip install codecov
   - codecov -f "coverage.xml"
