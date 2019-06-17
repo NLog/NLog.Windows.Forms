@@ -6,7 +6,7 @@
     <Product>NLog.Windows.Forms</Product>
     <Description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </Description>
     <Copyright>Copyright 2014-2019</Copyright>
-    <Version>4.3</Version>
+    <Version>4.3.0</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Authors>NLog</Authors>
     <PackageIconUrl>https://nlog-project.org/N.png</PackageIconUrl>
@@ -15,15 +15,11 @@
     <PackageProjectUrl>https://github.com/NLog/NLog.Windows.Forms</PackageProjectUrl>
     <PackageTags>nlog target forms windows richtextbox</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DebugType Condition=" '$(Configuration)' == 'Debug' ">Full</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>full</DebugType>
-    <DocumentationFile></DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
-  <PropertyGroup>
+ <PropertyGroup>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
