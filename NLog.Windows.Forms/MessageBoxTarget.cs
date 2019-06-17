@@ -86,6 +86,7 @@ namespace NLog.Windows.Forms
         /// <param name="logEvents">The array of logging events.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions",
             Justification = "This is just debugging output.")]
+        [Obsolete("Instead override Write(IList<AsyncLogEventInfo> logEvents. Marked obsolete on NLog 4.5")]
         protected override void Write(AsyncLogEventInfo[] logEvents)
         {
             if (logEvents.Length == 0)
