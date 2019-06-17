@@ -34,6 +34,9 @@
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <FileVersion>4.0.0.0</FileVersion>
+    <PackageReleaseNotes>- Support snupkg
+- Update dependency to lastest NLog
+- Package improvements</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.6.5" />
