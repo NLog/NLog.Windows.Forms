@@ -36,7 +36,7 @@
     <FileVersion>4.0.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.0.0" />
+    <PackageReference Include="NLog" Version="4.6.5" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
