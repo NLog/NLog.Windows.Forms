@@ -12,7 +12,7 @@
     <PackageIconUrl>https://nlog-project.org/N.png</PackageIconUrl>
     <PackageId>NLog.Windows.Forms</PackageId>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/NLog/NLog.Windows.Forms</PackageProjectUrl>
+    <PackageProjectUrl>https://nlog-project.org</PackageProjectUrl>
     <PackageTags>nlog target forms windows richtextbox</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
