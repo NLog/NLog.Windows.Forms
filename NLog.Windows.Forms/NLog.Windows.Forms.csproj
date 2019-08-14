@@ -18,6 +18,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType Condition=" '$(Configuration)' == 'Debug' ">Full</DebugType>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
  <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -30,9 +31,9 @@
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
     <FileVersion>4.0.0.0</FileVersion>
-    <PackageReleaseNotes>- Support snupkg
-- Update dependency to lastest NLog
-- Package improvements</PackageReleaseNotes>
+    <PackageReleaseNotes>
+
+</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.6.5" />
