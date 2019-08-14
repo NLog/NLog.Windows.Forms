@@ -807,14 +807,15 @@ namespace NLog.Windows.Forms
             RichTextBox textBox = TargetRichTextBox;
 
             int startIndex = textBox.Text.Length;
+            textBox.AppendText(logMessage + "\n");
+
             textBox.SelectionStart = startIndex;
             textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor, textBox.BackColor);
             textBox.SelectionColor = GetColorFromString(rule.FontColor, textBox.ForeColor);
             textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
-            textBox.AppendText(logMessage + "\n");
-            var textBoxSelectionLength = textBox.Text.Length - textBox.SelectionStart;
-            if (textBoxSelectionLength >= 0)
-                textBox.SelectionLength = textBoxSelectionLength;
+           
+            var textBoxSelectionLength = textBox.Text.Length - startIndex;
+            textBox.SelectionLength = textBoxSelectionLength;
 
             // find word to color
             foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
@@ -844,7 +845,7 @@ namespace NLog.Windows.Forms
                     bool linksAdded = false;
 
                     textBox.SelectionStart = startIndex;
-                    textBox.SelectionLength = textBoxSelectionLength;
+                    textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
                     string addedText = textBox.SelectedText;
                     MatchCollection matches = linkAddRegex.Matches(addedText); //only access regex after checking SupportLinks, as it assures the initialization
                     for (int i = matches.Count - 1; i >= 0; --i)    //backwards order, so the string positions are not affected
