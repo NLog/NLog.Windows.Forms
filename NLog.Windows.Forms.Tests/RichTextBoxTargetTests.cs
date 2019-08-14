@@ -16,9 +16,6 @@ namespace NLog.Windows.Forms.Tests
     {
         private Logger logger = LogManager.GetLogger("NLog.UnitTests.Targets.RichTextBoxTargetTests");
 
-        /// <remarks>
-        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
-        /// </remarks>
         [Fact]
         public void SimpleRichTextBoxTargetTest()
         {
@@ -57,7 +54,16 @@ namespace NLog.Windows.Forms.Tests
 
             var result = rtfText;
             Assert.Contains(@"{\colortbl ;\red255\green255\blue255;\red255\green0\blue0;\red255\green165\blue0;\red0\green0\blue0;\red128\green128\blue128;\red169\green169\blue169;}", result);
-            Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+
+            if (IsAppVeyor())
+            {
+                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+            }
+            else
+            {
+                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+            }
+
             Assert.Contains(@"\cf2\highlight1\i Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
             Assert.Contains(@"\cf3\ul\b0\i0 Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
             Assert.Contains(@"\cf4\ulnone Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
@@ -72,9 +78,6 @@ namespace NLog.Windows.Forms.Tests
             Assert.True(form.IsDisposed);
         }
 
-        /// <remarks>
-        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
-        /// </remarks>
         [Fact]
         public void NoColoringTest()
         {
@@ -106,7 +109,7 @@ namespace NLog.Windows.Forms.Tests
 
                 var result = rtfText;
                 Assert.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;}", result);
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                AssertViewkind(result);
                 Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
                 Assert.Contains(@"Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
                 Assert.Contains(@"Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
@@ -121,9 +124,6 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
-        /// <remarks>
-        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
-        /// </remarks>
         [Fact]
         public void CustomRowColoringTest()
         {
@@ -159,7 +159,8 @@ namespace NLog.Windows.Forms.Tests
 
                 var result = rtfText;
                 Assert.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;\red128\green0\blue0;}", result);
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+
+                AssertViewkind(result);
                 Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
                 Assert.Contains(@"\cf3 Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
                 Assert.Contains(@"\cf1 Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
@@ -174,9 +175,18 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
-        /// <remarks>
-        /// Fails locally, see <a href="https://github.com/NLog/NLog.Windows.Forms/issues/21">#21</a>
-        /// </remarks>
+        private static void AssertViewkind(string result)
+        {
+            if (IsAppVeyor())
+            {
+                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+            }
+            else
+            {
+                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+            }
+        }
+
         [Fact]
         public void CustomWordRowColoringTest()
         {
@@ -215,7 +225,16 @@ namespace NLog.Windows.Forms.Tests
 
                 var result = rtfText;
                 Assert.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;\red255\green0\blue0;\red0\green128\blue0;}", result);
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+
+                if (IsAppVeyor())
+                {
+                    Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+                }
+                else
+                {
+                    Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+                }
+
                 Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo xxx\par", result);
                 Assert.Contains(@"Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar yyy\par", result);
                 Assert.Contains(@"Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf4\f1 aaa\cf1\f0\par", result);
@@ -806,7 +825,7 @@ namespace NLog.Windows.Forms.Tests
             logger.Trace("Accessory Form");
             Application.DoEvents();
 
-            { 
+            {
                 Assert.True(target.CreatedForm);
                 Assert.NotNull(target.TargetForm);
                 Assert.NotNull(target.TargetRichTextBox);
@@ -872,7 +891,8 @@ namespace NLog.Windows.Forms.Tests
         public void CustomFormReinitializeInConstructor()
         {
             var config = new LoggingConfiguration();
-            var target = new RichTextBoxTarget() {
+            var target = new RichTextBoxTarget()
+            {
                 FormName = "MyForm1",
                 ControlName = "Control1",
                 UseDefaultRowColoringRules = true,
@@ -893,7 +913,7 @@ namespace NLog.Windows.Forms.Tests
 
             using (TestForm form = new TestForm())
             {
-                
+
                 form.Show();
                 form.Activate();
 
@@ -1146,7 +1166,8 @@ namespace NLog.Windows.Forms.Tests
             string linkTextFromHandler = null;
             LogEventInfo logEventFromHandler = null;
 
-            RichTextBoxTarget.DelLinkClicked clickHandler = (RichTextBoxTarget sender, string linkText, LogEventInfo logEvent) => {
+            RichTextBoxTarget.DelLinkClicked clickHandler = (RichTextBoxTarget sender, string linkText, LogEventInfo logEvent) =>
+            {
                 //actual checks moved to main code to make exceptions caught by the test runner.
                 linkClickedFromHandler = true;
                 linkTextFromHandler = linkText;
@@ -1157,7 +1178,8 @@ namespace NLog.Windows.Forms.Tests
             RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox).LinkClicked += clickHandler;
 
             //simulate clicking on a link
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 for (int i = 0; i < 3; ++i) //needs a number of clicks. Probably - to make application focused, form focused, and finally link clicked.
                 {
                     InvokeLambda(target.TargetRichTextBox, () =>
@@ -1210,6 +1232,16 @@ namespace NLog.Windows.Forms.Tests
         private static void InvokeLambda(Control control, Action action)
         {
             control.Invoke(action);
+        }
+
+        /// <summary>
+        /// Are we running on AppVeyor?
+        /// </summary>
+        /// <returns></returns>
+        protected static bool IsAppVeyor()
+        {
+            var val = Environment.GetEnvironmentVariable("APPVEYOR");
+            return val != null && val.Equals("true", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
