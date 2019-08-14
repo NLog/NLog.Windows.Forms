@@ -45,7 +45,7 @@ namespace NLog.Windows.Forms.Tests
             var form = target.TargetForm;
 
             Assert.True(target.CreatedForm);
-            Assert.True(form.Name.StartsWith("NLog"));
+            Assert.StartsWith("NLog", form.Name);
             Assert.Equal(FormWindowState.Normal, form.WindowState);
             Assert.Equal("NLog", form.Text);
             Assert.Equal(300, form.Width);
@@ -56,15 +56,15 @@ namespace NLog.Windows.Forms.Tests
             Assert.True(target.CreatedForm);
 
             var result = rtfText;
-            Assert.True(result.Contains(@"{\colortbl ;\red255\green255\blue255;\red255\green0\blue0;\red255\green165\blue0;\red0\green0\blue0;\red128\green128\blue128;\red169\green169\blue169;}"));
-            Assert.True(result.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par"));
-            Assert.True(result.Contains(@"\cf2\highlight1\i Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par"));
-            Assert.True(result.Contains(@"\cf3\ul\b0\i0 Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par"));
-            Assert.True(result.Contains(@"\cf4\ulnone Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par"));
-            Assert.True(result.Contains(@"\cf5 Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par"));
-            Assert.True(result.Contains(@"\cf6\i Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par"));
-            Assert.True(result.Contains(@"\cf0\highlight0\i0\f1\par"));
-            Assert.True(result.Contains(@"}"));
+            Assert.Contains(@"{\colortbl ;\red255\green255\blue255;\red255\green0\blue0;\red255\green165\blue0;\red0\green0\blue0;\red128\green128\blue128;\red169\green169\blue169;}", result);
+            Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+            Assert.Contains(@"\cf2\highlight1\i Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
+            Assert.Contains(@"\cf3\ul\b0\i0 Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+            Assert.Contains(@"\cf4\ulnone Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+            Assert.Contains(@"\cf5 Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
+            Assert.Contains(@"\cf6\i Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+            Assert.Contains(@"\cf0\highlight0\i0\f1\par", result);
+            Assert.Contains(@"}", result);
 
             LogManager.Configuration = null;
             Assert.Null(target.TargetForm);
@@ -105,15 +105,15 @@ namespace NLog.Windows.Forms.Tests
                 Assert.True(target.CreatedForm);
 
                 var result = rtfText;
-                Assert.True(result.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;}"));
-                Assert.True(result.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par"));
-                Assert.True(result.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par"));
-                Assert.True(result.Contains(@"Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par"));
-                Assert.True(result.Contains(@"Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par"));
-                Assert.True(result.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par"));
-                Assert.True(result.Contains(@"Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par"));
-                Assert.True(result.Contains(@"\cf0\highlight0\f1\par"));
-                Assert.True(result.Contains(@"}"));
+                Assert.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;}", result);
+                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
+                Assert.Contains(@"Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+                Assert.Contains(@"Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
+                Assert.Contains(@"Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+                Assert.Contains(@"\cf0\highlight0\f1\par", result);
+                Assert.Contains(@"}", result);
             }
             finally
             {
@@ -158,15 +158,15 @@ namespace NLog.Windows.Forms.Tests
                 Assert.True(target.CreatedForm);
 
                 var result = rtfText;
-                Assert.True(result.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;\red128\green0\blue0;}"));
-                Assert.True(result.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par"));
-                Assert.True(result.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par"));
-                Assert.True(result.Contains(@"\cf3 Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par"));
-                Assert.True(result.Contains(@"\cf1 Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par"));
-                Assert.True(result.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par"));
-                Assert.True(result.Contains(@"\cf3 Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par"));
-                Assert.True(result.Contains(@"\cf0\highlight0\f1\par"));
-                Assert.True(result.Contains(@"}"));
+                Assert.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;\red128\green0\blue0;}", result);
+                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
+                Assert.Contains(@"\cf3 Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+                Assert.Contains(@"\cf1 Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
+                Assert.Contains(@"\cf3 Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+                Assert.Contains(@"\cf0\highlight0\f1\par", result);
+                Assert.Contains(@"}", result);
             }
             finally
             {
@@ -214,15 +214,15 @@ namespace NLog.Windows.Forms.Tests
                 // "zzz" string will be highlighted
 
                 var result = rtfText;
-                Assert.True(result.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;\red255\green0\blue0;\red0\green128\blue0;}"));
-                Assert.True(result.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par"));
-                Assert.True(result.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo xxx\par"));
-                Assert.True(result.Contains(@"Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar yyy\par"));
-                Assert.True(result.Contains(@"Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf4\f1 aaa\cf1\f0\par"));
-                Assert.True(result.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo \cf3\f1 zzz\cf1\f0\par"));
-                Assert.True(result.Contains(@"Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar ccc\par"));
-                Assert.True(result.Contains(@"\cf0\highlight0\f1\par"));
-                Assert.True(result.Contains(@"}"));
+                Assert.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;\red255\green0\blue0;\red0\green128\blue0;}", result);
+                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+                Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo xxx\par", result);
+                Assert.Contains(@"Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar yyy\par", result);
+                Assert.Contains(@"Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf4\f1 aaa\cf1\f0\par", result);
+                Assert.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo \cf3\f1 zzz\cf1\f0\par", result);
+                Assert.Contains(@"Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar ccc\par", result);
+                Assert.Contains(@"\cf0\highlight0\f1\par", result);
+                Assert.Contains(@"}", result);
             }
             finally
             {
@@ -262,7 +262,7 @@ namespace NLog.Windows.Forms.Tests
                     logger.Info("Test");
                     Application.DoEvents();
                     Assert.Equal(target.TargetRichTextBox.SelectionStart, target.TargetRichTextBox.TextLength);
-                    Assert.Equal(target.TargetRichTextBox.SelectionLength, 0);
+                    Assert.Equal(0, target.TargetRichTextBox.SelectionLength);
                 }
             }
             finally
@@ -525,8 +525,8 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.False(result.Contains(@"Accessory Form"));
-                Assert.True(result.Contains(@"Normal Form"));
+                Assert.DoesNotContain(@"Accessory Form", result);
+                Assert.Contains(@"Normal Form", result);
             }
         }
 
@@ -560,7 +560,7 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.True(result.Contains(@"Accessory Form"));
+                Assert.Contains(@"Accessory Form", result);
             }
             Form accessoryForm = target.TargetForm;
 
@@ -590,8 +590,8 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.False(result.Contains(@"Accessory Form"));
-                Assert.True(result.Contains(@"Normal Form"));
+                Assert.DoesNotContain(@"Accessory Form", result);
+                Assert.Contains(@"Normal Form", result);
             }
         }
 
@@ -644,8 +644,8 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.True(result.Contains(@"Accessory Form"));
-                Assert.True(result.Contains(@"Normal Form"));
+                Assert.Contains(@"Accessory Form", result);
+                Assert.Contains(@"Normal Form", result);
             }
         }
 
@@ -680,7 +680,7 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.True(result.Contains(@"Accessory Form"));
+                Assert.Contains(@"Accessory Form", result);
             }
             Form accessoryForm = target.TargetForm;
 
@@ -711,8 +711,8 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.False(result.Contains(@"Accessory Form"));
-                Assert.True(result.Contains(@"Normal Form"));
+                Assert.DoesNotContain(@"Accessory Form", result);
+                Assert.Contains(@"Normal Form", result);
             }
         }
 
@@ -776,9 +776,9 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.True(result.Contains(@"Accessory Form"));
-                Assert.True(result.Contains(@"Form without Control"));
-                Assert.True(result.Contains(@"Form with Control"));
+                Assert.Contains(@"Accessory Form", result);
+                Assert.Contains(@"Form without Control", result);
+                Assert.Contains(@"Form with Control", result);
                 Assert.Equal(3 + 1, rtb.Lines.Length);  //3 lines + 1 empty
             }
         }
@@ -811,7 +811,7 @@ namespace NLog.Windows.Forms.Tests
                 Assert.NotNull(target.TargetForm);
                 Assert.NotNull(target.TargetRichTextBox);
                 string result = ExtractRtf(target.TargetRichTextBox);
-                Assert.True(result.Contains(@"Accessory Form"));
+                Assert.Contains(@"Accessory Form", result);
             }
             Form accessoryForm = target.TargetForm;
 
@@ -841,8 +841,8 @@ namespace NLog.Windows.Forms.Tests
 
                 string result = ExtractRtf(target.TargetRichTextBox);
 
-                Assert.True(result.Contains(@"Accessory Form"));
-                Assert.True(result.Contains(@"Normal Form"));
+                Assert.Contains(@"Accessory Form", result);
+                Assert.Contains(@"Normal Form", result);
                 Assert.Equal(2 + 1, rtb.Lines.Length);  //2 lines + 1 empty
             }
         }
@@ -906,8 +906,8 @@ namespace NLog.Windows.Forms.Tests
 
                     string result = ExtractRtf(target.TargetRichTextBox);
 
-                    Assert.True(result.Contains(@"No Control"));
-                    Assert.True(result.Contains(@"Has Control"));
+                    Assert.Contains(@"No Control", result);
+                    Assert.Contains(@"Has Control", result);
                     Assert.Equal(2 + 1, form.rtb.Lines.Length);  //2 lines + 1 empty
                 }
             }
@@ -961,8 +961,8 @@ namespace NLog.Windows.Forms.Tests
 
                     string result = ExtractRtf(target.TargetRichTextBox);
 
-                    Assert.True(result.Contains(@"No Control"));
-                    Assert.True(result.Contains(@"Has Control"));
+                    Assert.Contains(@"No Control", result);
+                    Assert.Contains(@"Has Control", result);
                     Assert.Equal(2 + 1, rtb.Lines.Length);  //2 lines + 1 empty
                 }
 
@@ -977,8 +977,8 @@ namespace NLog.Windows.Forms.Tests
 
                     string result = ExtractRtf(target.TargetRichTextBox);
 
-                    Assert.True(result.Contains(@"No Control"));
-                    Assert.True(result.Contains(@"Has Control"));
+                    Assert.Contains(@"No Control", result);
+                    Assert.Contains(@"Has Control", result);
 
                     //currently fails because RichTextBoxTargetMessageRetentionStrategy.All causes re-issuing of all messages
                     Assert.Equal(2 + 1, rtb.Lines.Length);  //should be 2 lines + 1 empty, actually - 4 lines + 1 empty
@@ -1006,7 +1006,7 @@ namespace NLog.Windows.Forms.Tests
             Application.DoEvents();
 
             string result = ExtractRtf(target.TargetRichTextBox);
-            Assert.True(Regex.IsMatch(result, @"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))"));  //the placeholder GUID was not replaced by was not replaced because of SupportLinks set to false
+            Assert.Matches(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", result);  //the placeholder GUID was not replaced by was not replaced because of SupportLinks set to false
         }
 
         [Fact]
@@ -1032,9 +1032,9 @@ namespace NLog.Windows.Forms.Tests
 
             string resultRtf = ExtractRtf(target.TargetRichTextBox);
             string resultText = target.TargetRichTextBox.Text;
-            Assert.False(Regex.IsMatch(resultRtf, @"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))"));  //the placeholder GUID was replaced
-            Assert.True(resultText.Contains("descr#link"));  //text contains visible and invisible parts
-            Assert.True(resultRtf.Contains(@"descr\v #link"));  //RTF contains everything
+            Assert.DoesNotMatch(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", resultRtf);  //the placeholder GUID was replaced
+            Assert.Contains("descr#link", resultText);  //text contains visible and invisible parts
+            Assert.Contains(@"descr\v #link", resultRtf);  //RTF contains everything
         }
 
         [Fact]
@@ -1062,9 +1062,9 @@ namespace NLog.Windows.Forms.Tests
             {
                 string resultText = target.TargetRichTextBox.Text;
                 string resultRtf = ExtractRtf(target.TargetRichTextBox);
-                Assert.True(resultText.Contains("TestNoLink"));
-                Assert.False(resultText.Contains("#link"));  //no link for first event
-                Assert.False(resultRtf.Contains(@"\v #link"));  //no link for first event
+                Assert.Contains("TestNoLink", resultText);
+                Assert.DoesNotContain("#link", resultText);  //no link for first event
+                Assert.DoesNotContain(@"\v #link", resultRtf);  //no link for first event
             }
 
 
@@ -1080,8 +1080,8 @@ namespace NLog.Windows.Forms.Tests
             {
                 string resultText = target.TargetRichTextBox.Text;
                 string resultRtf = ExtractRtf(target.TargetRichTextBox);
-                Assert.True(resultText.Contains("TestWithLink marker_text#link"));  //link for a second event
-                Assert.True(resultRtf.Contains(@"marker_text\v #link"));  //link for a second event
+                Assert.Contains("TestWithLink marker_text#link", resultText);  //link for a second event
+                Assert.Contains(@"marker_text\v #link", resultRtf);  //link for a second event
             }
         }
 
@@ -1114,8 +1114,8 @@ namespace NLog.Windows.Forms.Tests
 
             string resultText = target.TargetRichTextBox.Text;
             string resultRtf = ExtractRtf(target.TargetRichTextBox);
-            Assert.True(resultText.Contains("#link"));  //some links exist
-            Assert.True(resultRtf.Contains(@"\v #link"));  //some links exist
+            Assert.Contains("#link", resultText);  //some links exist
+            Assert.Contains(@"\v #link", resultRtf);  //some links exist
 
             Assert.True(target.LinkedEventsCount == target.MaxLines); //storing 5, not 100 events
         }
@@ -1140,7 +1140,7 @@ namespace NLog.Windows.Forms.Tests
             Application.DoEvents();
 
             Assert.Same(target, RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox));
-            Assert.True(target.TargetRichTextBox.Text.Contains("link"));
+            Assert.Contains("link", target.TargetRichTextBox.Text);
 
             bool linkClickedFromHandler = false;
             string linkTextFromHandler = null;
