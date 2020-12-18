@@ -625,6 +625,15 @@ namespace NLog.Windows.Forms
                 linkClickEvent(this, linkText, logEvent);
             }
         }
+        
+        /// <summary>
+        /// Used to detach the control manually from the target
+        /// </summary>
+        public void DetachControl()
+        {
+            DetachFromControl();
+            lastLoggedTextBoxControl = null;
+        }
 
         /// <summary>
         /// if <see cref="CreatedForm"/> is true, then destroys created form. Resets <see cref="CreatedForm"/>, <see cref="TargetForm"/> and <see cref="TargetRichTextBox"/> to default values
