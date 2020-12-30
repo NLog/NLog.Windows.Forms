@@ -15,30 +15,30 @@ namespace TestApplicationCore3
 
             NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
             Logger.Info("Init");
-            
+
             RichTextBoxTarget.ReInitializeAllTextboxes(this);
 
-            //var thread = new Thread(() =>
-            //{
-            //    Random rnd = new Random();
-            //    for (int i = 0; i < 10; i++)
-            //    {
-            //        LogEventInfo theEvent = new LogEventInfo(LogLevel.Debug, "", i + ": a line with some length\n a new line");
-            //        if (rnd.NextDouble() > 0.1)
-            //        {
-            //            theEvent.Properties["ShowLink"] = "link via property";
-            //        }
-            //        if (rnd.NextDouble() > 0.5)
-            //        {
-            //            theEvent.Properties["ShowLink2"] = "Another link";
-            //        }
-            //        Logger.Log(theEvent);
-            //        Thread.Sleep(200);
-            //    }
-            //    Logger.Info("Done");
-            //});
+            var thread = new Thread(() =>
+            {
+                Random rnd = new Random();
+                for (int i = 0; i < 10; i++)
+                {
+                    LogEventInfo theEvent = new LogEventInfo(LogLevel.Debug, "", i + ": a line with some length\n a new line");
+                    if (rnd.NextDouble() > 0.1)
+                    {
+                        theEvent.Properties["ShowLink"] = "link via property";
+                    }
+                    if (rnd.NextDouble() > 0.5)
+                    {
+                        theEvent.Properties["ShowLink2"] = "Another link";
+                    }
+                    Logger.Log(theEvent);
+                    Thread.Sleep(200);
+                }
+                Logger.Info("Done");
+            });
             Logger.Info("start thread");
-           // thread.Start();
+            thread.Start();
 
         }
 
