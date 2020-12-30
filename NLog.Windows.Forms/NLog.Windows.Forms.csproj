@@ -5,7 +5,7 @@
     <Company>NLog</Company>
     <Product>NLog.Windows.Forms</Product>
     <Description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </Description>
-    <Copyright>Copyright 2014-2019</Copyright>
+    <Copyright>Copyright 2014-2020</Copyright>
     <Version>4.3.1-rc1</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Authors>NLog</Authors>
@@ -30,7 +30,7 @@
 - Package improvements</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.6.5" />
+    <PackageReference Include="NLog" Version="4.7.6" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
