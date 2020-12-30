@@ -1165,9 +1165,13 @@ namespace NLog.Windows.Forms.Tests
             bool linkClickedFromHandler = false;
             string linkTextFromHandler = null;
             LogEventInfo logEventFromHandler = null;
+            var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
+
 
             RichTextBoxTarget.DelLinkClicked clickHandler = (RichTextBoxTarget sender, string linkText, LogEventInfo logEvent) =>
             {
+                cancellationTokenSource.Cancel();
                 //actual checks moved to main code to make exceptions caught by the test runner.
                 linkClickedFromHandler = true;
                 linkTextFromHandler = linkText;
@@ -1176,6 +1180,16 @@ namespace NLog.Windows.Forms.Tests
             };
 
             RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox).LinkClicked += clickHandler;
+
+            Task.Run(() =>
+            {
+                // max wait time. After that. Stop 
+                int timeout = 1_000;
+                Thread.Sleep(timeout);
+                target.TargetForm.Close();
+                throw new TimeoutException("Waited to long for click");
+
+            }, cancellationToken);
 
             //simulate clicking on a link
             Task.Run(() =>
@@ -1190,7 +1204,7 @@ namespace NLog.Windows.Forms.Tests
                 }
             });
 
-            //in case link does not click, this would hang up infinitely;
+
             Application.Run(target.TargetForm);
 
             Assert.True(linkClickedFromHandler); //check that we have actually clicked on a link, not just missed anything
