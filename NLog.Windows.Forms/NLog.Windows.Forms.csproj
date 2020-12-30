@@ -30,7 +30,7 @@
 - Package improvements</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.6.5" />
+    <PackageReference Include="NLog" Version="4.7.6" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
