@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <TargetFrameworks>net35;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>net35;netcoreapp3.0;net5.0-windows</TargetFrameworks>
     <AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
     <Company>NLog</Company>
     <Product>NLog.Windows.Forms</Product>
