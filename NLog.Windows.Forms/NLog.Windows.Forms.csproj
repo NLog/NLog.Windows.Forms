@@ -9,20 +9,15 @@
     <Version>4.3.0</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Authors>NLog</Authors>
-    <PackageIconUrl>https://nlog-project.org/N.png</PackageIconUrl>
+    <PackageIcon>N.png</PackageIcon>
     <PackageId>NLog.Windows.Forms</PackageId>
-    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://nlog-project.org</PackageProjectUrl>
     <PackageTags>nlog target forms windows richtextbox</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType Condition=" '$(Configuration)' == 'Debug' ">Full</DebugType>
-  </PropertyGroup>
- <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
@@ -46,5 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="NLog.snk" />
+    <None Include="N.png" Pack="true" PackagePath=""/>
   </ItemGroup>
+  <Target Name="DownloadMissingContent" BeforeTargets="GenerateNuspec">
+    <DownloadFile SourceUrl="https://nlog-project.org/N.png" DestinationFolder="$(MSBuildThisFileDirectory)" />
+  </Target>
 </Project>
