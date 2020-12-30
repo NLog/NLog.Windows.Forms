@@ -5,13 +5,12 @@
     <Company>NLog</Company>
     <Product>NLog.Windows.Forms</Product>
     <Description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </Description>
-    <Copyright>Copyright 2014-2019</Copyright>
+    <Copyright>Copyright 2014-2020</Copyright>
     <Version>4.4-beta1</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Authors>NLog</Authors>
-    <PackageIconUrl>https://nlog-project.org/N.png</PackageIconUrl>
+    <PackageIcon>N.png</PackageIcon>
     <PackageId>NLog.Windows.Forms</PackageId>
-    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://nlog-project.org</PackageProjectUrl>
     <PackageTags>nlog target forms windows richtextbox</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -19,11 +18,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType Condition=" '$(Configuration)' == 'Debug' ">Full</DebugType>
     <UseWindowsForms>true</UseWindowsForms>
-  </PropertyGroup>
- <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
@@ -33,10 +28,10 @@
     <FileVersion>4.0.0.0</FileVersion>
     <PackageReleaseNotes>
 
-</PackageReleaseNotes>
+    </PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.6.5" />
+    <PackageReference Include="NLog" Version="4.7.6" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
@@ -47,5 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="NLog.snk" />
+    <None Include="N.png" Pack="true" PackagePath=""/>
   </ItemGroup>
+  <Target Name="DownloadMissingContent" BeforeTargets="GenerateNuspec">
+    <DownloadFile SourceUrl="https://nlog-project.org/N.png" DestinationFolder="$(MSBuildThisFileDirectory)" />
+  </Target>
 </Project>
