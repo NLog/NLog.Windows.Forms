@@ -24,6 +24,13 @@ namespace TestApplication
             Logger.Info("Init");
             
             RichTextBoxTarget.ReInitializeAllTextboxes(this);
+            
+            Logger.Log(LogLevel.Trace, "Log Trace");
+            Logger.Log(LogLevel.Debug, "Log Debug");
+            Logger.Log(LogLevel.Info, "Log Info");
+            Logger.Log(LogLevel.Warn, "Log Warn");
+            Logger.Log(LogLevel.Error, "Log Error");
+            Logger.Log(LogLevel.Fatal, "Log Fatal");
 
             var thread = new Thread(() =>
             {
