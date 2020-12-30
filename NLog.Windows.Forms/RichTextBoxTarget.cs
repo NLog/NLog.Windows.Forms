@@ -310,6 +310,13 @@ namespace NLog.Windows.Forms
         /// </summary>
         private volatile Queue<MessageInfo> messageQueue;
 
+#if !NETCOREAPP3_0 // this is an issue in .NET Core 3 - see https://github.com/dotnet/winforms/issues/3399, but fixed in .MET 5
+
+        /// <summary>
+        /// Actual value of the <see cref="LinkClicked"/> property
+        /// </summary>
+        private bool supportLinks;
+
         /// <summary>
         /// If set to true, using "rtb-link" renderer (<see cref="RichTextBoxLinkLayoutRenderer"/>) would create clickable links in the control.
         /// <seealso cref="LinkClicked"/>
@@ -344,6 +351,15 @@ namespace NLog.Windows.Forms
         }
 
         /// <summary>
+        /// Used to synchronize lazy initialization of <see cref="linkAddRegex"/> and <see cref="linkRemoveRtfRegex"/> in <see cref="SupportLinks"/>.set
+        /// </summary>
+        private static readonly object linkRegexLock = new object();
+#else
+
+        private bool SupportLinks = false;
+#endif
+
+        /// <summary>
         /// Type of delegate for <see cref="LinkClicked"/> event.
         /// </summary>
         /// <param name="sender">The target that caused the event</param>
@@ -358,11 +374,6 @@ namespace NLog.Windows.Forms
         public event DelLinkClicked LinkClicked;
 
         /// <summary>
-        /// Actual value of the <see cref="LinkClicked"/> property
-        /// </summary>
-        private bool supportLinks;
-
-        /// <summary>
         /// Lock for <see cref="linkedEvents"/> dictionary access
         /// </summary>
         private readonly object linkedEventsLock = new object();
@@ -370,7 +381,7 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// A map from link id to a corresponding log event
         /// </summary>
-        private Dictionary<int, LogEventInfo> linkedEvents;
+        private Dictionary<int, LogEventInfo> linkedEvents = null;
 
         /// <summary>
         /// Returns number of events stored for active links in the control. 
@@ -396,22 +407,19 @@ namespace NLog.Windows.Forms
         /// </summary>
         private const string LinkPrefix = "link";
 
-        /// <summary>
-        /// Used to synchronize lazy initialization of <see cref="linkAddRegex"/> and <see cref="linkRemoveRtfRegex"/> in <see cref="SupportLinks"/>.set
-        /// </summary>
-        private static readonly object linkRegexLock = new object();
+
 
         /// <summary>
         /// Used to capture link placeholders in <see cref="SendTheMessageToRichTextBox"/>
         /// Lazily initialized in <see cref="SupportLinks"/>.set(true). Assure checking <see cref="SupportLinks"/> before accessing the field 
         /// </summary>
-        private static Regex linkAddRegex;
+        private static Regex linkAddRegex = null;
 
         /// <summary>
         /// Used to parse RTF with links when removing excess lines in <see cref="SendTheMessageToRichTextBox"/>
         /// Lazily initialized in <see cref="SupportLinks"/>.set(true). Assure checking <see cref="SupportLinks"/> before accessing the field
         /// </summary>
-        private static Regex linkRemoveRtfRegex;
+        private static Regex linkRemoveRtfRegex = null;
 
 
         /// <summary>
@@ -813,7 +821,7 @@ namespace NLog.Windows.Forms
             textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor, textBox.BackColor);
             textBox.SelectionColor = GetColorFromString(rule.FontColor, textBox.ForeColor);
             textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
-           
+
             var textBoxSelectionLength = textBox.Text.Length - startIndex;
             textBox.SelectionLength = textBoxSelectionLength;
 
