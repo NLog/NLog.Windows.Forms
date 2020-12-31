@@ -1066,7 +1066,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
 #if NETCOREAPP3_0 || NETCOREAPP3_1
-        [Fact(Skip = ".NET Core 3.x does not support links based on hidden text")]
+        [Fact(Skip = ".NET Core 3.x does not support links")]
 #else
         [Fact]
 #endif
@@ -1094,11 +1094,15 @@ namespace NLog.Windows.Forms.Tests
             string resultText = target.TargetRichTextBox.Text;
             Assert.DoesNotMatch(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", resultRtf);  //the placeholder GUID was replaced
             Assert.Contains("descr#link", resultText);  //text contains visible and invisible parts
+#if NETCOREAPP
+            Assert.Contains(@"{\field{\*\fldinst{HYPERLINK ""descr#link", resultRtf);  //RTF contains everything
+#else
             Assert.Contains(@"descr\v #link", resultRtf);  //RTF contains everything
+#endif
         }
 
 #if NETCOREAPP3_0 || NETCOREAPP3_1
-        [Fact(Skip = ".NET Core 3.x does not support links based on hidden text")]
+        [Fact(Skip = ".NET Core 3.x does not support links")]
 #else
         [Fact]
 #endif
@@ -1128,7 +1132,11 @@ namespace NLog.Windows.Forms.Tests
                 string resultRtf = ExtractRtf(target.TargetRichTextBox);
                 Assert.Contains("TestNoLink", resultText);
                 Assert.DoesNotContain("#link", resultText);  //no link for first event
+#if NETCOREAPP
+                Assert.DoesNotContain(@"{\field{\*\fldinst{HYPERLINK", resultRtf);  //no link for first event
+#else
                 Assert.DoesNotContain(@"\v #link", resultRtf);  //no link for first event
+#endif
             }
 
 
@@ -1144,13 +1152,18 @@ namespace NLog.Windows.Forms.Tests
             {
                 string resultText = target.TargetRichTextBox.Text;
                 string resultRtf = ExtractRtf(target.TargetRichTextBox);
+#if NETCOREAPP
+                Assert.Contains("TestWithLink HYPERLINK \"marker_text#link", resultText);  //link for a second event
+                Assert.Contains(@"TestWithLink {{\field{\*\fldinst{HYPERLINK ""marker_text#link", resultRtf);  //link for a second event
+#else
                 Assert.Contains("TestWithLink marker_text#link", resultText);  //link for a second event
                 Assert.Contains(@"marker_text\v #link", resultRtf);  //link for a second event
+#endif
             }
         }
 
 #if NETCOREAPP3_0 || NETCOREAPP3_1
-        [Fact(Skip = ".NET Core 3.x does not support links based on hidden text")]
+        [Fact(Skip = ".NET Core 3.x does not support links")]
 #else
         [Fact]
 #endif
@@ -1183,13 +1196,17 @@ namespace NLog.Windows.Forms.Tests
             string resultText = target.TargetRichTextBox.Text;
             string resultRtf = ExtractRtf(target.TargetRichTextBox);
             Assert.Contains("#link", resultText);  //some links exist
+#if NETCOREAPP
+            Assert.Contains(@"{\field{\*\fldinst{HYPERLINK", resultRtf);  //some links exist
+#else
             Assert.Contains(@"\v #link", resultRtf);  //some links exist
+#endif
 
             Assert.True(target.LinkedEventsCount == target.MaxLines); //storing 5, not 100 events
         }
 
-#if NETCOREAPP
-        [Fact(Skip = ".NET Core does not pass hidden text to LinkClicked handlers")]
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+        [Fact(Skip = ".NET Core 3.x does not support links")]
 #else
         [Fact]
 #endif

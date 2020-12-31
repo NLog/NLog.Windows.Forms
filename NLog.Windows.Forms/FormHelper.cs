@@ -163,6 +163,9 @@ namespace NLog.Windows.Forms
         /// </remarks>
         internal static void ChangeSelectionToLink(RichTextBox textBox, string text, string hyperlink)
         {
+#if NETCOREAPP
+            textBox.SelectedRtf = @"{\rtf1\ansi{\field{\*\fldinst{HYPERLINK """ + text + @"#" + hyperlink + @""" }}{\fldrslt{" + text + @"}}}}";
+#else
             int selectionStart = textBox.SelectionStart;
 
             //using \v tag to hide hyperlink part of the text, and \v0 to end hiding. See http://stackoverflow.com/a/14339531/376066
@@ -171,6 +174,7 @@ namespace NLog.Windows.Forms
 
             textBox.Select(selectionStart, text.Length + 1 + hyperlink.Length); //now select both visible and invisible part
             SetSelectionStyle(textBox, CFM_LINK, CFE_LINK);                     //and turn into a link
+#endif
         }
 
         /// <summary>

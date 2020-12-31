@@ -327,7 +327,11 @@ namespace NLog.Windows.Forms
                         if (linkAddRegex == null)
                         {
                             linkAddRegex = new Regex(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", RegexOptions.Compiled);
+#if NETCOREAPP
+                            linkRemoveRtfRegex = new Regex(@"\{\\field\{\\\*\\fldinst\{HYPERLINK ""[^""]*\#" + LinkPrefix + @"(\d+)"" \}\}", RegexOptions.Compiled);
+#else
                             linkRemoveRtfRegex = new Regex(@"\\v #" + LinkPrefix + @"(\d+)\\v0", RegexOptions.Compiled);
+#endif
                         }
                     }
                     lock (linkedEventsLock)
