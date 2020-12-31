@@ -1034,7 +1034,11 @@ namespace NLog.Windows.Forms.Tests
             Assert.Matches(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", result);  //the placeholder GUID was not replaced by was not replaced because of SupportLinks set to false
         }
 
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+        [Fact(Skip = ".NET Core 3.x does not support links based on hidden text")]
+#else
         [Fact]
+#endif
         public void LinkTest()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -1062,7 +1066,11 @@ namespace NLog.Windows.Forms.Tests
             Assert.Contains(@"descr\v #link", resultRtf);  //RTF contains everything
         }
 
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+        [Fact(Skip = ".NET Core 3.x does not support links based on hidden text")]
+#else
         [Fact]
+#endif
         public void LinkTestConditional()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -1110,7 +1118,11 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+        [Fact(Skip = ".NET Core 3.x does not support links based on hidden text")]
+#else
         [Fact]
+#endif
         public void LinkTestExcessLinksRemoved()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -1145,7 +1157,11 @@ namespace NLog.Windows.Forms.Tests
             Assert.True(target.LinkedEventsCount == target.MaxLines); //storing 5, not 100 events
         }
 
+#if NETCOREAPP
+        [Fact(Skip = ".NET Core does not pass hidden text to LinkClicked handlers")]
+#else
         [Fact]
+#endif
         public void LinkClickTest()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
