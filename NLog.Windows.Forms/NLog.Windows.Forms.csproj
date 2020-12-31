@@ -20,7 +20,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/NLog/NLog.Windows.Forms.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -30,6 +30,11 @@
 
     </PackageReleaseNotes>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.7.6" />
   </ItemGroup>
