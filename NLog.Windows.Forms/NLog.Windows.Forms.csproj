@@ -14,8 +14,6 @@
     <PackageProjectUrl>https://nlog-project.org</PackageProjectUrl>
     <PackageTags>nlog target forms windows richtextbox</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType Condition=" '$(Configuration)' == 'Debug' ">Full</DebugType>
     <UseWindowsForms>true</UseWindowsForms>
     <SignAssembly>true</SignAssembly>
