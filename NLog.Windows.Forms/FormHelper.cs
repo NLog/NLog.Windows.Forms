@@ -108,7 +108,8 @@ namespace NLog.Windows.Forms
             {
                 Name = name,
                 Text = "NLog",
-                Icon = GetNLogIcon()
+                Icon = GetNLogIcon(),
+                Font = new Font("Microsoft Sans Serif", 7.5f, FontStyle.Regular, GraphicsUnit.Point, 0),
             };
 
 #if !Smartphone
