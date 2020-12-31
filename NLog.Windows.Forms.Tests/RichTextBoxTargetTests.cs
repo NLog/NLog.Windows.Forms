@@ -299,7 +299,6 @@ namespace NLog.Windows.Forms.Tests
                 {
                     ControlName = "Control1",
                     Layout = "${message}",
-                    ShowMinimized = true,
                     ToolWindow = false,
                     AutoScroll = true,
                 };
