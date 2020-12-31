@@ -57,11 +57,13 @@ namespace NLog.Windows.Forms.Tests
 
             if (IsAppVeyor())
             {
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             }
             else
             {
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\b\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             }
 
             Assert.Contains(@"\cf2\highlight1\i Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
@@ -179,11 +181,13 @@ namespace NLog.Windows.Forms.Tests
         {
             if (IsAppVeyor())
             {
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             }
             else
             {
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             }
         }
 
@@ -228,11 +232,13 @@ namespace NLog.Windows.Forms.Tests
 
                 if (IsAppVeyor())
                 {
-                    Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+                    Assert.Contains(@"\viewkind4\uc1", result);
+                    Assert.Contains(@"\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
                 }
                 else
                 {
-                    Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+                    Assert.Contains(@"\viewkind4\uc1", result);
+                    Assert.Contains(@"\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
                 }
 
                 Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo xxx\par", result);
