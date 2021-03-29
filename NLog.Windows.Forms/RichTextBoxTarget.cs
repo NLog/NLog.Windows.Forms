@@ -86,7 +86,7 @@ namespace NLog.Windows.Forms
                 return;
             }
 
-            foreach (RichTextBoxTarget target in LogManager.Configuration.AllTargets.OfType<RichTextBoxTarget>())
+            foreach (var target in GetRichTextBoxTargets())
             {
                 if (target.FormName == form.Name)
                 {
@@ -106,6 +106,8 @@ namespace NLog.Windows.Forms
             }
         }
 
+  
+
         /// <summary>
         /// Returns a target attached to a given RichTextBox control
         /// </summary>
@@ -113,15 +115,24 @@ namespace NLog.Windows.Forms
         /// <returns>A RichTextBoxTarget attached to a given control or <code>null</code> if no target is attached</returns>
         public static RichTextBoxTarget GetTargetByControl(RichTextBox control)
         {
-            foreach (Target target in LogManager.Configuration.AllTargets)
+            foreach (var target in GetRichTextBoxTargets())
             {
-                RichTextBoxTarget textboxTarget = target as RichTextBoxTarget;
-                if (textboxTarget != null && textboxTarget.TargetRichTextBox == control)
+                if (target != null && target.TargetRichTextBox == control)
                 {
-                    return textboxTarget;
+                    return target;
                 }
             }
             return null;
+        }
+
+        private static IEnumerable<RichTextBoxTarget> GetRichTextBoxTargets()
+        {
+            if (LogManager.Configuration == null)
+            {
+                return new List<RichTextBoxTarget>();
+            }
+
+            return LogManager.Configuration.AllTargets.OfType<RichTextBoxTarget>();
         }
         
         /// <summary>
