@@ -80,13 +80,14 @@ namespace NLog.Windows.Forms
         public static void ReInitializeAllTextboxes(Form form)
         {
             InternalLogger.Info("Executing ReInitializeAllTextboxes for Form {0}", form);
-            if (LogManager.Configuration == null)
+            var loggingConfiguration = LogManager.Configuration;
+            if (loggingConfiguration == null)
             {
                 InternalLogger.Warn("NLog configuration is empty. Skipping ReInitializeAllTextboxes for Form {0}", form);
                 return;
             }
 
-            foreach (var target in GetRichTextBoxTargets())
+            foreach (var target in GetRichTextBoxTargets(loggingConfiguration))
             {
                 if (target.FormName == form.Name)
                 {
@@ -106,8 +107,6 @@ namespace NLog.Windows.Forms
             }
         }
 
-  
-
         /// <summary>
         /// Returns a target attached to a given RichTextBox control
         /// </summary>
@@ -115,7 +114,15 @@ namespace NLog.Windows.Forms
         /// <returns>A RichTextBoxTarget attached to a given control or <code>null</code> if no target is attached</returns>
         public static RichTextBoxTarget GetTargetByControl(RichTextBox control)
         {
-            foreach (var target in GetRichTextBoxTargets())
+            var loggingConfiguration = LogManager.Configuration;
+
+            if (loggingConfiguration == null)
+            {
+                InternalLogger.Debug("NLog configuration is empty. Skipping GetTargetByControl");
+                return null;
+            }
+
+            foreach (var target in GetRichTextBoxTargets(loggingConfiguration))
             {
                 if (target != null && target.TargetRichTextBox == control)
                 {
@@ -125,16 +132,11 @@ namespace NLog.Windows.Forms
             return null;
         }
 
-        private static IEnumerable<RichTextBoxTarget> GetRichTextBoxTargets()
+        private static IEnumerable<RichTextBoxTarget> GetRichTextBoxTargets(LoggingConfiguration loggingConfiguration)
         {
-            if (LogManager.Configuration == null)
-            {
-                return new List<RichTextBoxTarget>();
-            }
-
-            return LogManager.Configuration.AllTargets.OfType<RichTextBoxTarget>();
+            return loggingConfiguration.AllTargets.OfType<RichTextBoxTarget>();
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
         /// </summary>
@@ -278,10 +280,10 @@ namespace NLog.Windows.Forms
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
         [DefaultValue(RichTextBoxTargetMessageRetentionStrategy.None)]
-        public RichTextBoxTargetMessageRetentionStrategy MessageRetention 
-        { 
-            get { return messageRetention; } 
-            set 
+        public RichTextBoxTargetMessageRetentionStrategy MessageRetention
+        {
+            get { return messageRetention; }
+            set
             {
                 lock (messageQueueLock)
                 {
@@ -302,7 +304,7 @@ namespace NLog.Windows.Forms
                         }
                     }
                 }
-            } 
+            }
         }
 
         /// <summary>
@@ -331,7 +333,7 @@ namespace NLog.Windows.Forms
         /// <seealso cref="LinkClicked"/>
         /// </summary>
         [DefaultValue(false)]
-        public bool SupportLinks 
+        public bool SupportLinks
         {
             get { return supportLinks; }
             set
@@ -703,7 +705,7 @@ namespace NLog.Windows.Forms
                 }
                 else if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
                 {
-                    InternalLogger.Trace("Textbox for target {0} is {1}, skipping logging", this.Name, textbox == null? "null" : "disposed");
+                    InternalLogger.Trace("Textbox for target {0} is {1}, skipping logging", this.Name, textbox == null ? "null" : "disposed");
                     return;
                 }
             }
@@ -711,7 +713,7 @@ namespace NLog.Windows.Forms
             string logMessage = Layout.Render(logEvent);
             RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
 
-            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);  
+            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);
 
             if (messageSent)
             {
