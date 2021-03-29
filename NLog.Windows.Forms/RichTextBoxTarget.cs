@@ -189,6 +189,8 @@ namespace NLog.Windows.Forms
         private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent);
 
         private delegate void FormCloseDelegate();
+        
+        private delegate void ScrollToEndDelegate(RichTextBox richTextBox);
 
         /// <summary>
         /// Gets the default set of row coloring rules which applies when <see cref="UseDefaultRowColoringRules"/> is set to true.
@@ -604,6 +606,10 @@ namespace NLog.Windows.Forms
                 this.TargetRichTextBox.LinkClicked += TargetRichTextBox_LinkClicked;
             }
 
+            //performance optimization for mass messages
+            var autoScrollBak = AutoScroll;
+            AutoScroll = false;
+
             //OnReattach?
             switch (messageRetention)
             {
@@ -632,9 +638,35 @@ namespace NLog.Windows.Forms
                     }
                     break;
                 default:
+                    AutoScroll = autoScrollBak;
                     HandleError("Unexpected retention strategy {0}", messageRetention);
                     break;
             }
+
+            //performance optimization for mass messages
+            if (autoScrollBak)
+            {
+                AutoScroll = true;
+
+                if (TargetRichTextBox.InvokeRequired)
+                {
+                    TargetRichTextBox.Invoke(new ScrollToEndDelegate(ScrollToEnd), TargetRichTextBox);
+                }
+                else
+                {
+                    ScrollToEnd(TargetRichTextBox);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Scroll to the end of the TextBox
+        /// </summary>
+        /// <param name="richTextBox"></param>
+        private void ScrollToEnd(RichTextBox richTextBox)
+        {
+            richTextBox.Select(richTextBox.TextLength, 0);
+            richTextBox.ScrollToCaret();    
         }
 
         /// <summary>
@@ -677,6 +709,15 @@ namespace NLog.Windows.Forms
                 string linkText = e.LinkText.Substring(0, match.Index);
                 linkClickEvent(this, linkText, logEvent);
             }
+        }
+        
+        /// <summary>
+        /// Used to detach the control manually from the target
+        /// </summary>
+        public void DetachControl()
+        {
+            DetachFromControl();
+            lastLoggedTextBoxControl = null;
         }
 
         /// <summary>
@@ -954,8 +995,7 @@ namespace NLog.Windows.Forms
 
             if (AutoScroll)
             {
-                textBox.Select(textBox.TextLength, 0);
-                textBox.ScrollToCaret();
+                ScrollToEnd(textBox);
             }
         }
 
