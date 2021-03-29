@@ -23,9 +23,18 @@
     <RepositoryUrl>https://github.com/NLog/NLog.Windows.Forms.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
-    <PackageReleaseNotes>- Support snupkg
-- Update dependency to lastest NLog
-- Package improvements</PackageReleaseNotes>
+<PackageReleaseNotes>
+
+- RichTextBoxTarget: added overloads for ReInitializeAllTextboxes and GetTargetByControl (#72) (@304NotModified)
+- RichTextBoxTarget: better error handling for empty or unexpected NLog configs (#72) (@304NotModified)
+
+- Update NLog to 4.7.9 (#74) (@304NotModified)
+- Fixed publishing Symbol package (#46) (@304NotModified)
+- Added Sourcelink (#70) (@304NotModified)
+- Enable deterministic build (#73) (@304NotModified)
+
+
+</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.7.9" />
