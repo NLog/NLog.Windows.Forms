@@ -80,21 +80,26 @@ namespace NLog.Windows.Forms
         public static void ReInitializeAllTextboxes(Form form)
         {
             InternalLogger.Info("Executing ReInitializeAllTextboxes for Form {0}", form);
-            foreach (Target target in LogManager.Configuration.AllTargets)
+            if (LogManager.Configuration == null)
             {
-                RichTextBoxTarget textboxTarget = target as RichTextBoxTarget;
-                if (textboxTarget != null && textboxTarget.FormName == form.Name)
+                InternalLogger.Warn("NLog configuration is empty. Skipping ReInitializeAllTextboxes for Form {0}", form);
+                return;
+            }
+
+            foreach (RichTextBoxTarget target in LogManager.Configuration.AllTargets.OfType<RichTextBoxTarget>())
+            {
+                if (target.FormName == form.Name)
                 {
                     //can't use InitializeTarget here as the Application.OpenForms would not work from Form's constructor
-                    RichTextBox textboxControl = FormHelper.FindControl<RichTextBox>(textboxTarget.ControlName, form);
+                    RichTextBox textboxControl = FormHelper.FindControl<RichTextBox>(target.ControlName, form);
                     if (textboxControl != null && !textboxControl.IsDisposed)
                     {
-                        if ( textboxTarget.TargetRichTextBox == null
-                            || textboxTarget.TargetRichTextBox.IsDisposed
-                            || textboxTarget.TargetRichTextBox != textboxControl
+                        if (target.TargetRichTextBox == null
+                            || target.TargetRichTextBox.IsDisposed
+                            || target.TargetRichTextBox != textboxControl
                         )
                         {
-                            textboxTarget.AttachToControl(form, textboxControl);
+                            target.AttachToControl(form, textboxControl);
                         }
                     }
                 }
