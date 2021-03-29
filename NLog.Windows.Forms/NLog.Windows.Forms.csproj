@@ -6,7 +6,6 @@
     <Product>NLog.Windows.Forms</Product>
     <Description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </Description>
     <Copyright>Copyright 2014-2020</Copyright>
-    <Version>4.3.0</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Authors>NLog</Authors>
     <PackageIcon>N.png</PackageIcon>
@@ -15,7 +14,6 @@
     <PackageTags>nlog target forms windows richtextbox</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType Condition=" '$(Configuration)' == 'Debug' ">Full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
@@ -24,7 +22,6 @@
     <RepositoryUrl>https://github.com/NLog/NLog.Windows.Forms.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
-    <FileVersion>4.0.0.0</FileVersion>
     <PackageReleaseNotes>- Support snupkg
 - Update dependency to lastest NLog
 - Package improvements</PackageReleaseNotes>
