@@ -73,34 +73,53 @@ namespace NLog.Windows.Forms
         /// Attempts to attach existing targets that have yet no textboxes to controls that exist on specified form if appropriate
         /// </summary>
         /// <remarks>
-        /// Setting <see cref="AllowAccessoryFormCreation"/> to true (default) actually causes target to always have a textbox 
+        /// Setting <see cref="AllowAccessoryFormCreation"/> to true (default) actually causes target to always have a text box 
         /// (after having <see cref="InitializeTarget"/> called), so such targets are not affected by this method.
         /// </remarks>
         /// <param name="form">a Form to check for RichTextBoxes</param>
         public static void ReInitializeAllTextboxes(Form form)
         {
             InternalLogger.Info("Executing ReInitializeAllTextboxes for Form {0}", form);
-            var loggingConfiguration = LogManager.Configuration;
-            if (loggingConfiguration == null)
+            var configuration = LogManager.Configuration;
+
+            if (configuration == null)
             {
-                InternalLogger.Warn("NLog configuration is empty. Skipping ReInitializeAllTextboxes for Form {0}", form);
-                return;
+                throw new NLogConfigurationException("NLog configuration is empty");
             }
 
-            foreach (var target in GetRichTextBoxTargets(loggingConfiguration))
+            ReInitializeAllTextboxes(form, configuration);
+        }
+
+        /// <summary>
+        /// Attempts to attach existing targets that have yet no textboxes to controls that exist on specified form if appropriate
+        /// </summary>
+        /// <remarks>
+        /// Setting <see cref="AllowAccessoryFormCreation"/> to true (default) actually causes target to always have a text box 
+        /// (after having <see cref="InitializeTarget"/> called), so such targets are not affected by this method.
+        /// </remarks>
+        /// <param name="form">a Form to check for RichTextBoxes</param>
+        /// /// <param name="configuration">NLog's configuration. <c>null</c> is not allowed</param>
+        public static void ReInitializeAllTextboxes(Form form, LoggingConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration), "NLog configuration is empty");
+            }
+
+            foreach (var target in GetRichTextBoxTargets(configuration))
             {
                 if (target.FormName == form.Name)
                 {
                     //can't use InitializeTarget here as the Application.OpenForms would not work from Form's constructor
-                    RichTextBox textboxControl = FormHelper.FindControl<RichTextBox>(target.ControlName, form);
-                    if (textboxControl != null && !textboxControl.IsDisposed)
+                    RichTextBox textBoxControl = FormHelper.FindControl<RichTextBox>(target.ControlName, form);
+                    if (textBoxControl != null && !textBoxControl.IsDisposed)
                     {
                         if (target.TargetRichTextBox == null
                             || target.TargetRichTextBox.IsDisposed
-                            || target.TargetRichTextBox != textboxControl
+                            || target.TargetRichTextBox != textBoxControl
                         )
                         {
-                            target.AttachToControl(form, textboxControl);
+                            target.AttachToControl(form, textBoxControl);
                         }
                     }
                 }
@@ -114,21 +133,37 @@ namespace NLog.Windows.Forms
         /// <returns>A RichTextBoxTarget attached to a given control or <code>null</code> if no target is attached</returns>
         public static RichTextBoxTarget GetTargetByControl(RichTextBox control)
         {
-            var loggingConfiguration = LogManager.Configuration;
+            var configuration = LogManager.Configuration;
 
-            if (loggingConfiguration == null)
+            if (configuration == null)
             {
-                InternalLogger.Debug("NLog configuration is empty. Skipping GetTargetByControl");
-                return null;
+                throw new NLogConfigurationException("NLog configuration is empty");
             }
 
-            foreach (var target in GetRichTextBoxTargets(loggingConfiguration))
+            return GetTargetByControl(control, configuration);
+        }
+
+        /// <summary>
+        /// Returns a target attached to a given RichTextBox control
+        /// </summary>
+        /// <param name="control">a RichTextBox control for which the target is to be returned</param>
+        /// <returns>A RichTextBoxTarget attached to a given control or <code>null</code> if no target is attached</returns>
+        /// /// <param name="configuration">NLog's configuration. <c>null</c> is not allowed</param>
+        public static RichTextBoxTarget GetTargetByControl(RichTextBox control, LoggingConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration), "NLog configuration is empty");
+            }
+
+            foreach (var target in GetRichTextBoxTargets(configuration))
             {
                 if (target != null && target.TargetRichTextBox == control)
                 {
                     return target;
                 }
             }
+
             return null;
         }
 
@@ -266,7 +301,7 @@ namespace NLog.Windows.Forms
         /// Gets or sets a value indicating whether to create accessory form if the specified form/control combination was not found during target initialization.
         /// </summary>
         /// <remarks>
-        /// If set to false and the control was not found during target initialiation, the target would skip events until the control is found during <see cref="ReInitializeAllTextboxes"/> call
+        /// If set to false and the control was not found during target initialization, the target would skip events until the control is found during <see cref="ReInitializeAllTextboxes(System.Windows.Forms.Form)"/> call
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
         [DefaultValue(true)]
