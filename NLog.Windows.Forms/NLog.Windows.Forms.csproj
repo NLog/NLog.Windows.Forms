@@ -28,6 +28,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.7.6" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
