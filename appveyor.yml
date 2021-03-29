@@ -3,17 +3,9 @@ image: Visual Studio 2019
 clone_folder: c:\projects\nlog
 configuration: Release
 platform: Any CPU
-dotnet_csproj:
-  patch: true
-  file: '**\*.csproj'
-  assembly_version: '4.0.0.0'
-  file_version: '{version}'
-  package_version: '4.3.0'
-  informational_version: '4.3.0'
-  version: '4.3.0'
 skip_tags: true
 build_script:	
-  - ps: msbuild /t:restore,build /p:Configuration=Release /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg /maxcpucount /v:m
+  - ps: .\build.ps1
 test_script:
   - nuget.exe install OpenCover -ExcludeVersion
   - OpenCover\tools\OpenCover.Console.exe -register:user -target:"%xunit20%\xunit.console.x86.exe" -targetargs:"\"c:\projects\nlog\NLog.Windows.Forms.Tests\bin\Release\net452\NLog.Windows.Forms.Tests.dll\" -appveyor -noshadow"  -returntargetcode -filter:"+[NLog.Windows.Forms]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -hideskipped:All -output:coverage.xml
