@@ -37,6 +37,7 @@ Added support for .NET Core 3.1 and .NET 5 (#42) (@weltkante, @304NotModified)
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.7.9" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
