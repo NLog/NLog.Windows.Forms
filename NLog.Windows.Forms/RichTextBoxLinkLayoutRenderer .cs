@@ -9,6 +9,8 @@ using System.Threading;
 
 namespace NLog.Windows.Forms
 {
+#if LINKS_SUPPORTED
+
     /// <summary>
     /// Strings rendered with this rendrer would convert to links in the control. <see cref="RichTextBoxTarget.SupportLinks"/>
     /// </summary>
@@ -92,4 +94,5 @@ namespace NLog.Windows.Forms
             }
         }
     }
+#endif
 }

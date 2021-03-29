@@ -363,6 +363,9 @@ namespace NLog.Windows.Forms
         /// </summary>
         private volatile Queue<MessageInfo> messageQueue;
 
+
+#if LINKS_SUPPORTED
+
         /// <summary>
         /// If set to true, using "rtb-link" renderer (<see cref="RichTextBoxLinkLayoutRenderer"/>) would create clickable links in the control.
         /// <seealso cref="LinkClicked"/>
@@ -400,6 +403,8 @@ namespace NLog.Windows.Forms
             }
         }
 
+#endif
+#if LINKS_SUPPORTED
         /// <summary>
         /// Type of delegate for <see cref="LinkClicked"/> event.
         /// </summary>
@@ -413,7 +418,7 @@ namespace NLog.Windows.Forms
         /// <seealso cref="DelLinkClicked"/>
         /// </summary>
         public event DelLinkClicked LinkClicked;
-
+        
         /// <summary>
         /// Actual value of the <see cref="LinkClicked"/> property
         /// </summary>
@@ -428,6 +433,7 @@ namespace NLog.Windows.Forms
         /// A map from link id to a corresponding log event
         /// </summary>
         private Dictionary<int, LogEventInfo> linkedEvents;
+
 
         /// <summary>
         /// Returns number of events stored for active links in the control. 
@@ -447,6 +453,8 @@ namespace NLog.Windows.Forms
                 }
             }
         }
+
+
 
         /// <summary>
         /// Internal prefix that is added to the link id in RTF
@@ -469,7 +477,7 @@ namespace NLog.Windows.Forms
         /// Lazily initialized in <see cref="SupportLinks"/>.set(true). Assure checking <see cref="SupportLinks"/> before accessing the field
         /// </summary>
         private static Regex linkRemoveRtfRegex;
-
+#endif
 
         /// <summary>
         /// Initializes the target. Can be used by inheriting classes
@@ -602,11 +610,15 @@ namespace NLog.Windows.Forms
             this.TargetForm = form;
             this.TargetRichTextBox = textboxControl;
 
+#if LINKS_SUPPORTED
+
             if (this.SupportLinks)
             {
                 this.TargetRichTextBox.DetectUrls = false;
                 this.TargetRichTextBox.LinkClicked += TargetRichTextBox_LinkClicked;
             }
+
+#endif
 
             //OnReattach?
             switch (messageRetention)
@@ -640,6 +652,8 @@ namespace NLog.Windows.Forms
                     break;
             }
         }
+
+#if LINKS_SUPPORTED
 
         /// <summary>
         /// Attached to RTB-control's LinkClicked event to convert link text to logEvent
@@ -682,6 +696,8 @@ namespace NLog.Windows.Forms
                 linkClickEvent(this, linkText, logEvent);
             }
         }
+
+#endif
 
         /// <summary>
         /// if <see cref="CreatedForm"/> is true, then destroys created form. Resets <see cref="CreatedForm"/>, <see cref="TargetForm"/> and <see cref="TargetRichTextBox"/> to default values
@@ -885,6 +901,8 @@ namespace NLog.Windows.Forms
                 }
             }
 
+#if LINKS_SUPPORTED
+
             if (SupportLinks)
             {
                 object linkInfoObj;
@@ -921,6 +939,9 @@ namespace NLog.Windows.Forms
                 }
             }
 
+#endif
+
+
             //remove some lines if there above the max
             if (MaxLines > 0)
             {
@@ -935,6 +956,7 @@ namespace NLog.Windows.Forms
                     {
                         textBox.SelectionStart = 0;
                         textBox.SelectionLength = textBox.GetFirstCharIndexFromLine(tooManyLines);
+#if LINKS_SUPPORTED
                         if (SupportLinks)
                         {
                             string selectedRtf = textBox.SelectedRtf;
@@ -951,6 +973,7 @@ namespace NLog.Windows.Forms
                                 }
                             }
                         }
+#endif
                         textBox.SelectedRtf = "{\\rtf1\\ansi}";
                     }
                 }

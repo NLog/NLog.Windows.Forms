@@ -5,7 +5,7 @@
     <AssemblyTitle>NLog.Windows.Forms.Tests</AssemblyTitle>
     <Company>Microsoft</Company>
     <Product>NLog.Windows.Forms.Tests</Product>
-    <Copyright>Copyright © Jaroslaw Kowalski, Kim Christensen, Julian Verdurmen 2015-2016</Copyright>
+    <Copyright>Copyright © Jaroslaw Kowalski, Kim Christensen, Julian Verdurmen</Copyright>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -18,6 +18,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' or  '$(TargetFramework)' == 'net5.0-windows' ">
+    <!-- Links aren't support for .NET Core 3.x, but does work for .NET 5 and .NET Framework-->
+    <DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.4.1" />

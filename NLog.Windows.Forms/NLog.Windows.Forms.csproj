@@ -30,6 +30,12 @@
 
     </PackageReleaseNotes>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' or  '$(TargetFramework)' == 'net5.0-windows' ">
+    <!-- Links aren't support for .NET Core 3.x, but does work for .NET 5 and .NET Framework-->
+    <DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.7.9" />
   </ItemGroup>
