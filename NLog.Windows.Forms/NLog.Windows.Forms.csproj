@@ -5,7 +5,8 @@
     <Company>NLog</Company>
     <Product>NLog.Windows.Forms</Product>
     <Description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </Description>
-    <Copyright>Copyright 2014-2020</Copyright>
+    <CurrentYear>$([System.DateTime]::Now.ToString(yyyy))</CurrentYear>
+    <Copyright>Copyright (c) 2014-$(CurrentYear) NLog Project - https://nlog-project.org/ </Copyright>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Authors>NLog</Authors>
     <PackageIcon>N.png</PackageIcon>
