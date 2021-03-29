@@ -9,7 +9,7 @@ build_script:
 test_script:
   - nuget.exe install OpenCover -ExcludeVersion -DependencyVersion Ignore
   - OpenCover\tools\OpenCover.Console.exe -register:user              -target:"%xunit20%\xunit.console.x86.exe" -targetargs:"\"c:\projects\nlog\NLog.Windows.Forms.Tests\bin\Release\net452\NLog.Windows.Forms.Tests.dll\" -appveyor -noshadow"  -returntargetcode -filter:"+[NLog.Windows.Forms]* -[NLog.Windows.Forms.Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -hideskipped:All -output:coverage.xml
-  - OpenCover\tools\OpenCover.Console.exe -register:user -mergeoutput -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:"test -f netcoreapp3.0  -c debug NLog.Windows.Forms.Tests" -filter:"+[NLog.Windows.Forms]* -[NLog.Windows.Forms.Tests]*" -output:"coverage.xml" -oldstyle -targetdir:"NLog.Windows.Forms.Tests"
+  - OpenCover\tools\OpenCover.Console.exe -register:user -mergeoutput -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:"test -f netcoreapp3.1  -c debug NLog.Windows.Forms.Tests" -filter:"+[NLog.Windows.Forms]* -[NLog.Windows.Forms.Tests]*" -output:"coverage.xml" -oldstyle -targetdir:"NLog.Windows.Forms.Tests"
   - OpenCover\tools\OpenCover.Console.exe -register:user -mergeoutput -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:"test -f net5.0         -c debug NLog.Windows.Forms.Tests" -filter:"+[NLog.Windows.Forms]* -[NLog.Windows.Forms.Tests]*" -output:"coverage.xml" -oldstyle -targetdir:"NLog.Windows.Forms.Tests"
   - pip install codecov
   - codecov -f "coverage.xml"
