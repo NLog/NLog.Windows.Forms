@@ -1065,7 +1065,7 @@ namespace NLog.Windows.Forms.Tests
             Assert.Matches(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", result);  //the placeholder GUID was not replaced by was not replaced because of SupportLinks set to false
         }
 
-#if NETCOREAPP3_0 || NETCOREAPP3_1
+#if NETCOREAPP3_1
         [Fact(Skip = ".NET Core 3.x does not support links")]
 #else
         [Fact]
@@ -1101,7 +1101,7 @@ namespace NLog.Windows.Forms.Tests
 #endif
         }
 
-#if NETCOREAPP3_0 || NETCOREAPP3_1
+#if NETCOREAPP3_1
         [Fact(Skip = ".NET Core 3.x does not support links")]
 #else
         [Fact]
@@ -1162,7 +1162,7 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
-#if NETCOREAPP3_0 || NETCOREAPP3_1
+#if NETCOREAPP3_1
         [Fact(Skip = ".NET Core 3.x does not support links")]
 #else
         [Fact]
@@ -1205,7 +1205,7 @@ namespace NLog.Windows.Forms.Tests
             Assert.True(target.LinkedEventsCount == target.MaxLines); //storing 5, not 100 events
         }
 
-#if NETCOREAPP3_0 || NETCOREAPP3_1
+#if NETCOREAPP3_1
         [Fact(Skip = ".NET Core 3.x does not support links")]
 #else
         [Fact]
