@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFrameworks>net35;netcoreapp3.1;net5.0-windows</TargetFrameworks>
     <AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
     <Company>NLog</Company>
     <Product>NLog.Windows.Forms</Product>
@@ -16,6 +16,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <DebugType Condition=" '$(Configuration)' == 'Debug' ">Full</DebugType>
+    <UseWindowsForms>true</UseWindowsForms>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -23,19 +24,17 @@
     <RepositoryUrl>https://github.com/NLog/NLog.Windows.Forms.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
-<PackageReleaseNotes>
 
-- RichTextBoxTarget: added overloads for ReInitializeAllTextboxes and GetTargetByControl (#72) (@304NotModified)
-- RichTextBoxTarget: better error handling for empty or unexpected NLog configs (#72) (@304NotModified)
-
-- Update NLog to 4.7.9 (#74) (@304NotModified)
-- Fixed publishing Symbol package (#46) (@304NotModified)
-- Added Sourcelink (#70) (@304NotModified)
-- Enable deterministic build (#73) (@304NotModified)
-
-
-</PackageReleaseNotes>
+    <PackageReleaseNotes>
+Added support for .NET Core 3.1 and .NET 5 (#42) (@weltkante, @304NotModified)
+    </PackageReleaseNotes>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' or  '$(TargetFramework)' == 'net5.0-windows' ">
+    <!-- Links aren't support for .NET Core 3.x, but does work for .NET 5 and .NET Framework-->
+    <DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.7.9" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Windows.Forms;
 
-namespace TestApplication
+namespace TestApplicationCore3
 {
     static class Program
     {

@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using NLog;
 using NLog.Windows.Forms;
-using System.Globalization;
 
-namespace TestApplication
+namespace TestApplicationCore3
 {
     public partial class Form1 : Form
     {
@@ -22,9 +15,9 @@ namespace TestApplication
 
             NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
             Logger.Info("Init");
-            
+
             RichTextBoxTarget.ReInitializeAllTextboxes(this);
-            
+
             Logger.Log(LogLevel.Trace, "Log Trace");
             Logger.Log(LogLevel.Debug, "Log Debug");
             Logger.Log(LogLevel.Info, "Log Info");

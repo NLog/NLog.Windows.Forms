@@ -55,21 +55,32 @@ namespace NLog.Windows.Forms.Tests
             var result = rtfText;
             Assert.Contains(@"{\colortbl ;\red255\green255\blue255;\red255\green0\blue0;\red255\green165\blue0;\red0\green0\blue0;\red128\green128\blue128;\red169\green169\blue169;}", result);
 
+#if NETCOREAPP
+            Assert.Contains(@"\viewkind4\uc1", result);
+            Assert.Contains(@"\pard\cf1\highlight2\b\f0\fs18 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+#else
             if (IsAppVeyor())
             {
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             }
             else
             {
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\b\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\b\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             }
+#endif
 
             Assert.Contains(@"\cf2\highlight1\i Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
             Assert.Contains(@"\cf3\ul\b0\i0 Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
             Assert.Contains(@"\cf4\ulnone Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             Assert.Contains(@"\cf5 Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
             Assert.Contains(@"\cf6\i Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+#if NETCOREAPP
+            Assert.Contains(@"\cf0\highlight0\i0\par", result);
+#else
             Assert.Contains(@"\cf0\highlight0\i0\f1\par", result);
+#endif
             Assert.Contains(@"}", result);
 
             LogManager.Configuration = null;
@@ -115,7 +126,11 @@ namespace NLog.Windows.Forms.Tests
                 Assert.Contains(@"Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
                 Assert.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
                 Assert.Contains(@"Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+#if NETCOREAPP
+                Assert.Contains(@"\cf0\highlight0\par", result);
+#else
                 Assert.Contains(@"\cf0\highlight0\f1\par", result);
+#endif
                 Assert.Contains(@"}", result);
             }
             finally
@@ -166,7 +181,11 @@ namespace NLog.Windows.Forms.Tests
                 Assert.Contains(@"\cf1 Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
                 Assert.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
                 Assert.Contains(@"\cf3 Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
+#if NETCOREAPP
+                Assert.Contains(@"\cf0\highlight0\par", result);
+#else
                 Assert.Contains(@"\cf0\highlight0\f1\par", result);
+#endif
                 Assert.Contains(@"}", result);
             }
             finally
@@ -177,14 +196,21 @@ namespace NLog.Windows.Forms.Tests
 
         private static void AssertViewkind(string result)
         {
+#if NETCOREAPP
+            Assert.Contains(@"\viewkind4\uc1", result);
+            Assert.Contains(@"\pard\cf1\highlight2\f0\fs18 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+#else
             if (IsAppVeyor())
             {
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             }
             else
             {
-                Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
             }
+#endif
         }
 
         [Fact]
@@ -226,21 +252,32 @@ namespace NLog.Windows.Forms.Tests
                 var result = rtfText;
                 Assert.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;\red255\green0\blue0;\red0\green128\blue0;}", result);
 
+#if NETCOREAPP
+                Assert.Contains(@"\viewkind4\uc1", result);
+                Assert.Contains(@"\pard\cf1\highlight2\f0\fs18 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+#else
                 if (IsAppVeyor())
                 {
-                    Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+                    Assert.Contains(@"\viewkind4\uc1", result);
+                    Assert.Contains(@"\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
                 }
                 else
                 {
-                    Assert.Contains(@"\viewkind4\uc1\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
+                    Assert.Contains(@"\viewkind4\uc1", result);
+                    Assert.Contains(@"\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
                 }
+#endif
 
                 Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo xxx\par", result);
                 Assert.Contains(@"Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar yyy\par", result);
                 Assert.Contains(@"Info NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf4\f1 aaa\cf1\f0\par", result);
                 Assert.Contains(@"Debug NLog.UnitTests.Targets.RichTextBoxTargetTests Foo \cf3\f1 zzz\cf1\f0\par", result);
                 Assert.Contains(@"Trace NLog.UnitTests.Targets.RichTextBoxTargetTests Bar ccc\par", result);
+#if NETCOREAPP
+                Assert.Contains(@"\cf0\highlight0\par", result);
+#else
                 Assert.Contains(@"\cf0\highlight0\f1\par", result);
+#endif
                 Assert.Contains(@"}", result);
             }
             finally
@@ -299,7 +336,6 @@ namespace NLog.Windows.Forms.Tests
                 {
                     ControlName = "Control1",
                     Layout = "${message}",
-                    ShowMinimized = true,
                     ToolWindow = false,
                     AutoScroll = true,
                 };
@@ -1006,6 +1042,8 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
+#if LINKS_SUPPORTED
+
         [Fact]
         public void LinkLayoutTestDisabledLinks()
         {
@@ -1028,6 +1066,7 @@ namespace NLog.Windows.Forms.Tests
             string result = ExtractRtf(target.TargetRichTextBox);
             Assert.Matches(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", result);  //the placeholder GUID was not replaced by was not replaced because of SupportLinks set to false
         }
+
 
         [Fact]
         public void LinkTest()
@@ -1054,8 +1093,13 @@ namespace NLog.Windows.Forms.Tests
             string resultText = target.TargetRichTextBox.Text;
             Assert.DoesNotMatch(@"(\([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\))", resultRtf);  //the placeholder GUID was replaced
             Assert.Contains("descr#link", resultText);  //text contains visible and invisible parts
+#if NETCOREAPP
+            Assert.Contains(@"{\field{\*\fldinst{HYPERLINK ""descr#link", resultRtf);  //RTF contains everything
+#else
             Assert.Contains(@"descr\v #link", resultRtf);  //RTF contains everything
+#endif
         }
+
 
         [Fact]
         public void LinkTestConditional()
@@ -1084,7 +1128,11 @@ namespace NLog.Windows.Forms.Tests
                 string resultRtf = ExtractRtf(target.TargetRichTextBox);
                 Assert.Contains("TestNoLink", resultText);
                 Assert.DoesNotContain("#link", resultText);  //no link for first event
+#if NETCOREAPP
+                Assert.DoesNotContain(@"{\field{\*\fldinst{HYPERLINK", resultRtf);  //no link for first event
+#else
                 Assert.DoesNotContain(@"\v #link", resultRtf);  //no link for first event
+#endif
             }
 
 
@@ -1100,8 +1148,13 @@ namespace NLog.Windows.Forms.Tests
             {
                 string resultText = target.TargetRichTextBox.Text;
                 string resultRtf = ExtractRtf(target.TargetRichTextBox);
+#if NETCOREAPP
+                Assert.Contains("TestWithLink HYPERLINK \"marker_text#link", resultText);  //link for a second event
+                Assert.Contains(@"TestWithLink {{\field{\*\fldinst{HYPERLINK ""marker_text#link", resultRtf);  //link for a second event
+#else
                 Assert.Contains("TestWithLink marker_text#link", resultText);  //link for a second event
                 Assert.Contains(@"marker_text\v #link", resultRtf);  //link for a second event
+#endif
             }
         }
 
@@ -1135,7 +1188,11 @@ namespace NLog.Windows.Forms.Tests
             string resultText = target.TargetRichTextBox.Text;
             string resultRtf = ExtractRtf(target.TargetRichTextBox);
             Assert.Contains("#link", resultText);  //some links exist
+#if NETCOREAPP
+            Assert.Contains(@"{\field{\*\fldinst{HYPERLINK", resultRtf);  //some links exist
+#else
             Assert.Contains(@"\v #link", resultRtf);  //some links exist
+#endif
 
             Assert.True(target.LinkedEventsCount == target.MaxLines); //storing 5, not 100 events
         }
@@ -1165,9 +1222,13 @@ namespace NLog.Windows.Forms.Tests
             bool linkClickedFromHandler = false;
             string linkTextFromHandler = null;
             LogEventInfo logEventFromHandler = null;
+            var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
+
 
             RichTextBoxTarget.DelLinkClicked clickHandler = (RichTextBoxTarget sender, string linkText, LogEventInfo logEvent) =>
             {
+                cancellationTokenSource.Cancel();
                 //actual checks moved to main code to make exceptions caught by the test runner.
                 linkClickedFromHandler = true;
                 linkTextFromHandler = linkText;
@@ -1176,6 +1237,16 @@ namespace NLog.Windows.Forms.Tests
             };
 
             RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox).LinkClicked += clickHandler;
+
+            Task.Run(() =>
+            {
+                // max wait time. After that. Stop 
+                int timeout = 1_000;
+                Thread.Sleep(timeout);
+                target.TargetForm.Close();
+                throw new TimeoutException("Waited to long for click");
+
+            }, cancellationToken);
 
             //simulate clicking on a link
             Task.Run(() =>
@@ -1190,13 +1261,14 @@ namespace NLog.Windows.Forms.Tests
                 }
             });
 
-            //in case link does not click, this would hang up infinitely;
+
             Application.Run(target.TargetForm);
 
             Assert.True(linkClickedFromHandler); //check that we have actually clicked on a link, not just missed anything
             Assert.True("link" == linkTextFromHandler);
             Assert.True("Test" == logEventFromHandler.Message);
         }
+#endif
 
 
         #region mouse click smulation
