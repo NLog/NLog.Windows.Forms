@@ -26,7 +26,7 @@
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
 
     <PackageReleaseNotes>
-
+Added support for .NET Core 3.1 and .NET 5 (#42) (@weltkante, @304NotModified)
     </PackageReleaseNotes>
   </PropertyGroup>
 
