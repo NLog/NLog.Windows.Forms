@@ -133,7 +133,7 @@ namespace NLog.Windows.Forms
             AllowAccessoryFormCreation = true;
         }
 
-        private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent);
+        private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent, bool autoScroll);
 
         private delegate void FormCloseDelegate();
         
@@ -540,7 +540,8 @@ namespace NLog.Windows.Forms
         /// </summary>
         /// <param name="form">form owning textboxControl</param>
         /// <param name="textboxControl">a new control to attach to</param>
-        private void AttachToControl(Form form, RichTextBox textboxControl)
+        /// <param name="scrollOnce">scroll the textbox to the end once. If false then AutoScroll property is used.</param>
+        private void AttachToControl(Form form, RichTextBox textboxControl, bool scrollOnce = false)
         {
             InternalLogger.Info("Attaching target {0} to textbox {1}.{2}", this.Name, form.Name, textboxControl.Name);
             DetachFromControl();
@@ -553,9 +554,7 @@ namespace NLog.Windows.Forms
                 this.TargetRichTextBox.LinkClicked += TargetRichTextBox_LinkClicked;
             }
 
-            //performance optimization for mass messages
-            var autoScrollBak = AutoScroll;
-            AutoScroll = false;
+            var autoScroll = scrollOnce || AutoScroll; 
 
             //OnReattach?
             switch (messageRetention)
@@ -569,7 +568,7 @@ namespace NLog.Windows.Forms
                         {
                             foreach (MessageInfo messageInfo in messageQueue)
                             {
-                                DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent);
+                                DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent, autoScroll);
                             }
                         }
                     }
@@ -580,21 +579,18 @@ namespace NLog.Windows.Forms
                         while (messageQueue.Count > 0)
                         {
                             MessageInfo messageInfo = messageQueue.Dequeue();
-                            DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent);
+                            DoSendMessageToTextbox(messageInfo.Message, messageInfo.Rule, messageInfo.LogEvent, autoScroll);
                         }
                     }
                     break;
                 default:
-                    AutoScroll = autoScrollBak;
                     HandleError("Unexpected retention strategy {0}", messageRetention);
                     break;
             }
 
             //performance optimization for mass messages
-            if (autoScrollBak)
+            if (scrollOnce)
             {
-                AutoScroll = true;
-
                 if (TargetRichTextBox.InvokeRequired)
                 {
                     TargetRichTextBox.Invoke(new ScrollToEndDelegate(ScrollToEnd), TargetRichTextBox);
@@ -736,7 +732,7 @@ namespace NLog.Windows.Forms
             string logMessage = Layout.Render(logEvent);
             RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
 
-            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);  
+            bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent, AutoScroll);  
 
             if (messageSent)
             {
@@ -769,8 +765,9 @@ namespace NLog.Windows.Forms
         /// <param name="logMessage">a message to send</param>
         /// <param name="rule">matching coloring rule</param>
         /// <param name="logEvent">original logEvent</param>
+        /// <param name="autoScroll">scroll to the end of the textbox</param>
         /// <returns>true if the message was actually sent (i.e. <see cref="TargetRichTextBox"/> is not null and not disposed, and no exception happened during message send)</returns>
-        private bool DoSendMessageToTextbox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
+        private bool DoSendMessageToTextbox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent, bool autoScroll)
         {
             RichTextBox textbox = TargetRichTextBox;
             try
@@ -779,11 +776,11 @@ namespace NLog.Windows.Forms
                 {
                     if (textbox.InvokeRequired)
                     {
-                        textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule, logEvent);
+                        textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule, logEvent, autoScroll);
                     }
                     else
                     {
-                        SendTheMessageToRichTextBox(logMessage, rule, logEvent);
+                        SendTheMessageToRichTextBox(logMessage, rule, logEvent, autoScroll);
                     }
                     return true;
                 }
@@ -843,7 +840,7 @@ namespace NLog.Windows.Forms
             return Color.FromName(color);
         }
 
-        private void SendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
+        private void SendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent, bool autoScroll)
         {
             RichTextBox textBox = TargetRichTextBox;
 
@@ -940,7 +937,7 @@ namespace NLog.Windows.Forms
                 }
             }
 
-            if (AutoScroll)
+            if (autoScroll)
             {
                 ScrollToEnd(textBox);
             }
