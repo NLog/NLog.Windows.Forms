@@ -77,7 +77,8 @@ namespace NLog.Windows.Forms
         /// (after having <see cref="InitializeTarget"/> called), so such targets are not affected by this method.
         /// </remarks>
         /// <param name="form">a Form to check for RichTextBoxes</param>
-        public static void ReInitializeAllTextboxes(Form form)
+        /// <param name="scrollOnce">Scroll text box to the end only once. use this if you have performance issues when filling the textbox</param>
+        public static void ReInitializeAllTextboxes(Form form, bool scrollOnce = false)
         {
             InternalLogger.Info("Executing ReInitializeAllTextboxes for Form {0}", form);
             foreach (Target target in LogManager.Configuration.AllTargets)
@@ -94,7 +95,7 @@ namespace NLog.Windows.Forms
                             || textboxTarget.TargetRichTextBox != textboxControl
                         )
                         {
-                            textboxTarget.AttachToControl(form, textboxControl);
+                            textboxTarget.AttachToControl(form, textboxControl, scrollOnce);
                         }
                     }
                 }
@@ -554,7 +555,7 @@ namespace NLog.Windows.Forms
                 this.TargetRichTextBox.LinkClicked += TargetRichTextBox_LinkClicked;
             }
 
-            var autoScroll = scrollOnce || AutoScroll; 
+            var autoScroll = !scrollOnce && AutoScroll; 
 
             //OnReattach?
             switch (messageRetention)
