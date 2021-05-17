@@ -13,7 +13,7 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NLog.Schema" Version="4.7.9" />
+    <PackageReference Include="NLog.Schema" Version="4.7.10" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Data.DataSetExtensions" />
