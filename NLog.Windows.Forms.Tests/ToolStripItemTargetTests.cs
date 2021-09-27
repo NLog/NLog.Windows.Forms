@@ -33,29 +33,29 @@ namespace NLog.Windows.Forms.Tests
                 };
                 SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
-                logger.Fatal("Test");
-                Application.DoEvents();
-                Assert.Equal("Fatal NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
+                logger.Fatal("Test");   // Send log
+                Application.DoEvents(); // Do events so invoked method can run.
+                Assert.Equal("Fatal NLog.UnitTests.Targets.ToolStripItemTargetTests Test", getText(testForm,testItem)); // Test if method worked.
                 
                 logger.Error("Foo");
                 Application.DoEvents();
-                Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
+                Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", getText(testForm, testItem));
                 
                 logger.Warn("Bar");
                 Application.DoEvents();
-                Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
+                Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", getText(testForm, testItem));
                 
                 logger.Info("Test");
                 Application.DoEvents();
-                Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
+                Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", getText(testForm, testItem));
                 
                 logger.Debug("Foo");
                 Application.DoEvents();
-                Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
+                Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", getText(testForm, testItem));
                 
                 logger.Trace("Bar");
                 Application.DoEvents();
-                Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
+                Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", getText(testForm, testItem));
 
             }
             finally
@@ -66,6 +66,11 @@ namespace NLog.Windows.Forms.Tests
                 }
                 LogManager.Configuration = null;
             }
+        }
+
+        private string getText(Form testForm, ToolStripMenuItem testItem)
+        {
+            return (string)testForm.Invoke((Func<string>)(()=> testItem.Text));
         }
 
         [STAThread]
