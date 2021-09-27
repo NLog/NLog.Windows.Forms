@@ -29,6 +29,7 @@ namespace NLog.Windows.Forms
     [Target("ToolStripItem")]
     public sealed class ToolStripItemTarget : TargetWithLayout
     {
+        private IAsyncResult currentOperation;
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolStripItemTarget" /> class.
         /// </summary>
@@ -37,6 +38,15 @@ namespace NLog.Windows.Forms
         /// </remarks>
         public ToolStripItemTarget()
         {
+        }
+
+        /// <summary>
+        /// Determine if there are any pending invoked operations.
+        /// </summary>
+        /// <returns>True if there is a pending invoke operation.</returns>
+        public bool IsWaiting()
+        {
+            return currentOperation != null && !currentOperation.IsCompleted;
         }
 
         private delegate void DelSendTheMessageToFormControl(ToolStripItem control, string logMessage);
@@ -109,7 +119,8 @@ namespace NLog.Windows.Forms
 
             try
             {
-                control.BeginInvoke(new DelSendTheMessageToFormControl(SendTheMessageToFormControl), item, logMessage);
+                currentOperation = control.BeginInvoke(new DelSendTheMessageToFormControl(SendTheMessageToFormControl), item, logMessage);
+                
             }
             catch (Exception ex)
             {

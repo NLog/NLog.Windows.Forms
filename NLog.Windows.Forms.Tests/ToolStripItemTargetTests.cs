@@ -34,28 +34,34 @@ namespace NLog.Windows.Forms.Tests
                 SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
                 logger.Fatal("Test");   // Send log
-                Application.DoEvents(); // Do events so invoked method can run.
-                Assert.Equal("Fatal NLog.UnitTests.Targets.ToolStripItemTargetTests Test", getText(testForm,testItem)); // Test if method worked.
+                while (target.IsWaiting()) // Do events until the invoked method is completed.
+                    Application.DoEvents(); 
+                Assert.Equal("Fatal NLog.UnitTests.Targets.ToolStripItemTargetTests Test",testItem.Text); // Test if method worked.
                 
                 logger.Error("Foo");
-                Application.DoEvents();
-                Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", getText(testForm, testItem));
+                while (target.IsWaiting()) // Do events until the invoked method is completed.
+                    Application.DoEvents();
+                Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 
                 logger.Warn("Bar");
-                Application.DoEvents();
-                Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", getText(testForm, testItem));
+                while (target.IsWaiting()) // Do events until the invoked method is completed.
+                    Application.DoEvents();
+                Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
                 
                 logger.Info("Test");
-                Application.DoEvents();
-                Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", getText(testForm, testItem));
+                while (target.IsWaiting()) // Do events until the invoked method is completed.
+                    Application.DoEvents();
+                Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
                 
                 logger.Debug("Foo");
-                Application.DoEvents();
-                Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", getText(testForm, testItem));
+                while (target.IsWaiting()) // Do events until the invoked method is completed.
+                    Application.DoEvents();
+                Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 
                 logger.Trace("Bar");
-                Application.DoEvents();
-                Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", getText(testForm, testItem));
+                while (target.IsWaiting()) // Do events until the invoked method is completed.
+                    Application.DoEvents();
+                Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
 
             }
             finally
@@ -66,11 +72,6 @@ namespace NLog.Windows.Forms.Tests
                 }
                 LogManager.Configuration = null;
             }
-        }
-
-        private string getText(Form testForm, ToolStripMenuItem testItem)
-        {
-            return (string)testForm.Invoke((Func<string>)(()=> testItem.Text));
         }
 
         [STAThread]
