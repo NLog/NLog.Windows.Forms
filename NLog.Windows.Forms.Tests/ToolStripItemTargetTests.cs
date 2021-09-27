@@ -16,9 +16,10 @@ namespace NLog.Windows.Forms.Tests
         [Fact]
         public void SimpleToolStripItemTargetTest()
         {
+            Form testForm = null;
             try
             {
-                Form testForm = new Form();
+                testForm = new Form();
                 testForm.Name = "Form1";
 
 
@@ -44,20 +45,31 @@ namespace NLog.Windows.Forms.Tests
                 SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
                 logger.Fatal("Test");
-                Assert.Equal("FATAL NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
+                Application.DoEvents();
+                Assert.Equal("Fatal NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
                 logger.Error("Foo");
-                Assert.Equal("ERROR NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
+                Application.DoEvents();
+                Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 logger.Warn("Bar");
-                Assert.Equal("WARN NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
+                Application.DoEvents();
+                Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
                 logger.Info("Test");
-                Assert.Equal("INFO NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
+                Application.DoEvents();
+                Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
                 logger.Debug("Foo");
-                Assert.Equal("DEBUG NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
+                Application.DoEvents();
+                Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 logger.Trace("Bar");
+                Application.DoEvents();
                 Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
+
             }
             finally
             {
+                if (testForm != null)
+                {
+                    testForm.Dispose();
+                }
                 LogManager.Configuration = null;
             }
         }
