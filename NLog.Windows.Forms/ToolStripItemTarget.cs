@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using NLog.Common;
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 
 namespace NLog.Windows.Forms
@@ -45,20 +46,20 @@ namespace NLog.Windows.Forms
         /// </summary>
         /// <docgen category='Form Options' order='10' />
         [RequiredParameter]
-        public string ItemName { get; set; }
+        public Layout ItemName { get; set; }
 
         /// <summary>
         /// Gets or sets the name of ToolStrip that contains the ToolStripItem to which NLog will log write log text.
         /// </summary>
         /// <docgen category='Form Options' order='10' />
         [RequiredParameter]
-        public string ToolStripName { get; set; }
+        public Layout ToolStripName { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the Form on which the ToolStrip is located.
         /// </summary>
         /// <docgen category='Form Options' order='10' />
-        public string FormName { get; set; }
+        public Layout FormName { get; set; }
 
         /// <summary>
         /// Log message to item.
@@ -70,11 +71,6 @@ namespace NLog.Windows.Forms
         {
             string logMessage = Layout.Render(logEvent);
 
-            FindItemAndSendTheMessage(logMessage);
-        }
-
-        private void FindItemAndSendTheMessage(string logMessage)
-        {
             Form form = null;
 
             if (Form.ActiveForm != null)
@@ -82,9 +78,9 @@ namespace NLog.Windows.Forms
                 form = Form.ActiveForm;
             }
 
-            if (Application.OpenForms[FormName] != null)
+            if (Application.OpenForms[FormName.Render(logEvent)] != null)
             {
-                form = Application.OpenForms[FormName];
+                form = Application.OpenForms[FormName.Render(logEvent)];
             }
 
             if (form == null)
@@ -93,7 +89,7 @@ namespace NLog.Windows.Forms
                 return;
             }
 
-            Control control = FormHelper.FindControl(ToolStripName, form);
+            Control control = FormHelper.FindControl(ToolStripName.Render(logEvent), form);
 
             if (control == null || !(control is ToolStrip))
             {
@@ -103,9 +99,9 @@ namespace NLog.Windows.Forms
 
             ToolStrip toolStrip = control as ToolStrip;
 
-            ToolStripItem item = FormHelper.FindToolStripItem(ItemName, toolStrip.Items);
+            ToolStripItem item = FormHelper.FindToolStripItem(ItemName.Render(logEvent), toolStrip.Items);
 
-            if(item == null)
+            if (item == null)
             {
                 InternalLogger.Info("ToolStripItem {0} on ToolStrip {1} not found", ItemName, ToolStripName);
                 return;
@@ -124,9 +120,7 @@ namespace NLog.Windows.Forms
                     throw;
                 }
             }
-
         }
-
         private void SendTheMessageToFormControl(ToolStripItem item, string logMessage)
         {
             item.Text = logMessage;
