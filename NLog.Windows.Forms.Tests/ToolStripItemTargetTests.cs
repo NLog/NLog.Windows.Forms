@@ -17,19 +17,12 @@ namespace NLog.Windows.Forms.Tests
         public void SimpleToolStripItemTargetTest()
         {
             Form testForm = null;
+            ToolStripMenuItem testItem = null;
             try
             {
-                testForm = new Form();
-                testForm.Name = "Form1";
+                RunForm(out testForm,out testItem);
 
-
-                ToolStrip testMenuStrip = new ToolStrip();
-                testMenuStrip.Name = "ToolStrip1";
-                testForm.Controls.Add(testMenuStrip);
-
-                ToolStripMenuItem testItem = new ToolStripMenuItem();
-                testItem.Name = "Item1";
-                testMenuStrip.Items.Add(testItem);
+                Application.DoEvents();
 
                 ToolStripItemTarget target = new ToolStripItemTarget()
                 {
@@ -38,10 +31,6 @@ namespace NLog.Windows.Forms.Tests
                     ToolStripName = "ToolStrip1",
                     Layout = "${level} ${logger} ${message}"
                 };
-                testForm.Show();
-
-                Application.DoEvents();
-
                 SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
                 logger.Fatal("Test");
@@ -50,26 +39,21 @@ namespace NLog.Windows.Forms.Tests
                 
                 logger.Error("Foo");
                 Application.DoEvents();
-                Application.DoEvents();
                 Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 
                 logger.Warn("Bar");
-                Application.DoEvents();
                 Application.DoEvents();
                 Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
                 
                 logger.Info("Test");
                 Application.DoEvents();
-                Application.DoEvents();
                 Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
                 
                 logger.Debug("Foo");
                 Application.DoEvents();
-                Application.DoEvents();
                 Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 
                 logger.Trace("Bar");
-                Application.DoEvents();
                 Application.DoEvents();
                 Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
 
@@ -82,6 +66,23 @@ namespace NLog.Windows.Forms.Tests
                 }
                 LogManager.Configuration = null;
             }
+        }
+
+        [STAThread]
+        private void RunForm(out Form testForm,out ToolStripMenuItem testItem)
+        {
+            testForm = new Form();
+            testForm.Name = "Form1";
+
+            ToolStrip testMenuStrip = new ToolStrip();
+            testMenuStrip.Name = "ToolStrip1";
+            testForm.Controls.Add(testMenuStrip);
+
+            testItem = new ToolStripMenuItem();
+            testItem.Name = "Item1";
+            testMenuStrip.Items.Add(testItem);
+
+            testForm.Show();
         }
     }
 }
