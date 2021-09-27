@@ -55,17 +55,21 @@ namespace NLog.Windows.Forms.Tests
                 
                 logger.Warn("Bar");
                 Application.DoEvents();
+                Application.DoEvents();
                 Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
                 
                 logger.Info("Test");
+                Application.DoEvents();
                 Application.DoEvents();
                 Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
                 
                 logger.Debug("Foo");
                 Application.DoEvents();
+                Application.DoEvents();
                 Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 
                 logger.Trace("Bar");
+                Application.DoEvents();
                 Application.DoEvents();
                 Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
 
