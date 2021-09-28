@@ -18,10 +18,20 @@ namespace NLog.Windows.Forms.Tests
         public void SimpleToolStripItemTargetTest()
         {
             Form testForm = null;
-            ToolStripMenuItem testItem = null;
             try
             {
-                RunForm(out testForm,out testItem);
+                testForm = new Form();
+                testForm.Name = "Form1";
+
+                ToolStrip testMenuStrip = new ToolStrip();
+                testMenuStrip.Name = "ToolStrip1";
+                testForm.Controls.Add(testMenuStrip);
+
+                ToolStripMenuItem testItem = new ToolStripMenuItem();
+                testItem.Name = "Item1";
+                testMenuStrip.Items.Add(testItem);
+
+                testForm.Show();
 
                 Application.DoEvents();
 
@@ -67,28 +77,6 @@ namespace NLog.Windows.Forms.Tests
                 }
                 LogManager.Configuration = null;
             }
-        }
-
-        private string getText(Form testForm, ToolStripMenuItem testItem)
-        {
-            return (string)testForm.Invoke((Func<string>)(()=> testItem.Text));
-        }
-
-        [STAThread]
-        private void RunForm(out Form testForm,out ToolStripMenuItem testItem)
-        {
-            testForm = new Form();
-            testForm.Name = "Form1";
-
-            ToolStrip testMenuStrip = new ToolStrip();
-            testMenuStrip.Name = "ToolStrip1";
-            testForm.Controls.Add(testMenuStrip);
-
-            testItem = new ToolStripMenuItem();
-            testItem.Name = "Item1";
-            testMenuStrip.Items.Add(testItem);
-
-            testForm.Show();
         }
     }
 }
