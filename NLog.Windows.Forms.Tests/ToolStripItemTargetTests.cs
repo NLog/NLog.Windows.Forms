@@ -9,6 +9,7 @@ using Xunit;
 
 namespace NLog.Windows.Forms.Tests
 {
+    [Collection("NLog.Windows.Forms Tests")]
     public class ToolStripItemTargetTests
     {
         private Logger logger = LogManager.GetLogger("NLog.UnitTests.Targets.ToolStripItemTargetTests");
@@ -34,34 +35,28 @@ namespace NLog.Windows.Forms.Tests
                 SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
                 logger.Fatal("Test");   // Send log
-                while (target.IsWaiting()) // Do events until the invoked method is completed.
-                    Application.DoEvents(); 
-                Assert.Equal("Fatal NLog.UnitTests.Targets.ToolStripItemTargetTests Test", getText(testForm, testItem)); // Test if method worked.
+                Application.DoEvents(); // Do events to allow the invoked method is completed.
+                Assert.Equal("Fatal NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text); // Test if method worked.
                 
                 logger.Error("Foo");
-                while (target.IsWaiting()) // Do events until the invoked method is completed.
-                    Application.DoEvents();
-                Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", getText(testForm, testItem));
+                Application.DoEvents();
+                Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 
                 logger.Warn("Bar");
-                while (target.IsWaiting()) // Do events until the invoked method is completed.
-                    Application.DoEvents();
-                Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", getText(testForm, testItem));
+                Application.DoEvents();
+                Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
                 
                 logger.Info("Test");
-                while (target.IsWaiting()) // Do events until the invoked method is completed.
-                    Application.DoEvents();
-                Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", getText(testForm, testItem));
+                Application.DoEvents();
+                Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
                 
                 logger.Debug("Foo");
-                while (target.IsWaiting()) // Do events until the invoked method is completed.
-                    Application.DoEvents();
-                Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", getText(testForm, testItem));
+                Application.DoEvents();
+                Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
                 
                 logger.Trace("Bar");
-                while (target.IsWaiting()) // Do events until the invoked method is completed.
-                    Application.DoEvents(); 
-                Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", getText(testForm, testItem));
+                Application.DoEvents();
+                Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
 
             }
             finally

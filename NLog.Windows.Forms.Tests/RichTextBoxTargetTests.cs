@@ -12,6 +12,7 @@ using System.Threading;
 
 namespace NLog.Windows.Forms.Tests
 {
+    [Collection("NLog.Windows.Forms Tests")]
     public class RichTextBoxTargetTests
     {
         private Logger logger = LogManager.GetLogger("NLog.UnitTests.Targets.RichTextBoxTargetTests");
