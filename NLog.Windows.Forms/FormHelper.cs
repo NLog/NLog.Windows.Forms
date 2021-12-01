@@ -56,6 +56,34 @@ namespace NLog.Windows.Forms
         }
 
         /// <summary>
+        /// Finds item within searchCollection it's contents drop down items.
+        /// </summary>
+        /// <param name="name">Name of the ToolStripItem</param>
+        /// <param name="searchCollection">Collection of ToolStripItem we are looking for the item in.</param>
+        /// <returns>A value of null of no item has been found.</returns>
+        internal static ToolStripItem FindToolStripItem(string name, ToolStripItemCollection searchCollection)
+        {
+            foreach (ToolStripItem childItem in searchCollection)
+            {
+                if(childItem.Name == name)
+                {
+                    return childItem;
+                }
+                if(childItem is ToolStripDropDownItem)
+                {
+                    ToolStripDropDownItem childDropDown = childItem as ToolStripDropDownItem;
+                    ToolStripItem foundItem = FindToolStripItem(name, childDropDown.DropDownItems);
+
+                    if (foundItem != null)
+                    {
+                        return foundItem;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Finds control of specified type embended on searchControl.
         /// </summary>
         /// <typeparam name="TControl">The type of the control.</typeparam>
