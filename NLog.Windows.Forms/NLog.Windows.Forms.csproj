@@ -36,7 +36,7 @@ Added support for .NET Core 3.1 and .NET 5 (#42) (@weltkante, @304NotModified)
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.7.11" />
+    <PackageReference Include="NLog" Version="4.7.12" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
