@@ -15,7 +15,8 @@ namespace RichTextBox2
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            // Programmatic configuration that is equivalent to
+            // the "toolstrip" target configuration in NLog.config
             ToolStripItemTarget target = new ToolStripItemTarget();
             target.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
             target.ToolStripName = "statusStrip1";

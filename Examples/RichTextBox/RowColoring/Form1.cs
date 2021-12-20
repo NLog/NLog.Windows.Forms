@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using NLog;
-using NLog.Targets;
+using NLog.Windows.Forms;
 
 namespace RichTextBox2
 {
@@ -17,6 +17,8 @@ namespace RichTextBox2
         private void Form1_Load(object sender, EventArgs e)
         {
 
+            // Programmatic configuration that is equivalent to
+            // the "richTextBox" target configuration in NLog.config
             RichTextBoxTarget target = new RichTextBoxTarget();
             target.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
             target.ControlName = "richTextBox1";
