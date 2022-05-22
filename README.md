@@ -3,10 +3,9 @@
 [![AppVeyor](https://img.shields.io/appveyor/ci/nlog/nlog-windows-forms/master.svg)](https://ci.appveyor.com/project/nlog/nlog-windows-forms/branch/master)
 [![codecov.io](https://codecov.io/github/NLog/NLog.Windows.Forms/coverage.svg?branch=master)](https://codecov.io/github/NLog/NLog.Windows.Forms?branch=master)
 
-This package is an extension to [NLog](https://github.com/NLog/NLog/). 
+This package is an extension to [NLog](https://github.com/NLog/NLog/).
 
-This package contains 
-targets specific for Windows.Forms
+This package contains targets specific for Windows.Forms
  
 ### Targets
 * [RichTextBoxTarget](https://github.com/NLog/NLog.Windows.Forms/wiki/RichTextBoxTarget)
@@ -16,10 +15,15 @@ targets specific for Windows.Forms
 
 See [list](https://nlog-project.org/config/?tab=targets&search=package:nlog.windows.forms)
 
-
 ## How to use
-When installing with Nuget, no additional configuration is needed.
+Install the [NLog.Windows.Forms](https://www.nuget.org/packages/NLog.Windows.Forms/) nuget-package and [register the extension-assembly](https://github.com/NLog/NLog/wiki/Register-your-custom-component):
 
+```xml
+  <!-- enable NLog.Windows.Forms targets and layoutrenderers -->
+  <extensions>
+    <add assembly="NLog.Windows.Forms"/>
+  </extensions>
+```
 
 ## License
 BSD
