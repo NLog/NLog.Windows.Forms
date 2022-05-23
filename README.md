@@ -16,7 +16,7 @@ This package contains targets specific for Windows.Forms
 See [list](https://nlog-project.org/config/?tab=targets&search=package:nlog.windows.forms)
 
 ## How to use
-Install the [NLog.Windows.Forms](https://www.nuget.org/packages/NLog.Windows.Forms/) nuget-package and [register the extension-assembly](https://github.com/NLog/NLog/wiki/Register-your-custom-component):
+Install the [NLog.Windows.Forms](https://www.nuget.org/packages/NLog.Windows.Forms/) NuGet package and [register the extension-assembly](https://github.com/NLog/NLog/wiki/Register-your-custom-component):
 
 ```xml
   <!-- enable NLog.Windows.Forms targets and layoutrenderers -->
