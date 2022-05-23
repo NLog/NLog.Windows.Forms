@@ -12,7 +12,13 @@ namespace NLog.Windows.Forms.Tests
     [Collection("NLog.Windows.Forms Tests")]
     public class ToolStripItemTargetTests
     {
-        private Logger logger = LogManager.GetLogger("NLog.UnitTests.Targets.ToolStripItemTargetTests");
+        private readonly Logger logger = LogManager.GetLogger("NLog.UnitTests.Targets.ToolStripItemTargetTests");
+
+        public ToolStripItemTargetTests()
+        {
+            LogManager.ThrowExceptions = true;
+            LogManager.Setup().SetupExtensions(ext => ext.RegisterAssembly(typeof(ToolStripItemTarget).Assembly));
+        }
 
         [Fact]
         public void SimpleToolStripItemTargetTest()

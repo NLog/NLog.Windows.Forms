@@ -17,6 +17,12 @@ namespace NLog.Windows.Forms.Tests
     {
         private Logger logger = LogManager.GetLogger("NLog.UnitTests.Targets.RichTextBoxTargetTests");
 
+        public RichTextBoxTargetTests()
+        {
+            LogManager.ThrowExceptions = true;
+            LogManager.Setup().SetupExtensions(ext => ext.RegisterAssembly(typeof(RichTextBoxTarget).Assembly));
+        }
+
         [Fact]
         public void SimpleRichTextBoxTargetTest()
         {
@@ -389,7 +395,6 @@ namespace NLog.Windows.Forms.Tests
         [Fact]
         public void ActiveFormTest()
         {
-            var config = new LoggingConfiguration();
             var target = new RichTextBoxTarget()
             {
                 FormName = "MyForm1",
@@ -400,9 +405,6 @@ namespace NLog.Windows.Forms.Tests
                 Width = 300,
                 Height = 200,
             };
-            config.AddTarget("target", target);
-            config.LoggingRules.Add(new LoggingRule("*", target));
-            LogManager.ThrowExceptions = true;
 
             using (Form form = new Form())
             {
@@ -415,7 +417,11 @@ namespace NLog.Windows.Forms.Tests
                 form.Show();
                 form.Activate();
 
-                new LogFactory(config);
+                var logFactory = new LogFactory().Setup().LoadConfiguration(builder =>
+                {
+                    builder.ForLogger().WriteTo(target);
+                }).LogFactory;
+
                 Assert.Same(form, target.TargetForm);
                 Assert.Same(rtb, target.TargetRichTextBox);
             }
@@ -424,7 +430,6 @@ namespace NLog.Windows.Forms.Tests
         [Fact]
         public void ActiveFormTest2()
         {
-            var config = new LoggingConfiguration();
             RichTextBoxTarget target = new RichTextBoxTarget()
             {
                 FormName = "MyForm2",
@@ -435,9 +440,6 @@ namespace NLog.Windows.Forms.Tests
                 Width = 300,
                 Height = 200,
             };
-            config.AddTarget("target", target);
-            config.LoggingRules.Add(new LoggingRule("*", target));
-            LogManager.ThrowExceptions = true;
 
             using (Form form = new Form())
             {
@@ -459,7 +461,11 @@ namespace NLog.Windows.Forms.Tests
                     form1.Show();
                     form1.Activate();
 
-                    new LogFactory(config);
+                    var logFactory = new LogFactory().Setup().LoadConfiguration(builder =>
+                    {
+                        builder.ForLogger().WriteTo(target);
+                    }).LogFactory;
+
                     Assert.Same(form1, target.TargetForm);
                     Assert.Same(rtb2, target.TargetRichTextBox);
                 }
@@ -469,7 +475,6 @@ namespace NLog.Windows.Forms.Tests
         [Fact]
         public void ActiveFormNegativeTest1()
         {
-            var config = new LoggingConfiguration();
             var target = new RichTextBoxTarget()
             {
                 FormName = "MyForm1",
@@ -480,10 +485,6 @@ namespace NLog.Windows.Forms.Tests
                 Width = 300,
                 Height = 200,
             };
-            config.AddTarget("target", target);
-            config.LoggingRules.Add(new LoggingRule("*", target));
-            LogManager.ThrowExceptions = true;
-
             using (var form = new Form())
             {
                 form.Name = "MyForm1";
@@ -492,7 +493,11 @@ namespace NLog.Windows.Forms.Tests
                 form.Show();
                 try
                 {
-                    new LogFactory(config);
+                    var logFactory = new LogFactory().Setup().LoadConfiguration(builder =>
+                    {
+                        builder.ForLogger().WriteTo(target);
+                    }).LogFactory;
+
                     Assert.True(false, "Expected exception.");
                 }
                 catch (NLogConfigurationException ex)
@@ -505,16 +510,12 @@ namespace NLog.Windows.Forms.Tests
         [Fact]
         public void ActiveFormNegativeTest2()
         {
-            var config = new LoggingConfiguration();
             RichTextBoxTarget target = new RichTextBoxTarget()
             {
                 FormName = "MyForm1",
                 UseDefaultRowColoringRules = true,
                 Layout = "${level} ${logger} ${message}",
             };
-            config.AddTarget("target", target);
-            config.LoggingRules.Add(new LoggingRule("*", target));
-            LogManager.ThrowExceptions = true;
 
             using (Form form = new Form())
             {
@@ -524,7 +525,10 @@ namespace NLog.Windows.Forms.Tests
 
                 try
                 {
-                    new LogFactory(config);
+                    var logFactory = new LogFactory().Setup().LoadConfiguration(builder =>
+                    {
+                        builder.ForLogger().WriteTo(target);
+                    }).LogFactory;
                     Assert.True(false, "Expected exception.");
                 }
                 catch (NLogConfigurationException ex)
@@ -547,7 +551,6 @@ namespace NLog.Windows.Forms.Tests
                 AllowAccessoryFormCreation = false
                 //default MessageRetention = RichTextBoxTargetMessageRetentionStrategy.None
             };
-            LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
             logger.Trace("Accessory Form");
@@ -602,7 +605,6 @@ namespace NLog.Windows.Forms.Tests
                 AllowAccessoryFormCreation = true,
                 //default MessageRetention = RichTextBoxTargetMessageRetentionStrategy.None
             };
-            LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
             logger.Trace("Accessory Form");
@@ -665,7 +667,6 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
             };
-            LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
             logger.Trace("Accessory Form");
@@ -722,7 +723,6 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
             };
-            LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
             logger.Trace("Accessory Form");
@@ -786,7 +786,6 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
             };
-            LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
             logger.Trace("Accessory Form");
@@ -856,7 +855,6 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
             };
-            LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
             logger.Trace("Accessory Form");
@@ -938,7 +936,6 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
             };
-            LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
             logger.Trace("No Control");
@@ -984,7 +981,6 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
             };
-            LogManager.ThrowExceptions = true;
             SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
 
             logger.Trace("No Control");
