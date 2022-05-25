@@ -879,13 +879,13 @@ namespace NLog.Windows.Forms
         {
             RichTextBox textBox = TargetRichTextBox;
 
-            int startIndex = textBox.Text.Length;
+            int startIndex = textBox.TextLength;
             textBox.SelectionStart = startIndex;
             textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor, textBox.BackColor);
             textBox.SelectionColor = GetColorFromString(rule.FontColor, textBox.ForeColor);
             textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
             textBox.AppendText(logMessage + "\n");
-            textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
+            textBox.SelectionLength = textBox.TextLength - textBox.SelectionStart;
 
             // find word to color
             foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
@@ -917,7 +917,7 @@ namespace NLog.Windows.Forms
                     bool linksAdded = false;
 
                     textBox.SelectionStart = startIndex;
-                    textBox.SelectionLength = textBox.Text.Length - textBox.SelectionStart;
+                    textBox.SelectionLength = textBox.TextLength - textBox.SelectionStart;
                     string addedText = textBox.SelectedText;
                     MatchCollection matches = linkAddRegex.Matches(addedText); //only access regex after checking SupportLinks, as it assures the initialization
                     for (int i = matches.Count - 1; i >= 0; --i)    //backwards order, so the string positions are not affected

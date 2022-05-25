@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using NLog;
 using NLog.Windows.Forms;
-using System.Globalization;
 
 namespace TestApplication
 {
@@ -22,17 +15,19 @@ namespace TestApplication
 
             LogManager.Setup().SetupExtensions(ext => ext.RegisterAssembly(typeof(RichTextBoxTarget).Assembly));
 
-            NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-            Logger.Info("Init");
-            
+            Logger logger = LogManager.GetCurrentClassLogger();
+            var file = Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName);
+            logger.Info("Init {Application}", file);
+
             RichTextBoxTarget.ReInitializeAllTextboxes(this);
             
-            Logger.Log(LogLevel.Trace, "Log Trace");
-            Logger.Log(LogLevel.Debug, "Log Debug");
-            Logger.Log(LogLevel.Info, "Log Info");
-            Logger.Log(LogLevel.Warn, "Log Warn");
-            Logger.Log(LogLevel.Error, "Log Error");
-            Logger.Log(LogLevel.Fatal, "Log Fatal");
+
+            logger.Log(LogLevel.Trace, "Log Trace");
+            logger.Log(LogLevel.Debug, "Log Debug");
+            logger.Log(LogLevel.Info, "Log Info");
+            logger.Log(LogLevel.Warn, "Log Warn");
+            logger.Log(LogLevel.Error, "Log Error");
+            logger.Log(LogLevel.Fatal, "Log Fatal");
 
             var thread = new Thread(() =>
             {
@@ -48,12 +43,12 @@ namespace TestApplication
                     {
                         theEvent.Properties["ShowLink2"] = "Another link";
                     }
-                    Logger.Log(theEvent);
+                    logger.Log(theEvent);
                     Thread.Sleep(200);
                 }
-                Logger.Info("Done");
+                logger.Info("Done");
             });
-            Logger.Info("start thread");
+            logger.Info("start thread");
             thread.Start();
 
         }

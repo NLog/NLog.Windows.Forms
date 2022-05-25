@@ -19,8 +19,7 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' or  '$(TargetFramework)' == 'net5.0-windows' ">
-    <!-- Links aren't support for .NET Core 3.x, but does work for .NET 5 and .NET Framework-->
+  <PropertyGroup>
     <DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
