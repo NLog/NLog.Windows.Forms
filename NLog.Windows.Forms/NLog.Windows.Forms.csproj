@@ -29,10 +29,6 @@
 		</PackageReleaseNotes>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<None Remove="NLog.Windows.Forms.csproj.DotSettings" />
 	</ItemGroup>

@@ -1040,8 +1040,6 @@ namespace NLog.Windows.Forms.Tests
             }
         }
 
-#if LINKS_SUPPORTED
-
         [Fact]
         public void LinkLayoutTestDisabledLinks()
         {
@@ -1266,8 +1264,6 @@ namespace NLog.Windows.Forms.Tests
             Assert.True("link" == linkTextFromHandler);
             Assert.True("Test" == logEventFromHandler.Message);
         }
-#endif
-
 
         #region mouse click smulation
         //http://stackoverflow.com/a/8273118/376066

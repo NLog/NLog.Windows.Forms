@@ -365,7 +365,6 @@ namespace NLog.Windows.Forms.Targets
         private volatile Queue<MessageInfo> messageQueue;
 
 
-#if LINKS_SUPPORTED
 
         /// <summary>
         /// If set to true, using "rtb-link" renderer (<see cref="RichTextBoxLinkLayoutRenderer"/>) would create clickable links in the control.
@@ -404,8 +403,6 @@ namespace NLog.Windows.Forms.Targets
             }
         }
 
-#endif
-#if LINKS_SUPPORTED
         /// <summary>
         /// Type of delegate for <see cref="LinkClicked"/> event.
         /// </summary>
@@ -478,7 +475,6 @@ namespace NLog.Windows.Forms.Targets
         /// Lazily initialized in <see cref="SupportLinks"/>.set(true). Assure checking <see cref="SupportLinks"/> before accessing the field
         /// </summary>
         private static Regex linkRemoveRtfRegex;
-#endif
 
         /// <summary>
         /// Initializes the target. Can be used by inheriting classes
@@ -611,15 +607,11 @@ namespace NLog.Windows.Forms.Targets
             this.TargetForm = form;
             this.TargetRichTextBox = textboxControl;
 
-#if LINKS_SUPPORTED
-
             if (this.SupportLinks)
             {
                 this.TargetRichTextBox.DetectUrls = false;
                 this.TargetRichTextBox.LinkClicked += TargetRichTextBox_LinkClicked;
             }
-
-#endif
 
             //OnReattach?
             switch (messageRetention)
@@ -653,8 +645,6 @@ namespace NLog.Windows.Forms.Targets
                     break;
             }
         }
-
-#if LINKS_SUPPORTED
 
         /// <summary>
         /// Attached to RTB-control's LinkClicked event to convert link text to logEvent
@@ -697,8 +687,6 @@ namespace NLog.Windows.Forms.Targets
                 linkClickEvent(this, linkText, logEvent);
             }
         }
-
-#endif
 
         /// <summary>
         /// if <see cref="CreatedForm"/> is true, then destroys created form. Resets <see cref="CreatedForm"/>, <see cref="TargetForm"/> and <see cref="TargetRichTextBox"/> to default values
@@ -902,8 +890,6 @@ namespace NLog.Windows.Forms.Targets
                 }
             }
 
-#if LINKS_SUPPORTED
-
             if (SupportLinks)
             {
                 object linkInfoObj;
@@ -940,9 +926,6 @@ namespace NLog.Windows.Forms.Targets
                 }
             }
 
-#endif
-
-
             //remove some lines if there above the max
             if (MaxLines > 0)
             {
@@ -957,7 +940,6 @@ namespace NLog.Windows.Forms.Targets
                     {
                         textBox.SelectionStart = 0;
                         textBox.SelectionLength = textBox.GetFirstCharIndexFromLine(tooManyLines);
-#if LINKS_SUPPORTED
                         if (SupportLinks)
                         {
                             string selectedRtf = textBox.SelectedRtf;
@@ -974,7 +956,6 @@ namespace NLog.Windows.Forms.Targets
                                 }
                             }
                         }
-#endif
                         textBox.SelectedRtf = "{\\rtf1\\ansi}";
                     }
                 }
