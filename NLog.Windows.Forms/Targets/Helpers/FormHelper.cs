@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace NLog.Windows.Forms
+namespace NLog.Windows.Forms.Targets
 {
     /// <summary>
     /// Form helper methods.
@@ -40,7 +40,7 @@ namespace NLog.Windows.Forms
         {
             if (searchControl.Name == name)
             {
-                return searchControl;
+                return searchControl;    
             }
 
             foreach (Control childControl in searchControl.Controls)

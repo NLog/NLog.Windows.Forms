@@ -1,10 +1,9 @@
-﻿using NLog;
+﻿using System.ComponentModel;
+using System.Drawing;
 using NLog.Conditions;
 using NLog.Config;
-using System.ComponentModel;
-using System.Drawing;
 
-namespace NLog.Windows.Forms
+namespace NLog.Windows.Forms.Targets
 {
     /// <summary>
     /// The row-coloring condition.

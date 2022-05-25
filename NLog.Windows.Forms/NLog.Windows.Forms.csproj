@@ -26,13 +26,16 @@
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
 
     <PackageReleaseNotes>
-Fixed obsolete warning in MessageBoxTarget that blocks NLog 5
     </PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="NLog.Windows.Forms.csproj.DotSettings" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="5.0.0" />

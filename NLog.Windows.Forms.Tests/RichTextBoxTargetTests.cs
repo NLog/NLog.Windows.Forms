@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System;
 using System.Threading.Tasks;
 using System.Threading;
+using NLog.Windows.Forms.Targets;
 
 namespace NLog.Windows.Forms.Tests
 {

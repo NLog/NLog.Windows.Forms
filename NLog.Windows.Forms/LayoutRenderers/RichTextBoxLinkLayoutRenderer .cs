@@ -6,8 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using NLog.Windows.Forms.Targets;
 
-namespace NLog.Windows.Forms
+namespace NLog.Windows.Forms.LayoutRenderers
 {
 #if LINKS_SUPPORTED
 
@@ -15,7 +16,7 @@ namespace NLog.Windows.Forms
     /// Strings rendered with this rendrer would convert to links in the control. <see cref="RichTextBoxTarget.SupportLinks"/>
     /// </summary>
     /// <remarks>
-    /// Internally this renderer replaces the rendered text with a GUID and stores the info in <see cref="LogEventInfo.Properties"/> by <see cref="RichTextBoxLinkLayoutRenderer.LinkInfo.PropertyName"/> as a key
+    /// Internally this renderer replaces the rendered text with a GUID and stores the info in <see cref="LogEventInfo.Properties"/> by <see cref="LinkInfo.PropertyName"/> as a key
     /// Actual rendering is done in <see cref="RichTextBoxTarget.SendTheMessageToRichTextBox"/>
     /// </remarks>
     [LayoutRenderer("rtb-link")]
@@ -34,8 +35,8 @@ namespace NLog.Windows.Forms
         /// <param name="logEvent"></param>
         protected override void Append(StringBuilder builder, LogEventInfo logEvent)
         {
-            string msg = this.Inner.Render(logEvent);
-            if (String.IsNullOrEmpty(msg))
+            string msg = Inner.Render(logEvent);
+            if (string.IsNullOrEmpty(msg))
             {
                 return;
             }

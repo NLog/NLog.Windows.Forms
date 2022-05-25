@@ -5,7 +5,7 @@ using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 
-namespace NLog.Windows.Forms
+namespace NLog.Windows.Forms.Targets
 {
     /// <summary>
     /// Logs text to Windows.Forms.Control.Text property control of specified Name.

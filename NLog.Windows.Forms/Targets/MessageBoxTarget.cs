@@ -6,7 +6,7 @@ using NLog.Common;
 using NLog.Layouts;
 using NLog.Targets;
 
-namespace NLog.Windows.Forms
+namespace NLog.Windows.Forms.Targets
 {
     /// <summary>
     /// Pops up log messages as message boxes.
@@ -42,7 +42,7 @@ namespace NLog.Windows.Forms
         /// </remarks>
         public MessageBoxTarget()
         {
-            this.Caption = "NLog";
+            Caption = "NLog";
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace NLog.Windows.Forms
         {
             try
             {
-                MessageBox.Show(RenderLogEvent(this.Layout, logEvent), RenderLogEvent(this.Caption, logEvent));
+                MessageBox.Show(RenderLogEvent(Layout, logEvent), RenderLogEvent(Caption, logEvent));
             }
             catch (Exception ex)
             {
@@ -77,7 +77,7 @@ namespace NLog.Windows.Forms
                     throw;
                 }
             }
-       
+
         }
 
         /// <summary>
@@ -98,11 +98,11 @@ namespace NLog.Windows.Forms
             var lastLogEvent = logEvents[logEvents.Count - 1];
             foreach (var ev in logEvents)
             {
-                sb.Append(RenderLogEvent(this.Layout, ev.LogEvent));
+                sb.Append(RenderLogEvent(Layout, ev.LogEvent));
                 sb.Append("\n");
             }
 
-            MessageBox.Show(sb.ToString(), RenderLogEvent(this.Caption, lastLogEvent.LogEvent));
+            MessageBox.Show(sb.ToString(), RenderLogEvent(Caption, lastLogEvent.LogEvent));
 
             for (int i = 0; i < logEvents.Count; ++i)
             {

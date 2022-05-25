@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NLog.Windows.Forms.Targets;
 using Xunit;
 
 namespace NLog.Windows.Forms.Tests
