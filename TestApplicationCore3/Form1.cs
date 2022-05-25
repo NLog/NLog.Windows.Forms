@@ -12,6 +12,7 @@ namespace TestApplicationCore3
         public Form1()
         {
             InitializeComponent();
+            LogManager.Setup().SetupExtensions(ext => ext.RegisterAssembly(typeof(RichTextBoxTarget).Assembly));
 
             NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
             Logger.Info("Init");

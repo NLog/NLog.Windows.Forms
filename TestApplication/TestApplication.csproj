@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net462</TargetFramework>
     <AssemblyTitle>TestApplication</AssemblyTitle>
     <Product>TestApplication</Product>
     <OutputPath>bin\$(Configuration)\</OutputPath>
