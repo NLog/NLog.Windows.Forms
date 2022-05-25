@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="..\TestApplication.Shared\Form1.cs" Link="Form1.cs" />
+		<Compile Include="..\TestApplication.Shared\Form1.Designer.cs" Link="Form1.Designer.cs" />
+		<Compile Include="..\TestApplication.Shared\Program.cs" Link="Program.cs" />
+		<EmbeddedResource Include="..\TestApplication.Shared\Form1.resx" Link="Form1.resx" />
+		<None Include="..\TestApplication.Shared\NLog.xsd" Link="NLog.xsd" />
+		<None Include="..\TestApplication.Shared\nlog.config" Link="nlog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<ProjectReference Include="..\NLog.Windows.Forms\NLog.Windows.Forms.csproj" />
+	</ItemGroup>
+
+</Project>
