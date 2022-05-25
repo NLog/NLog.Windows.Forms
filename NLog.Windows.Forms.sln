@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplicationNet5", "Test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Applications", "Test Applications", "{6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Shared", "TestApplication.Shared\TestApplication.Shared.csproj", "{CA02182B-27A3-485F-969F-3D3EE7720992}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Shared", "TestApplication.Shared\TestApplication.Shared.csproj", "{CA02182B-27A3-485F-969F-3D3EE7720992}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplicationNet6", "TestApplicationNet6\TestApplicationNet6.csproj", "{47AB6DA7-9F2C-44B6-86A0-EA9EFCD3566C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{CA02182B-27A3-485F-969F-3D3EE7720992}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA02182B-27A3-485F-969F-3D3EE7720992}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA02182B-27A3-485F-969F-3D3EE7720992}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47AB6DA7-9F2C-44B6-86A0-EA9EFCD3566C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47AB6DA7-9F2C-44B6-86A0-EA9EFCD3566C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47AB6DA7-9F2C-44B6-86A0-EA9EFCD3566C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47AB6DA7-9F2C-44B6-86A0-EA9EFCD3566C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,6 +62,7 @@ Global
 		{9FAC81DA-0137-47E9-957A-D8A9A5215338} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
 		{134980CC-0226-42B1-B02F-A9C81AAB0A3D} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
 		{CA02182B-27A3-485F-969F-3D3EE7720992} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
+		{47AB6DA7-9F2C-44B6-86A0-EA9EFCD3566C} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DC4C500-52F1-4D06-863D-209D713D03ED}
