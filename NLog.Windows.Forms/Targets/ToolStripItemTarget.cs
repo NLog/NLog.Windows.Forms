@@ -1,12 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Windows.Forms;
 using NLog.Common;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
 
-namespace NLog.Windows.Forms
+namespace NLog.Windows.Forms.Targets
 {
     /// <summary>
     /// Logs text to Windows.Forms.ToolStripItem.Text property control of specified Name.

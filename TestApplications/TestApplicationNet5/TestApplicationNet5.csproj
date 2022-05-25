@@ -15,7 +15,7 @@
 		<None Include="..\TestApplication.Shared\nlog.config" Link="nlog.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<ProjectReference Include="..\NLog.Windows.Forms\NLog.Windows.Forms.csproj" />
+		<ProjectReference Include="..\..\NLog.Windows.Forms\NLog.Windows.Forms.csproj" />
 	</ItemGroup>
 
 </Project>

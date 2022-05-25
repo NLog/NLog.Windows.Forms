@@ -1,9 +1,9 @@
-﻿using NLog.Config;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using NLog.Config;
 
-namespace NLog.Windows.Forms
+namespace NLog.Windows.Forms.Targets
 {
     /// <summary>
     /// Highlighting rule for Win32 colorful console.
