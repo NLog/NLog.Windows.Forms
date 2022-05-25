@@ -1,46 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp3.1;net5.0-windows</TargetFrameworks>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <AssemblyTitle>NLog.Windows.Forms.Tests</AssemblyTitle>
-    <Company>Microsoft</Company>
-    <Product>NLog.Windows.Forms.Tests</Product>
-    <Copyright>Copyright © Jaroslaw Kowalski, Kim Christensen, Julian Verdurmen</Copyright>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.extensibility.execution" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Data.DataSetExtensions" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="NLog.snk" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NLog.Windows.Forms\NLog.Windows.Forms.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net452;netcoreapp3.1;net5.0-windows</TargetFrameworks>
+		<SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+		<AssemblyTitle>NLog.Windows.Forms.Tests</AssemblyTitle>
+		<Company>Microsoft</Company>
+		<Product>NLog.Windows.Forms.Tests</Product>
+		<Copyright>Copyright © Jaroslaw Kowalski, Kim Christensen, Julian Verdurmen</Copyright>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugType>full</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DebugType>pdbonly</DebugType>
+	</PropertyGroup>
+	<PropertyGroup>
+		<SignAssembly>true</SignAssembly>
+	</PropertyGroup>
+	<PropertyGroup>
+		<AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+	<PropertyGroup>
+		<DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="xunit" Version="2.4.1" />
+		<PackageReference Include="xunit.extensibility.execution" Version="2.4.1" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net452'">
+		<Reference Include="System.Windows.Forms" />
+		<Reference Include="System.Data.DataSetExtensions" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="NLog.snk" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\NLog.Windows.Forms\NLog.Windows.Forms.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+	</ItemGroup>
 </Project>
