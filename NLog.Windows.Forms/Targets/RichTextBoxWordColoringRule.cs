@@ -61,7 +61,7 @@ namespace NLog.Windows.Forms.Targets
         {
                 if (this.compiledRegex == null)
                 {
-                    string pattern = this.Regex.Render(logEvent);
+                    string pattern = this.Regex == null? null: this.Regex.Render(logEvent);
                     if (pattern == null && this.Text != null)
                     {
                         pattern = System.Text.RegularExpressions.Regex.Escape(this.Text.Render(logEvent));
@@ -84,7 +84,7 @@ namespace NLog.Windows.Forms.Targets
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
         [DefaultValue("Empty")]
-        public string FontColor { get; set; }
+        public Layout FontColor { get; set; }
 
         /// <summary>
         /// Gets or sets the background color.
@@ -93,7 +93,7 @@ namespace NLog.Windows.Forms.Targets
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
         [DefaultValue("Empty")]
-        public string BackgroundColor { get; set; }
+        public Layout BackgroundColor { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:NLog.Targets.RichTextBoxWordColoringRule"/> class.
@@ -113,8 +113,8 @@ namespace NLog.Windows.Forms.Targets
         public RichTextBoxWordColoringRule(string text, string fontColor, string backgroundColor)
         {
             this.Text = text;
-            this.FontColor = fontColor;
-            this.BackgroundColor = backgroundColor;
+            this.FontColor = Layout.FromString(fontColor);
+            this.BackgroundColor = Layout.FromString(backgroundColor);
         }
 
         /// <summary>
@@ -125,8 +125,8 @@ namespace NLog.Windows.Forms.Targets
         public RichTextBoxWordColoringRule(string text, string textColor, string backgroundColor, FontStyle fontStyle)
         {
             this.Text = text;
-            this.FontColor = textColor;
-            this.BackgroundColor = backgroundColor;
+            this.FontColor = Layout.FromString(textColor);
+            this.BackgroundColor = Layout.FromString(backgroundColor);
             this.Style = fontStyle;
         }
     }

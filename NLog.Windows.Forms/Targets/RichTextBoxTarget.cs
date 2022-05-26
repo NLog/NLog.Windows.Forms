@@ -896,8 +896,8 @@ namespace NLog.Windows.Forms.Targets
                 {
                     textBox.SelectionStart = match.Index;
                     textBox.SelectionLength = match.Length;
-                    textBox.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor, textBox.BackColor);
-                    textBox.SelectionColor = GetColorFromString(wordRule.FontColor, textBox.ForeColor);
+                    textBox.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor.Render(logEvent), textBox.BackColor);
+                    textBox.SelectionColor = GetColorFromString(wordRule.FontColor.Render(logEvent), textBox.ForeColor);
                     textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ wordRule.Style);
                 }
             }

@@ -91,8 +91,8 @@ namespace NLog.Windows.Forms.Targets
         public RichTextBoxRowColoringRule(string condition, string fontColor, string backColor, FontStyle fontStyle)
         {
             this.Condition = (ConditionExpression)condition;
-            this.FontColor = fontColor;
-            this.BackgroundColor = backColor;
+            this.FontColor = Layout.FromString(fontColor);
+            this.BackgroundColor = Layout.FromString(backColor);
             this.Style = fontStyle;
         }
 
@@ -104,8 +104,8 @@ namespace NLog.Windows.Forms.Targets
         public RichTextBoxRowColoringRule(string condition, string fontColor, string backColor)
         {
             this.Condition = (ConditionExpression)condition;
-            this.FontColor = fontColor;
-            this.BackgroundColor = backColor;
+            this.FontColor = Layout.FromString(fontColor);
+            this.BackgroundColor = Layout.FromString(backColor);
             this.Style = FontStyle.Regular;
         }
 
