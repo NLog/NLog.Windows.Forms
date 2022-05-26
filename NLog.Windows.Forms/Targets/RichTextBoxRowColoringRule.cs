@@ -2,6 +2,7 @@
 using System.Drawing;
 using NLog.Conditions;
 using NLog.Config;
+using NLog.Layouts;
 
 namespace NLog.Windows.Forms.Targets
 {
@@ -38,7 +39,7 @@ namespace NLog.Windows.Forms.Targets
         /// </remarks>
         /// <docgen category="Formatting Options" order="10"/>
         [DefaultValue("Empty")]
-        public string FontColor { get; set; }
+        public Layout FontColor { get; set; }
 
         /// <summary>
         /// Gets or sets the background color.
@@ -51,7 +52,7 @@ namespace NLog.Windows.Forms.Targets
         /// </remarks>
         /// <docgen category="Formatting Options" order="10"/>
         [DefaultValue("Empty")]
-        public string BackgroundColor { get; set; }
+        public Layout BackgroundColor { get; set; }
 
         /// <summary>
         /// Gets or sets the font style of matched text.

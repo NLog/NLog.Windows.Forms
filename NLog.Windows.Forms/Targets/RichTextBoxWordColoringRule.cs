@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Text.RegularExpressions;
 using NLog.Config;
+using NLog.Layouts;
 
 namespace NLog.Windows.Forms.Targets
 {
@@ -19,14 +20,14 @@ namespace NLog.Windows.Forms.Targets
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        public string Regex { get; set; }
+        public Layout Regex { get; set; }
 
         /// <summary>
         /// Gets or sets the text to be matched. You must specify either <c>text</c> or <c>regex</c>.
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        public string Text { get; set; }
+        public Layout Text { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to match whole words only.
@@ -56,16 +57,14 @@ namespace NLog.Windows.Forms.Targets
         /// Gets the compiled regular expression that matches either Text or Regex property.
         /// 
         /// </summary>
-        public Regex CompiledRegex
+        public Regex CompileRegex(LogEventInfo logEvent)
         {
-            get
-            {
                 if (this.compiledRegex == null)
                 {
-                    string pattern = this.Regex;
+                    string pattern = this.Regex.Render(logEvent);
                     if (pattern == null && this.Text != null)
                     {
-                        pattern = System.Text.RegularExpressions.Regex.Escape(this.Text);
+                        pattern = System.Text.RegularExpressions.Regex.Escape(this.Text.Render(logEvent));
                         if (this.WholeWords)
                             pattern = "\b" + pattern + "\b";
                     }
@@ -75,7 +74,7 @@ namespace NLog.Windows.Forms.Targets
                     this.compiledRegex = new Regex(pattern, options);
                 }
                 return this.compiledRegex;
-            }
+            
         }
 
         /// <summary>

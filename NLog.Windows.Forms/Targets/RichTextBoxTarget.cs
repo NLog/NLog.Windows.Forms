@@ -882,8 +882,8 @@ namespace NLog.Windows.Forms.Targets
 
             int startIndex = textBox.TextLength;
             textBox.SelectionStart = startIndex;
-            textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor, textBox.BackColor);
-            textBox.SelectionColor = GetColorFromString(rule.FontColor, textBox.ForeColor);
+            textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor.Render(logEvent), textBox.BackColor);
+            textBox.SelectionColor = GetColorFromString(rule.FontColor.Render(logEvent), textBox.ForeColor);
             textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
             textBox.AppendText(logMessage + "\n");
             textBox.SelectionLength = textBox.TextLength - textBox.SelectionStart;
@@ -891,7 +891,7 @@ namespace NLog.Windows.Forms.Targets
             // find word to color
             foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
             {
-                MatchCollection matches = wordRule.CompiledRegex.Matches(textBox.Text, startIndex);
+                MatchCollection matches = wordRule.CompileRegex(logEvent).Matches(textBox.Text, startIndex);
                 foreach (Match match in matches)
                 {
                     textBox.SelectionStart = match.Index;
