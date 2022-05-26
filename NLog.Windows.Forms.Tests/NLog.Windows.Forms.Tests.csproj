@@ -19,9 +19,6 @@
 	<PropertyGroup>
 		<AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
-	<PropertyGroup>
-		<DefineConstants>$(DefineConstants);LINKS_SUPPORTED</DefineConstants>
-	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="xunit" Version="2.4.1" />
 		<PackageReference Include="xunit.extensibility.execution" Version="2.4.1" />

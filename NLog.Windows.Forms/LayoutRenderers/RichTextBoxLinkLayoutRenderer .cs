@@ -1,23 +1,20 @@
-﻿using NLog.Config;
-using NLog.LayoutRenderers;
-using NLog.Layouts;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
+using NLog.Config;
+using NLog.LayoutRenderers;
+using NLog.Layouts;
 using NLog.Windows.Forms.Targets;
 
 namespace NLog.Windows.Forms.LayoutRenderers
 {
-#if LINKS_SUPPORTED
-
     /// <summary>
-    /// Strings rendered with this rendrer would convert to links in the control. <see cref="RichTextBoxTarget.SupportLinks"/>
+    /// Strings rendered with this rendrer would convert to links in the control. <see cref="RichTextBoxTarget.SupportLinks" />
     /// </summary>
     /// <remarks>
-    /// Internally this renderer replaces the rendered text with a GUID and stores the info in <see cref="LogEventInfo.Properties"/> by <see cref="LinkInfo.PropertyName"/> as a key
-    /// Actual rendering is done in <see cref="RichTextBoxTarget.SendTheMessageToRichTextBox"/>
+    /// Internally this renderer replaces the rendered text with a GUID and stores the info in <see cref="LogEventInfo.Properties" /> by <see cref="LinkInfo.PropertyName" /> as a key
+    /// Actual rendering is done in <see cref="RichTextBoxTarget.SendTheMessageToRichTextBox" />
     /// </remarks>
     [LayoutRenderer("rtb-link")]
     public sealed class RichTextBoxLinkLayoutRenderer : LayoutRenderer
@@ -29,13 +26,13 @@ namespace NLog.Windows.Forms.LayoutRenderers
         public Layout Inner { get; set; }
 
         /// <summary>
-        /// Implementation of a <see cref="LayoutRenderer.Append"/>
+        /// Implementation of a <see cref="LayoutRenderer.Append" />
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="logEvent"></param>
         protected override void Append(StringBuilder builder, LogEventInfo logEvent)
         {
-            string msg = Inner.Render(logEvent);
+            var msg = Inner.Render(logEvent);
             if (string.IsNullOrEmpty(msg))
             {
                 return;
@@ -57,24 +54,25 @@ namespace NLog.Windows.Forms.LayoutRenderers
                 }
             }
 
-            string guid = Guid.NewGuid().ToString("P"); //(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+            var guid = Guid.NewGuid().ToString("P"); //(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
             linkInfo.Add(guid, msg);
 
             builder.Append(guid);
         }
 
         /// <summary>
-        /// Inernal class storing the captured link info, used by <see cref="RichTextBoxTarget.SendTheMessageToRichTextBox"/> to convert the text to link and then identify the logEvent
+        /// Inernal class storing the captured link info, used by <see cref="RichTextBoxTarget.SendTheMessageToRichTextBox" /> to convert the text to link and then identify the logEvent
         /// </summary>
         internal sealed class LinkInfo
         {
             /// <summary>
-            /// Used as a key in <see cref="LogEventInfo.Properties"/>
+            /// Used as a key in <see cref="LogEventInfo.Properties" />
             /// </summary>
             internal const string PropertyName = "NLog.Windows.Forms.RichTextBoxLinkLayoutRenderer.LinkInfo";
 
-            private readonly object lockObj = new object();
             private readonly Dictionary<string, string> guidToLinkText = new Dictionary<string, string>();
+
+            private readonly object lockObj = new object();
 
             internal void Add(string guid, string linkText)
             {
@@ -91,9 +89,9 @@ namespace NLog.Windows.Forms.LayoutRenderers
                 {
                     guidToLinkText.TryGetValue(guid, out result);
                 }
+
                 return result;
             }
         }
     }
-#endif
 }
