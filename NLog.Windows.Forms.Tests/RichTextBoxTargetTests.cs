@@ -386,8 +386,8 @@ namespace NLog.Windows.Forms.Tests
             Assert.Equal(expectedRules.Length, actualRules.Count);
             for (int i = 0; i < expectedRules.Length; ++i)
             {
-                Assert.Equal(expectedRules[i].BackgroundColor, actualRules[i].BackgroundColor);
-                Assert.Equal(expectedRules[i].FontColor, actualRules[i].FontColor);
+                Assert.Equal(expectedRules[i].BackgroundColor.ToString(), actualRules[i].BackgroundColor.ToString());
+                Assert.Equal(expectedRules[i].FontColor.ToString(), actualRules[i].FontColor.ToString());
                 Assert.Equal(expectedRules[i].Condition.ToString(), actualRules[i].Condition.ToString());
                 Assert.Equal(expectedRules[i].Style, actualRules[i].Style);
             }
