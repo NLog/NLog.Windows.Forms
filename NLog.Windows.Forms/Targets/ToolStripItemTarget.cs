@@ -77,9 +77,10 @@ namespace NLog.Windows.Forms.Targets
                 form = Form.ActiveForm;
             }
 
-            if (Application.OpenForms[FormName.Render(logEvent)] != null)
+            string renderedFormName = FormName.Render(logEvent);
+            if (Application.OpenForms[renderedFormName] != null)
             {
-                form = Application.OpenForms[FormName.Render(logEvent)];
+                form = Application.OpenForms[renderedFormName];
             }
 
             if (form == null)
