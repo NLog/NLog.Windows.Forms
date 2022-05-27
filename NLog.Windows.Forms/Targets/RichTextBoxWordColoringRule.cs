@@ -13,8 +13,6 @@ namespace NLog.Windows.Forms.Targets
     [NLogConfigurationItem]
     public class RichTextBoxWordColoringRule
     {
-        private Regex compiledRegex;
-
         /// <summary>
         /// Gets or sets the regular expression to be matched. You must specify either <c>text</c> or <c>regex</c>.
         /// 
@@ -59,22 +57,18 @@ namespace NLog.Windows.Forms.Targets
         /// </summary>
         public Regex CompileRegex(LogEventInfo logEvent)
         {
-                if (this.compiledRegex == null)
-                {
-                    string pattern = this.Regex == null? null: this.Regex.Render(logEvent);
-                    if (pattern == null && this.Text != null)
-                    {
-                        pattern = System.Text.RegularExpressions.Regex.Escape(this.Text.Render(logEvent));
-                        if (this.WholeWords)
-                            pattern = "\b" + pattern + "\b";
-                    }
-                    RegexOptions options = RegexOptions.Compiled;
-                    if (this.IgnoreCase)
-                        options |= RegexOptions.IgnoreCase;
-                    this.compiledRegex = new Regex(pattern, options);
-                }
-                return this.compiledRegex;
-            
+            string pattern = this.Regex == null? null: this.Regex.Render(logEvent);
+            if (pattern == null && this.Text != null)
+            {
+                pattern = System.Text.RegularExpressions.Regex.Escape(this.Text.Render(logEvent));
+                if (this.WholeWords)
+                    pattern = "\b" + pattern + "\b";
+            }
+            RegexOptions options = RegexOptions.Compiled;
+            if (this.IgnoreCase)
+                options |= RegexOptions.IgnoreCase;
+                
+            return new Regex(pattern, options);
         }
 
         /// <summary>
