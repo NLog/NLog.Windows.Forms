@@ -766,7 +766,7 @@ namespace NLog.Windows.Forms.Targets
                 }
             }
 
-            string logMessage = Layout.Render(logEvent);
+            string logMessage = RenderLogEvent(Layout, logEvent);
             RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
 
             bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);
@@ -882,8 +882,8 @@ namespace NLog.Windows.Forms.Targets
 
             int startIndex = textBox.TextLength;
             textBox.SelectionStart = startIndex;
-            textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor.Render(logEvent), textBox.BackColor);
-            textBox.SelectionColor = GetColorFromString(rule.FontColor.Render(logEvent), textBox.ForeColor);
+            textBox.SelectionBackColor = GetColorFromString(RenderLogEvent(rule.BackgroundColor, logEvent), textBox.BackColor);
+            textBox.SelectionColor = GetColorFromString(RenderLogEvent(rule.FontColor, logEvent), textBox.ForeColor);
             textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
             textBox.AppendText(logMessage + "\n");
             textBox.SelectionLength = textBox.TextLength - textBox.SelectionStart;
@@ -896,8 +896,8 @@ namespace NLog.Windows.Forms.Targets
                 {
                     textBox.SelectionStart = match.Index;
                     textBox.SelectionLength = match.Length;
-                    textBox.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor.Render(logEvent), textBox.BackColor);
-                    textBox.SelectionColor = GetColorFromString(wordRule.FontColor.Render(logEvent), textBox.ForeColor);
+                    textBox.SelectionBackColor = GetColorFromString(RenderLogEvent(wordRule.BackgroundColor, logEvent), textBox.BackColor);
+                    textBox.SelectionColor = GetColorFromString(RenderLogEvent(wordRule.FontColor, logEvent), textBox.ForeColor);
                     textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ wordRule.Style);
                 }
             }

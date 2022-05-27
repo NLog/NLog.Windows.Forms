@@ -68,7 +68,7 @@ namespace NLog.Windows.Forms.Targets
         /// </param>
         protected override void Write(LogEventInfo logEvent)
         {
-            string logMessage = Layout.Render(logEvent);
+            string logMessage = RenderLogEvent(Layout, logEvent);
 
             Form form = null;
 
@@ -77,7 +77,7 @@ namespace NLog.Windows.Forms.Targets
                 form = Form.ActiveForm;
             }
 
-            string renderedFormName = FormName.Render(logEvent);
+            string renderedFormName = RenderLogEvent(FormName, logEvent);
             if (Application.OpenForms[renderedFormName] != null)
             {
                 form = Application.OpenForms[renderedFormName];
@@ -89,7 +89,7 @@ namespace NLog.Windows.Forms.Targets
                 return;
             }
 
-            Control control = FormHelper.FindControl(ToolStripName.Render(logEvent), form);
+            Control control = FormHelper.FindControl(RenderLogEvent(ToolStripName, logEvent), form);
 
             if (control == null || !(control is ToolStrip))
             {
@@ -99,7 +99,7 @@ namespace NLog.Windows.Forms.Targets
 
             ToolStrip toolStrip = control as ToolStrip;
 
-            ToolStripItem item = FormHelper.FindToolStripItem(ItemName.Render(logEvent), toolStrip.Items);
+            ToolStripItem item = FormHelper.FindToolStripItem(RenderLogEvent(ItemName, logEvent), toolStrip.Items);
 
             if (item == null)
             {
