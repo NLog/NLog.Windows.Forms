@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using NLog.Common;
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 
 namespace NLog.Windows.Forms.Targets
@@ -46,7 +47,7 @@ namespace NLog.Windows.Forms.Targets
         /// </summary>
         /// <docgen category='Form Options' order='10' />
         [RequiredParameter]
-        public string ControlName { get; set; }
+        public Layout ControlName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether log text should be appended to the text of the control instead of overwriting it. </summary>
@@ -58,7 +59,7 @@ namespace NLog.Windows.Forms.Targets
         /// Gets or sets the name of the Form on which the control is located.
         /// </summary>
         /// <docgen category='Form Options' order='10' />
-        public string FormName { get; set; }
+        public Layout FormName { get; set; }
 
         /// <summary>
         /// Gets or sets whether new log entry are added to the start or the end of the control
@@ -73,23 +74,18 @@ namespace NLog.Windows.Forms.Targets
         /// </param>
         protected override void Write(LogEventInfo logEvent)
         {
-            string logMessage = Layout.Render(logEvent);
+            string logMessage = RenderLogEvent(Layout, logEvent);
 
-            FindControlAndSendTheMessage(logMessage);
-        }
-
-        private void FindControlAndSendTheMessage(string logMessage)
-        {
             Form form = null;
 
             if (Form.ActiveForm != null)
             {
                 form = Form.ActiveForm;
             }
-
-            if (Application.OpenForms[FormName] != null)
+            string renderedFormName = RenderLogEvent(FormName, logEvent);
+            if (Application.OpenForms[renderedFormName] != null)
             {
-                form = Application.OpenForms[FormName];
+                form = Application.OpenForms[renderedFormName];
             }
 
             if (form == null)
@@ -98,7 +94,7 @@ namespace NLog.Windows.Forms.Targets
                 return;
             }
 
-            Control control = FormHelper.FindControl(ControlName, form);
+            Control control = FormHelper.FindControl(RenderLogEvent(ControlName, logEvent), form);
 
             if (control == null)
             {
@@ -118,7 +114,6 @@ namespace NLog.Windows.Forms.Targets
                     throw;
                 }
             }
-
         }
 
         private void SendTheMessageToFormControl(Control control, string logMessage)

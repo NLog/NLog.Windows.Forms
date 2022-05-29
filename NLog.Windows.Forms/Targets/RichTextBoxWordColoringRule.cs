@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Text.RegularExpressions;
 using NLog.Config;
+using NLog.Layouts;
 
 namespace NLog.Windows.Forms.Targets
 {
@@ -12,21 +13,19 @@ namespace NLog.Windows.Forms.Targets
     [NLogConfigurationItem]
     public class RichTextBoxWordColoringRule
     {
-        private Regex compiledRegex;
-
         /// <summary>
         /// Gets or sets the regular expression to be matched. You must specify either <c>text</c> or <c>regex</c>.
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        public string Regex { get; set; }
+        public Layout Regex { get; set; }
 
         /// <summary>
         /// Gets or sets the text to be matched. You must specify either <c>text</c> or <c>regex</c>.
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        public string Text { get; set; }
+        public Layout Text { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to match whole words only.
@@ -56,26 +55,20 @@ namespace NLog.Windows.Forms.Targets
         /// Gets the compiled regular expression that matches either Text or Regex property.
         /// 
         /// </summary>
-        public Regex CompiledRegex
+        public Regex CompileRegex(LogEventInfo logEvent)
         {
-            get
+            string pattern = this.Regex == null? null: this.Regex.Render(logEvent);
+            if (pattern == null && this.Text != null)
             {
-                if (this.compiledRegex == null)
-                {
-                    string pattern = this.Regex;
-                    if (pattern == null && this.Text != null)
-                    {
-                        pattern = System.Text.RegularExpressions.Regex.Escape(this.Text);
-                        if (this.WholeWords)
-                            pattern = "\b" + pattern + "\b";
-                    }
-                    RegexOptions options = RegexOptions.Compiled;
-                    if (this.IgnoreCase)
-                        options |= RegexOptions.IgnoreCase;
-                    this.compiledRegex = new Regex(pattern, options);
-                }
-                return this.compiledRegex;
+                pattern = System.Text.RegularExpressions.Regex.Escape(this.Text.Render(logEvent));
+                if (this.WholeWords)
+                    pattern = "\b" + pattern + "\b";
             }
+            RegexOptions options = RegexOptions.Compiled;
+            if (this.IgnoreCase)
+                options |= RegexOptions.IgnoreCase;
+                
+            return new Regex(pattern, options);
         }
 
         /// <summary>
@@ -85,7 +78,7 @@ namespace NLog.Windows.Forms.Targets
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
         [DefaultValue("Empty")]
-        public string FontColor { get; set; }
+        public Layout FontColor { get; set; }
 
         /// <summary>
         /// Gets or sets the background color.
@@ -94,7 +87,7 @@ namespace NLog.Windows.Forms.Targets
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
         [DefaultValue("Empty")]
-        public string BackgroundColor { get; set; }
+        public Layout BackgroundColor { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:NLog.Targets.RichTextBoxWordColoringRule"/> class.
@@ -114,8 +107,8 @@ namespace NLog.Windows.Forms.Targets
         public RichTextBoxWordColoringRule(string text, string fontColor, string backgroundColor)
         {
             this.Text = text;
-            this.FontColor = fontColor;
-            this.BackgroundColor = backgroundColor;
+            this.FontColor = Layout.FromString(fontColor);
+            this.BackgroundColor = Layout.FromString(backgroundColor);
         }
 
         /// <summary>
@@ -126,8 +119,8 @@ namespace NLog.Windows.Forms.Targets
         public RichTextBoxWordColoringRule(string text, string textColor, string backgroundColor, FontStyle fontStyle)
         {
             this.Text = text;
-            this.FontColor = textColor;
-            this.BackgroundColor = backgroundColor;
+            this.FontColor = Layout.FromString(textColor);
+            this.BackgroundColor = Layout.FromString(backgroundColor);
             this.Style = fontStyle;
         }
     }
