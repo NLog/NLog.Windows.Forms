@@ -11,13 +11,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplicationNetFramework
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplicationCore3", "TestApplications\TestApplicationCore3\TestApplicationCore3.csproj", "{9FAC81DA-0137-47E9-957A-D8A9A5215338}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplicationNet5", "TestApplications\TestApplicationNet5\TestApplicationNet5.csproj", "{134980CC-0226-42B1-B02F-A9C81AAB0A3D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Applications", "Test Applications", "{6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Shared", "TestApplications\TestApplication.Shared\TestApplication.Shared.csproj", "{CA02182B-27A3-485F-969F-3D3EE7720992}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplicationNet6", "TestApplications\TestApplicationNet6\TestApplicationNet6.csproj", "{47AB6DA7-9F2C-44B6-86A0-EA9EFCD3566C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9E22BDDB-E0CD-4C22-AE81-0310DE7B6E9B}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		build.ps1 = build.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +45,6 @@ Global
 		{9FAC81DA-0137-47E9-957A-D8A9A5215338}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FAC81DA-0137-47E9-957A-D8A9A5215338}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FAC81DA-0137-47E9-957A-D8A9A5215338}.Release|Any CPU.Build.0 = Release|Any CPU
-		{134980CC-0226-42B1-B02F-A9C81AAB0A3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{134980CC-0226-42B1-B02F-A9C81AAB0A3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{134980CC-0226-42B1-B02F-A9C81AAB0A3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{134980CC-0226-42B1-B02F-A9C81AAB0A3D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CA02182B-27A3-485F-969F-3D3EE7720992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CA02182B-27A3-485F-969F-3D3EE7720992}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA02182B-27A3-485F-969F-3D3EE7720992}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,7 +60,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{03D9D89A-B972-4446-AB4A-A430851243D0} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
 		{9FAC81DA-0137-47E9-957A-D8A9A5215338} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
-		{134980CC-0226-42B1-B02F-A9C81AAB0A3D} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
 		{CA02182B-27A3-485F-969F-3D3EE7720992} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
 		{47AB6DA7-9F2C-44B6-86A0-EA9EFCD3566C} = {6AB4C95A-36D8-4F52-8F25-EF9CA98AF536}
 	EndGlobalSection

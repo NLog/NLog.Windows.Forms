@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net452;netcoreapp3.1;net5.0-windows</TargetFrameworks>
+		<TargetFrameworks>net461;netcoreapp3.1;net6.0-windows</TargetFrameworks>
+    <UseWindowsForms>true</UseWindowsForms>
 		<SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
 		<AssemblyTitle>NLog.Windows.Forms.Tests</AssemblyTitle>
 		<Company>Microsoft</Company>
@@ -20,16 +21,12 @@
 		<AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="xunit" Version="2.4.2" />
-		<PackageReference Include="xunit.extensibility.execution" Version="2.4.2" />
+		<PackageReference Include="xunit" Version="2.4.0" />
+		<PackageReference Include="xunit.extensibility.execution" Version="2.4.0" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-	</ItemGroup>
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net452'">
-		<Reference Include="System.Windows.Forms" />
-		<Reference Include="System.Data.DataSetExtensions" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="NLog.snk" />
