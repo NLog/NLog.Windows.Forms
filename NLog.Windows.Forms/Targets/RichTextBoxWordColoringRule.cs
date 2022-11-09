@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Text.RegularExpressions;
 using NLog.Config;
 using NLog.Layouts;
@@ -32,16 +31,14 @@ namespace NLog.Windows.Forms.Targets
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        [DefaultValue(false)]
-        public bool WholeWords { get; set; }
+        public Layout<bool> WholeWords { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to ignore case when comparing texts.
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        [DefaultValue(false)]
-        public bool IgnoreCase { get; set; }
+        public Layout<bool> IgnoreCase { get; set; }
 
         /// <summary>
         /// Gets or sets the font style of matched text.
@@ -53,22 +50,21 @@ namespace NLog.Windows.Forms.Targets
 
         /// <summary>
         /// Gets the compiled regular expression that matches either Text or Regex property.
-        /// 
         /// </summary>
-        public Regex CompileRegex(LogEventInfo logEvent)
+        internal Regex ResolveRegEx(string pattern, string text, bool wholeWords, bool ignoreCase)
         {
-            string pattern = this.Regex == null? null: this.Regex.Render(logEvent);
-            if (pattern == null && this.Text != null)
+            if (string.IsNullOrEmpty(pattern) && text != null)
             {
-                pattern = System.Text.RegularExpressions.Regex.Escape(this.Text.Render(logEvent));
-                if (this.WholeWords)
+                pattern = System.Text.RegularExpressions.Regex.Escape(text);
+                if (wholeWords)
                     pattern = "\b" + pattern + "\b";
             }
-            RegexOptions options = RegexOptions.Compiled;
-            if (this.IgnoreCase)
+
+            RegexOptions options = RegexOptions.None;
+            if (ignoreCase)
                 options |= RegexOptions.IgnoreCase;
-                
-            return new Regex(pattern, options);
+
+            return new Regex(pattern, options);   // RegEx-Cache
         }
 
         /// <summary>
@@ -77,7 +73,6 @@ namespace NLog.Windows.Forms.Targets
         /// 
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
-        [DefaultValue("Empty")]
         public Layout FontColor { get; set; }
 
         /// <summary>
@@ -86,7 +81,6 @@ namespace NLog.Windows.Forms.Targets
         /// 
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
-        [DefaultValue("Empty")]
         public Layout BackgroundColor { get; set; }
 
         /// <summary>
