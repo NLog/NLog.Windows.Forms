@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -213,7 +212,6 @@ namespace NLog.Windows.Forms.Targets
         /// Gets or sets a value indicating whether to use default coloring rules.
         /// </summary>
         /// <docgen category='Highlighting Options' order='10' />
-        [DefaultValue(false)]
         public bool UseDefaultRowColoringRules { get; set; }
 
         /// <summary>
@@ -238,7 +236,6 @@ namespace NLog.Windows.Forms.Targets
         /// Tool windows have thin border, and do not show up in the task bar.
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
-        [DefaultValue(true)]
         public bool ToolWindow { get; set; }
 
         /// <summary>
@@ -305,7 +302,6 @@ namespace NLog.Windows.Forms.Targets
         /// If set to false and the control was not found during target initialization, the target would skip events until the control is found during <see cref="ReInitializeAllTextboxes(System.Windows.Forms.Form)"/> call
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
-        [DefaultValue(true)]
         public bool AllowAccessoryFormCreation { get; set; }
 
 
@@ -315,7 +311,6 @@ namespace NLog.Windows.Forms.Targets
         /// <remarks>
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
-        [DefaultValue(RichTextBoxTargetMessageRetentionStrategy.None)]
         public RichTextBoxTargetMessageRetentionStrategy MessageRetention
         {
             get { return messageRetention; }
@@ -364,13 +359,10 @@ namespace NLog.Windows.Forms.Targets
         /// </summary>
         private volatile Queue<MessageInfo> messageQueue;
 
-
-
         /// <summary>
         /// If set to true, using "rtb-link" renderer (<see cref="RichTextBoxLinkLayoutRenderer"/>) would create clickable links in the control.
         /// <seealso cref="LinkClicked"/>
         /// </summary>
-        [DefaultValue(false)]
         public bool SupportLinks
         {
             get { return supportLinks; }
@@ -711,7 +703,7 @@ namespace NLog.Windows.Forms.Targets
                 }
                 catch (Exception ex)
                 {
-                    InternalLogger.Warn(ex.ToString());
+                    InternalLogger.Warn(ex, "Failed DetachFromControl");
 
                     if (LogManager.ThrowExceptions)
                     {
@@ -811,7 +803,7 @@ namespace NLog.Windows.Forms.Targets
             }
             catch (Exception ex)
             {
-                InternalLogger.Warn(ex.ToString());
+                InternalLogger.Warn(ex, "Failed to append RichTextBox");
 
                 if (LogManager.ThrowExceptions)
                 {
@@ -879,7 +871,12 @@ namespace NLog.Windows.Forms.Targets
             // find word to color
             foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
             {
-                MatchCollection matches = wordRule.CompileRegex(logEvent).Matches(textBox.Text, startIndex);
+                var wordRulePattern = RenderLogEvent(wordRule.Regex, logEvent);
+                var wordRuleText = RenderLogEvent(wordRule.Text, logEvent);
+                var wordRuleWholeWords = RenderLogEvent(wordRule.WholeWords, logEvent);
+                var wordRuleIgnoreCase = RenderLogEvent(wordRule.IgnoreCase, logEvent);
+
+                MatchCollection matches = wordRule.ResolveRegEx(wordRulePattern, wordRuleText, wordRuleWholeWords, wordRuleIgnoreCase).Matches(textBox.Text, startIndex);
                 foreach (Match match in matches)
                 {
                     textBox.SelectionStart = match.Index;
@@ -993,7 +990,7 @@ namespace NLog.Windows.Forms.Targets
             }
         }
 
-        private class MessageInfo
+        private sealed class MessageInfo
         {
             internal string Message { get; private set; }
             internal RichTextBoxRowColoringRule Rule { get; private set; }

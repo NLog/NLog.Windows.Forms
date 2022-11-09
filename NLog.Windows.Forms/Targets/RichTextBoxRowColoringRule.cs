@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Drawing;
+﻿using System.Drawing;
 using NLog.Conditions;
 using NLog.Config;
 using NLog.Layouts;
@@ -38,7 +37,6 @@ namespace NLog.Windows.Forms.Targets
         /// 
         /// </remarks>
         /// <docgen category="Formatting Options" order="10"/>
-        [DefaultValue("Empty")]
         public Layout FontColor { get; set; }
 
         /// <summary>
@@ -51,7 +49,6 @@ namespace NLog.Windows.Forms.Targets
         /// 
         /// </remarks>
         /// <docgen category="Formatting Options" order="10"/>
-        [DefaultValue("Empty")]
         public Layout BackgroundColor { get; set; }
 
         /// <summary>

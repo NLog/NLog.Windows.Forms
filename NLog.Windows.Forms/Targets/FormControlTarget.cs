@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Windows.Forms;
 using NLog.Common;
 using NLog.Config;
@@ -40,7 +39,7 @@ namespace NLog.Windows.Forms.Targets
             Append = true;
         }
 
-        private delegate void DelSendTheMessageToFormControl(Control control, string logMessage);
+        private delegate void DelSendTheMessageToFormControl(Control control, string logMessage, bool append, bool reverseOrder);
 
         /// <summary>
         /// Gets or sets the name of control to which NLog will log write log text.
@@ -52,8 +51,7 @@ namespace NLog.Windows.Forms.Targets
         /// <summary>
         /// Gets or sets a value indicating whether log text should be appended to the text of the control instead of overwriting it. </summary>
         /// <docgen category='Form Options' order='10' />
-        [DefaultValue(true)]
-        public bool Append { get; set; }
+        public Layout<bool> Append { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the Form on which the control is located.
@@ -64,7 +62,7 @@ namespace NLog.Windows.Forms.Targets
         /// <summary>
         /// Gets or sets whether new log entry are added to the start or the end of the control
         /// </summary>
-        public bool ReverseOrder { get; set; }
+        public Layout<bool> ReverseOrder { get; set; }
 
         /// <summary>
         /// Log message to control.
@@ -82,6 +80,7 @@ namespace NLog.Windows.Forms.Targets
             {
                 form = Form.ActiveForm;
             }
+
             string renderedFormName = RenderLogEvent(FormName, logEvent);
             if (Application.OpenForms[renderedFormName] != null)
             {
@@ -95,19 +94,21 @@ namespace NLog.Windows.Forms.Targets
             }
 
             Control control = FormHelper.FindControl(RenderLogEvent(ControlName, logEvent), form);
-
             if (control == null)
             {
                 InternalLogger.Info("Control {0} on Form {1} not found", ControlName, FormName);
                 return;
             }
+
             try
             {
-                control.BeginInvoke(new DelSendTheMessageToFormControl(SendTheMessageToFormControl), control, logMessage);
+                bool append = RenderLogEvent(Append, logEvent);
+                bool reverseOrder = RenderLogEvent(ReverseOrder, logEvent);
+                control.BeginInvoke(new DelSendTheMessageToFormControl(SendTheMessageToFormControl), control, logMessage, append, reverseOrder);
             }
             catch (Exception ex)
             {
-                InternalLogger.Warn(ex.ToString());
+                InternalLogger.Warn(ex, "Failed to assign Control.Text");
 
                 if (LogManager.ThrowExceptions)
                 {
@@ -116,13 +117,13 @@ namespace NLog.Windows.Forms.Targets
             }
         }
 
-        private void SendTheMessageToFormControl(Control control, string logMessage)
+        private void SendTheMessageToFormControl(Control control, string logMessage, bool append, bool reverseOrder)
         {
             //append of replace?
-            if (Append)
+            if (append)
             {
                 //beginning or end?
-                if (ReverseOrder)
+                if (reverseOrder)
                     control.Text = logMessage + control.Text;
                 else
                     control.Text += logMessage;

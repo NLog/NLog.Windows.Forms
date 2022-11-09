@@ -70,14 +70,13 @@ namespace NLog.Windows.Forms.Targets
             }
             catch (Exception ex)
             {
-                InternalLogger.Warn(ex.ToString());
+                InternalLogger.Warn(ex, "Failed MessageBox.Show");
 
                 if (LogManager.ThrowExceptions)
                 {
                     throw;
                 }
             }
-
         }
 
         /// <summary>

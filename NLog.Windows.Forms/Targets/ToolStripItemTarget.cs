@@ -91,16 +91,14 @@ namespace NLog.Windows.Forms.Targets
 
             Control control = FormHelper.FindControl(RenderLogEvent(ToolStripName, logEvent), form);
 
-            if (control == null || !(control is ToolStrip))
+            ToolStrip toolStrip = control as ToolStrip;
+            if (toolStrip == null)
             {
                 InternalLogger.Info("ToolStrip {0} on Form {1} not found", ToolStripName, FormName);
                 return;
             }
 
-            ToolStrip toolStrip = control as ToolStrip;
-
             ToolStripItem item = FormHelper.FindToolStripItem(RenderLogEvent(ItemName, logEvent), toolStrip.Items);
-
             if (item == null)
             {
                 InternalLogger.Info("ToolStripItem {0} on ToolStrip {1} not found", ItemName, ToolStripName);
@@ -110,11 +108,10 @@ namespace NLog.Windows.Forms.Targets
             try
             {
                 control.BeginInvoke(new DelSendTheMessageToFormControl(SendTheMessageToFormControl), item, logMessage);
-                
             }
             catch (Exception ex)
             {
-                InternalLogger.Warn(ex.ToString());
+                InternalLogger.Warn(ex, "Failed to assign Control.Text");
 
                 if (LogManager.ThrowExceptions)
                 {
@@ -122,6 +119,7 @@ namespace NLog.Windows.Forms.Targets
                 }
             }
         }
+
         private void SendTheMessageToFormControl(ToolStripItem item, string logMessage)
         {
             item.Text = logMessage;
