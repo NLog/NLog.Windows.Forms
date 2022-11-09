@@ -33,7 +33,7 @@ namespace NLog.Windows.Forms.Targets
         /// Initializes a new instance of the <see cref="FormControlTarget" /> class.
         /// </summary>
         /// <remarks>
-        /// The default value of the layout is: <code>${longdate}|${level:uppercase=true}|${logger}|${message}</code>
+        /// The default value of the layout is: <code>${longdate}|${level:uppercase=true}|${logger}|${message:withException=true}</code>
         /// </remarks>
         public FormControlTarget()
         {

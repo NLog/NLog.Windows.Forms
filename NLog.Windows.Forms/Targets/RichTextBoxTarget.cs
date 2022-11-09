@@ -53,7 +53,7 @@ namespace NLog.Windows.Forms.Targets
         /// Initializes static members of the RichTextBoxTarget class.
         /// </summary>
         /// <remarks>
-        /// The default value of the layout is: <code>${longdate}|${level:uppercase=true}|${logger}|${message}</code>
+        /// The default value of the layout is: <code>${longdate}|${level:uppercase=true}|${logger}|${message:withException=true}</code>
         /// </remarks>
         static RichTextBoxTarget()
         {
@@ -177,7 +177,7 @@ namespace NLog.Windows.Forms.Targets
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
         /// </summary>
         /// <remarks>
-        /// The default value of the layout is: <code>${longdate}|${level:uppercase=true}|${logger}|${message}</code>
+        /// The default value of the layout is: <code>${longdate}|${level:uppercase=true}|${logger}|${message:withException=true}</code>
         /// </remarks>
         public RichTextBoxTarget()
         {
