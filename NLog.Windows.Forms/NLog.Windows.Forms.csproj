@@ -23,30 +23,38 @@
 		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/NLog/NLog.Windows.Forms.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<AssemblyVersion>4.0.0.0</AssemblyVersion>
-
+		<AssemblyVersion>5.0.0.0</AssemblyVersion>
 		<PackageReleaseNotes>
+- Updated to NLog 5.0.2 (@snakefoot)
+- Replaced net5.0-windows with net6.0-windows (@304NotModified)
+- Fix crash SelectionLength + support links on all platforms (@304NotModified)
+- Changed to typed Layout-properties (@Fr33dan)
+
+Remember to register NLog.Windows.Forms in NLog.config
+
+&lt;extensions&gt;
+    &lt;add assembly="NLog.Windows.Forms" /&gt;
+&lt;/extensions&gt;
 		</PackageReleaseNotes>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<None Remove="NLog.Windows.Forms.csproj.DotSettings" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="NLog" Version="5.0.2" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
+  
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
 		<Reference Include="System.Windows.Forms" />
 		<Reference Include="System.Data.DataSetExtensions" />
 	</ItemGroup>
+  
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\NLog.ico" />
+    <None Include="NLog.snk" />
 	</ItemGroup>
+  
 	<ItemGroup>
-		<None Include="NLog.snk" />
-		<None Include="N.png" Pack="true" PackagePath="" />
+		<None Include="N.png" Pack="true" PackagePath="" Visible="false" />
 	</ItemGroup>
 	<Target Name="DownloadMissingContent" BeforeTargets="GenerateNuspec">
 		<DownloadFile SourceUrl="https://nlog-project.org/N.png" DestinationFolder="$(MSBuildThisFileDirectory)" />

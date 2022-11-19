@@ -4,7 +4,6 @@ using System.Threading;
 using System.Windows.Forms;
 using NLog;
 using NLog.Windows.Forms;
-using NLog.Windows.Forms.Targets;
 
 namespace TestApplication
 {

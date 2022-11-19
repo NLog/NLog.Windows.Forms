@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using NLog.Config;
 using NLog.Layouts;
 
-namespace NLog.Windows.Forms.Targets
+namespace NLog.Windows.Forms
 {
     /// <summary>
     /// Highlighting rule for Win32 colorful console.

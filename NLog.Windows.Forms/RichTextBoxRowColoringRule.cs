@@ -3,7 +3,7 @@ using NLog.Conditions;
 using NLog.Config;
 using NLog.Layouts;
 
-namespace NLog.Windows.Forms.Targets
+namespace NLog.Windows.Forms
 {
     /// <summary>
     /// The row-coloring condition.

@@ -5,9 +5,8 @@ using System.Text;
 using NLog.Config;
 using NLog.LayoutRenderers;
 using NLog.Layouts;
-using NLog.Windows.Forms.Targets;
 
-namespace NLog.Windows.Forms.LayoutRenderers
+namespace NLog.Windows.Forms
 {
     /// <summary>
     /// Strings rendered with this rendrer would convert to links in the control. <see cref="RichTextBoxTarget.SupportLinks" />
