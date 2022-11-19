@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace NLog.Windows.Forms.Targets
+namespace NLog.Windows.Forms
 {
     /// <summary>
     /// Form helper methods.

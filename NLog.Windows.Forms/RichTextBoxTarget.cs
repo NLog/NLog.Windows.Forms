@@ -8,9 +8,8 @@ using System.Windows.Forms;
 using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
-using NLog.Windows.Forms.LayoutRenderers;
 
-namespace NLog.Windows.Forms.Targets
+namespace NLog.Windows.Forms
 {
     /// <summary>
     /// Log text a Rich Text Box control in an existing or new form.

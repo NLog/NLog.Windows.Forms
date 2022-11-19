@@ -6,7 +6,7 @@ using NLog.Common;
 using NLog.Layouts;
 using NLog.Targets;
 
-namespace NLog.Windows.Forms.Targets
+namespace NLog.Windows.Forms
 {
     /// <summary>
     /// Pops up log messages as message boxes.

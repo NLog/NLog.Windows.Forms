@@ -3,13 +3,10 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using NLog.Config;
-using NLog.Targets;
 using Xunit;
-using System.Text.RegularExpressions;
 using System;
 using System.Threading.Tasks;
 using System.Threading;
-using NLog.Windows.Forms.Targets;
 
 namespace NLog.Windows.Forms.Tests
 {
