@@ -25,7 +25,7 @@
 		<RepositoryType>git</RepositoryType>
 		<AssemblyVersion>5.0.0.0</AssemblyVersion>
 		<PackageReleaseNotes>
-- Updated to NLog 5.0.2 (@snakefoot)
+- Updated to NLog 5.0.5 (@snakefoot)
 - Replaced net5.0-windows with net6.0-windows (@304NotModified)
 - Fix crash SelectionLength + support links on all platforms (@304NotModified)
 - Changed to typed Layout-properties (@Fr33dan)
