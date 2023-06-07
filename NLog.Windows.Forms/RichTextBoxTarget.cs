@@ -48,27 +48,6 @@ namespace NLog.Windows.Forms
     public sealed class RichTextBoxTarget : TargetWithLayout
     {
         /// <summary>
-        /// Initializes static members of the RichTextBoxTarget class.
-        /// </summary>
-        /// <remarks>
-        /// The default value of the layout is: <code>${longdate}|${level:uppercase=true}|${logger}|${message:withException=true}</code>
-        /// </remarks>
-        static RichTextBoxTarget()
-        {
-            var rules = new List<RichTextBoxRowColoringRule>()
-            {
-                new RichTextBoxRowColoringRule("level == LogLevel.Fatal", "White", "Red", FontStyle.Bold),
-                new RichTextBoxRowColoringRule("level == LogLevel.Error", "Red", "Empty", FontStyle.Bold | FontStyle.Italic),
-                new RichTextBoxRowColoringRule("level == LogLevel.Warn", "Orange", "Empty", FontStyle.Underline),
-                new RichTextBoxRowColoringRule("level == LogLevel.Info", "Black", "Empty"),
-                new RichTextBoxRowColoringRule("level == LogLevel.Debug", "Gray", "Empty"),
-                new RichTextBoxRowColoringRule("level == LogLevel.Trace", "DarkGray", "Empty", FontStyle.Italic),
-            };
-
-            DefaultRowColoringRules = rules.AsReadOnly();
-        }
-
-        /// <summary>
         /// Attempts to attach existing targets that have yet no textboxes to controls that exist on specified form if appropriate
         /// </summary>
         /// <remarks>
@@ -171,6 +150,19 @@ namespace NLog.Windows.Forms
             return loggingConfiguration.AllTargets.OfType<RichTextBoxTarget>();
         }
 
+        private static ReadOnlyCollection<RichTextBoxRowColoringRule> CreateDefaultColoringRules()
+        {
+            return new List<RichTextBoxRowColoringRule>()
+            {
+                new RichTextBoxRowColoringRule("level == LogLevel.Fatal", "White", "Red", FontStyle.Bold),
+                new RichTextBoxRowColoringRule("level == LogLevel.Error", "Red", "Empty", FontStyle.Bold | FontStyle.Italic),
+                new RichTextBoxRowColoringRule("level == LogLevel.Warn", "Orange", "Empty", FontStyle.Underline),
+                new RichTextBoxRowColoringRule("level == LogLevel.Info", "Black", "Empty"),
+                new RichTextBoxRowColoringRule("level == LogLevel.Debug", "Gray", "Empty"),
+                new RichTextBoxRowColoringRule("level == LogLevel.Trace", "DarkGray", "Empty", FontStyle.Italic),
+            }.AsReadOnly();
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RichTextBoxTarget" /> class.
         /// </summary>
@@ -179,20 +171,20 @@ namespace NLog.Windows.Forms
         /// </remarks>
         public RichTextBoxTarget()
         {
-            WordColoringRules = new List<RichTextBoxWordColoringRule>();
-            RowColoringRules = new List<RichTextBoxRowColoringRule>();
-            ToolWindow = true;
-            AllowAccessoryFormCreation = true;
+            _sendTheMessageToRichTextBox = new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox);
         }
 
+
         private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent);
+
+        private readonly DelSendTheMessageToRichTextBox _sendTheMessageToRichTextBox;
 
         private delegate void FormCloseDelegate();
 
         /// <summary>
         /// Gets the default set of row coloring rules which applies when <see cref="UseDefaultRowColoringRules"/> is set to true.
         /// </summary>
-        public static ReadOnlyCollection<RichTextBoxRowColoringRule> DefaultRowColoringRules { get; private set; }
+        public static ReadOnlyCollection<RichTextBoxRowColoringRule> DefaultRowColoringRules { get; } = CreateDefaultColoringRules();
 
         /// <summary>
         /// Gets or sets the Name of RichTextBox to which Nlog will write.
@@ -218,14 +210,14 @@ namespace NLog.Windows.Forms
         /// </summary>
         /// <docgen category='Highlighting Options' order='10' />
         [ArrayParameter(typeof(RichTextBoxRowColoringRule), "row-coloring")]
-        public IList<RichTextBoxRowColoringRule> RowColoringRules { get; private set; }
+        public IList<RichTextBoxRowColoringRule> RowColoringRules { get; } = new List<RichTextBoxRowColoringRule>();
 
         /// <summary>
         /// Gets the word highlighting rules.
         /// </summary>
         /// <docgen category='Highlighting Options' order='10' />
         [ArrayParameter(typeof(RichTextBoxWordColoringRule), "word-coloring")]
-        public IList<RichTextBoxWordColoringRule> WordColoringRules { get; private set; }
+        public IList<RichTextBoxWordColoringRule> WordColoringRules { get; } = new List<RichTextBoxWordColoringRule>();
 
         /// <summary>
         /// Gets or sets a value indicating whether the created window will be a tool window.
@@ -235,7 +227,7 @@ namespace NLog.Windows.Forms
         /// Tool windows have thin border, and do not show up in the task bar.
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
-        public bool ToolWindow { get; set; }
+        public bool ToolWindow { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the created form will be initially minimized.
@@ -301,7 +293,7 @@ namespace NLog.Windows.Forms
         /// If set to false and the control was not found during target initialization, the target would skip events until the control is found during <see cref="ReInitializeAllTextboxes(System.Windows.Forms.Form)"/> call
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
-        public bool AllowAccessoryFormCreation { get; set; }
+        public bool AllowAccessoryFormCreation { get; set; } = true;
 
 
         /// <summary>
@@ -791,7 +783,7 @@ namespace NLog.Windows.Forms
                 {
                     if (textbox.InvokeRequired)
                     {
-                        textbox.BeginInvoke(new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox), logMessage, rule, logEvent);
+                        textbox.BeginInvoke(_sendTheMessageToRichTextBox, logMessage, rule, logEvent);
                     }
                     else
                     {
@@ -820,7 +812,7 @@ namespace NLog.Windows.Forms
         private RichTextBoxRowColoringRule FindMatchingRule(LogEventInfo logEvent)
         {
             //custom rules first
-            if (RowColoringRules != null)
+            if (RowColoringRules.Count > 0)
             {
                 foreach (RichTextBoxRowColoringRule coloringRule in RowColoringRules)
                 {
@@ -847,7 +839,7 @@ namespace NLog.Windows.Forms
 
         private static Color GetColorFromString(string color, Color defaultColor)
         {
-            if (color == "Empty")
+            if (string.IsNullOrEmpty(color) || color == "Empty")
             {
                 return defaultColor;
             }
@@ -861,38 +853,42 @@ namespace NLog.Windows.Forms
 
             int startIndex = textBox.TextLength;
             textBox.SelectionStart = startIndex;
-            textBox.SelectionBackColor = GetColorFromString(RenderLogEvent(rule.BackgroundColor, logEvent), textBox.BackColor);
-            textBox.SelectionColor = GetColorFromString(RenderLogEvent(rule.FontColor, logEvent), textBox.ForeColor);
+            textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor?.Render(logEvent), textBox.BackColor);
+            textBox.SelectionColor = GetColorFromString(rule.FontColor?.Render(logEvent), textBox.ForeColor);
             textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ rule.Style);
             textBox.AppendText(logMessage + "\n");
             textBox.SelectionLength = textBox.TextLength - textBox.SelectionStart;
 
-            // find word to color
-            foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
+            if (WordColoringRules.Count > 0)
             {
-                var wordRulePattern = RenderLogEvent(wordRule.Regex, logEvent);
-                var wordRuleText = RenderLogEvent(wordRule.Text, logEvent);
-                var wordRuleWholeWords = RenderLogEvent(wordRule.WholeWords, logEvent);
-                var wordRuleIgnoreCase = RenderLogEvent(wordRule.IgnoreCase, logEvent);
-
-                MatchCollection matches = wordRule.ResolveRegEx(wordRulePattern, wordRuleText, wordRuleWholeWords, wordRuleIgnoreCase).Matches(textBox.Text, startIndex);
-                foreach (Match match in matches)
+                // find word to color
+                foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
                 {
-                    textBox.SelectionStart = match.Index;
-                    textBox.SelectionLength = match.Length;
-                    textBox.SelectionBackColor = GetColorFromString(RenderLogEvent(wordRule.BackgroundColor, logEvent), textBox.BackColor);
-                    textBox.SelectionColor = GetColorFromString(RenderLogEvent(wordRule.FontColor, logEvent), textBox.ForeColor);
-                    textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ wordRule.Style);
+                    var wordRulePattern = wordRule.Regex?.Render(logEvent) ?? string.Empty;
+                    var wordRuleText = wordRule.Text?.Render(logEvent) ?? string.Empty;
+                    var wordRuleWholeWords = wordRule.WholeWords.RenderValue(logEvent);
+                    var wordRuleIgnoreCase = wordRule.IgnoreCase.RenderValue(logEvent);
+
+                    MatchCollection matches = wordRule.ResolveRegEx(wordRulePattern, wordRuleText, wordRuleWholeWords, wordRuleIgnoreCase).Matches(textBox.Text, startIndex);
+                    foreach (Match match in matches)
+                    {
+                        textBox.SelectionStart = match.Index;
+                        textBox.SelectionLength = match.Length;
+                        textBox.SelectionBackColor = GetColorFromString(wordRule.BackgroundColor?.Render(logEvent), textBox.BackColor);
+                        textBox.SelectionColor = GetColorFromString(wordRule.FontColor?.Render(logEvent), textBox.ForeColor);
+                        textBox.SelectionFont = new Font(textBox.SelectionFont, textBox.SelectionFont.Style ^ wordRule.Style);
+                    }
                 }
             }
 
             if (SupportLinks)
             {
-                object linkInfoObj;
-                lock (logEvent.Properties)
+                object linkInfoObj = null;
+                if (logEvent.HasProperties)
                 {
                     logEvent.Properties.TryGetValue(RichTextBoxLinkLayoutRenderer.LinkInfo.PropertyName, out linkInfoObj);
                 }
+
                 if (linkInfoObj != null)
                 {
                     RichTextBoxLinkLayoutRenderer.LinkInfo linkInfo = (RichTextBoxLinkLayoutRenderer.LinkInfo)linkInfoObj;
@@ -989,16 +985,16 @@ namespace NLog.Windows.Forms
             }
         }
 
-        private sealed class MessageInfo
+        private readonly struct MessageInfo
         {
-            internal string Message { get; private set; }
-            internal RichTextBoxRowColoringRule Rule { get; private set; }
-            internal LogEventInfo LogEvent { get; private set; }
+            internal string Message { get; }
+            internal RichTextBoxRowColoringRule Rule { get; }
+            internal LogEventInfo LogEvent { get; }
             internal MessageInfo(string message, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
             {
-                this.Message = message;
-                this.Rule = rule;
-                this.LogEvent = logEvent;
+                Message = message;
+                Rule = rule;
+                LogEvent = logEvent;
             }
         }
     }
