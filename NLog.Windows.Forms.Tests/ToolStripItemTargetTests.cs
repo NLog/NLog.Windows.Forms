@@ -17,10 +17,11 @@ namespace NLog.Windows.Forms.Tests
         public ToolStripItemTargetTests()
         {
             LogManager.ThrowExceptions = true;
-            LogManager.Setup().SetupExtensions(ext => ext.RegisterAssembly(typeof(ToolStripItemTarget).Assembly));
+            LogManager.Setup().SetupExtensions(ext => ext.RegisterWindowsForms());
         }
 
         [Fact]
+        [LogManagerReset]
         public void SimpleToolStripItemTargetTest()
         {
             Form testForm = null;
@@ -48,7 +49,7 @@ namespace NLog.Windows.Forms.Tests
                     ToolStripName = "ToolStrip1",
                     Layout = "${level} ${logger} ${message}"
                 };
-                SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+                NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
                 logger.Fatal("Test");   // Send log
                 Application.DoEvents(); // Do events to allow the invoked method is completed.

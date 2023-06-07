@@ -18,10 +18,11 @@ namespace NLog.Windows.Forms.Tests
         public RichTextBoxTargetTests()
         {
             LogManager.ThrowExceptions = true;
-            LogManager.Setup().SetupExtensions(ext => ext.RegisterAssembly(typeof(RichTextBoxTarget).Assembly));
+            LogManager.Setup().SetupExtensions(ext => ext.RegisterWindowsForms());
         }
 
         [Fact]
+        [LogManagerReset]
         public void SimpleRichTextBoxTargetTest()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -34,7 +35,7 @@ namespace NLog.Windows.Forms.Tests
                 Height = 200,
             };
 
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
             logger.Fatal("Test");
             logger.Error("Foo");
             logger.Warn("Bar");
@@ -95,6 +96,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void NoColoringTest()
         {
             try
@@ -107,7 +109,7 @@ namespace NLog.Windows.Forms.Tests
                     ToolWindow = false,
                 };
 
-                SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+                NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
                 logger.Fatal("Test");
                 logger.Error("Foo");
                 logger.Warn("Bar");
@@ -145,6 +147,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void CustomRowColoringTest()
         {
             try
@@ -161,7 +164,7 @@ namespace NLog.Windows.Forms.Tests
                     }
                 };
 
-                SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+                NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
                 logger.Fatal("Test");
                 logger.Error("Foo");
                 logger.Warn("Bar");
@@ -219,6 +222,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void CustomWordRowColoringTest()
         {
             try
@@ -236,7 +240,7 @@ namespace NLog.Windows.Forms.Tests
                     }
                 };
 
-                SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+                NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
                 logger.Fatal("Test zzz");
                 logger.Error("Foo xxx");
                 logger.Warn("Bar yyy");
@@ -292,6 +296,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void RichTextBoxTargetDefaultsTest()
         {
             var target = new RichTextBoxTarget();
@@ -303,6 +308,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void AutoScrollTest()
         {
             try
@@ -317,7 +323,7 @@ namespace NLog.Windows.Forms.Tests
                 };
 
                 var form = target.TargetForm;
-                SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+                NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
                 for (int i = 0; i < 100; ++i)
                 {
                     logger.Info("Test");
@@ -333,6 +339,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void MaxLinesTest()
         {
             try
@@ -349,7 +356,7 @@ namespace NLog.Windows.Forms.Tests
                 target.MaxLines = 7;
 
                 var form = target.TargetForm;
-                SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+                NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
                 for (int i = 0; i < 100; ++i)
                 {
                     logger.Info("Test {0}", i);
@@ -367,6 +374,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ColoringRuleDefaults()
         {
             var expectedRules = new[]
@@ -391,6 +399,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ActiveFormTest()
         {
             var target = new RichTextBoxTarget()
@@ -426,6 +435,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ActiveFormTest2()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -471,6 +481,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ActiveFormNegativeTest1()
         {
             var target = new RichTextBoxTarget()
@@ -506,6 +517,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ActiveFormNegativeTest2()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -537,6 +549,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ManualRegisterTestNoRetention()
         {
             var config = new LoggingConfiguration();
@@ -549,7 +562,7 @@ namespace NLog.Windows.Forms.Tests
                 AllowAccessoryFormCreation = false
                 //default MessageRetention = RichTextBoxTargetMessageRetentionStrategy.None
             };
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Trace("Accessory Form");
             Application.DoEvents();
@@ -588,6 +601,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ManualRegisterTestNoRetentionAndAccessoryForm()
         {
             var config = new LoggingConfiguration();
@@ -603,7 +617,7 @@ namespace NLog.Windows.Forms.Tests
                 AllowAccessoryFormCreation = true,
                 //default MessageRetention = RichTextBoxTargetMessageRetentionStrategy.None
             };
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Trace("Accessory Form");
             Application.DoEvents();
@@ -652,6 +666,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ManualRegisterTestWithRetentionOnlyMissed()
         {
             var config = new LoggingConfiguration();
@@ -665,7 +680,7 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
             };
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Trace("Accessory Form");
             Application.DoEvents();
@@ -705,6 +720,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ManualRegisterTestWithRetentionOnlyMissedAndAccessoryForm()
         {
             var config = new LoggingConfiguration();
@@ -721,7 +737,7 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
             };
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Trace("Accessory Form");
             Application.DoEvents();
@@ -771,6 +787,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ManualRegisterTestWithRetentionOnlyMissedDelayedControlCreation()
         {
             var config = new LoggingConfiguration();
@@ -784,7 +801,7 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.OnlyMissed
             };
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Trace("Accessory Form");
             Application.DoEvents();
@@ -837,6 +854,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ManualRegisterTestWithRetentionAndAccessoryForm()
         {
             var config = new LoggingConfiguration();
@@ -853,7 +871,7 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
             };
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Trace("Accessory Form");
             Application.DoEvents();
@@ -921,6 +939,7 @@ namespace NLog.Windows.Forms.Tests
         /// a test for <a href="https://github.com/NLog/NLog.Windows.Forms/issues/24">#24</a>
         /// </summary>
         [Fact]
+        [LogManagerReset]
         public void CustomFormReinitializeInConstructor()
         {
             var config = new LoggingConfiguration();
@@ -934,7 +953,7 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
             };
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Trace("No Control");
             Application.DoEvents();
@@ -966,6 +985,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void ManualRegisterTestWithRetentionConfigReload()
         {
             var config = new LoggingConfiguration();
@@ -979,7 +999,7 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 10,
                 MessageRetention = RichTextBoxTargetMessageRetentionStrategy.All
             };
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Trace("No Control");
             Application.DoEvents();
@@ -1038,6 +1058,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void LinkLayoutTestDisabledLinks()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -1051,7 +1072,7 @@ namespace NLog.Windows.Forms.Tests
                 SupportLinks = false
             };
 
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
             logger.Info("Test");
 
             Application.DoEvents();
@@ -1062,6 +1083,7 @@ namespace NLog.Windows.Forms.Tests
 
 
         [Fact]
+        [LogManagerReset]
         public void LinkTest()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -1075,7 +1097,7 @@ namespace NLog.Windows.Forms.Tests
                 SupportLinks = true
             };
 
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
             logger.Info("Test");
 
             Application.DoEvents();
@@ -1095,6 +1117,7 @@ namespace NLog.Windows.Forms.Tests
 
 
         [Fact]
+        [LogManagerReset]
         public void LinkTestConditional()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -1108,7 +1131,7 @@ namespace NLog.Windows.Forms.Tests
                 SupportLinks = true
             };
 
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             logger.Info("TestNoLink");
             Application.DoEvents();
@@ -1152,6 +1175,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void LinkTestExcessLinksRemoved()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -1166,7 +1190,7 @@ namespace NLog.Windows.Forms.Tests
                 MaxLines = 5
             };
 
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
 
             Assert.Same(target, RichTextBoxTarget.GetTargetByControl(target.TargetRichTextBox));
 
@@ -1191,6 +1215,7 @@ namespace NLog.Windows.Forms.Tests
         }
 
         [Fact]
+        [LogManagerReset]
         public void LinkClickTest()
         {
             RichTextBoxTarget target = new RichTextBoxTarget()
@@ -1204,7 +1229,7 @@ namespace NLog.Windows.Forms.Tests
                 SupportLinks = true
             };
 
-            SimpleConfigurator.ConfigureForTargetLogging(target, LogLevel.Trace);
+            NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target));
             logger.Info("Test");
 
             Application.DoEvents();
