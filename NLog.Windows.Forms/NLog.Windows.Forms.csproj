@@ -25,17 +25,19 @@
 		<RepositoryType>git</RepositoryType>
 		<AssemblyVersion>5.0.0.0</AssemblyVersion>
 		<PackageReleaseNotes>
-- Updated to NLog 5.0.5 (@snakefoot)
-- Replaced net5.0-windows with net6.0-windows (@304NotModified)
-- Fix crash SelectionLength + support links on all platforms (@304NotModified)
-- Changed to typed Layout-properties (@Fr33dan)
+- Updated to NLog v5.2 (@snakefoot)
+- Added LogManager.Setup() extension method RegisterWindowsForms() (@snakefoot)
 
 Remember to register NLog.Windows.Forms in NLog.config
 
-&lt;extensions&gt;
-    &lt;add assembly="NLog.Windows.Forms" /&gt;
-&lt;/extensions&gt;
-		</PackageReleaseNotes>
+   &lt;extensions&gt;
+      &lt;add assembly="NLog.Windows.Forms" /&gt;
+   &lt;/extensions&gt;
+
+Alternative register from code without reflection of assembly-types:
+
+   NLog.LogManager.Setup().RegisterWindowsForms();
+    </PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
