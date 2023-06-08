@@ -25,5 +25,10 @@ Install the [NLog.Windows.Forms](https://www.nuget.org/packages/NLog.Windows.For
   </extensions>
 ```
 
+To register from code without reflection of assembly-types:
+```csharp
+NLog.LogManager.Setup().RegisterWindowsForms();
+```
+
 ## License
 BSD
