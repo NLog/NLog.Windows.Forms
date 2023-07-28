@@ -171,11 +171,24 @@ namespace NLog.Windows.Forms
         /// </remarks>
         public RichTextBoxTarget()
         {
-            _sendTheMessageToRichTextBox = new DelSendTheMessageToRichTextBox(SendTheMessageToRichTextBox);
+            _sendTheMessageToRichTextBox = new DelSendTheMessageToRichTextBox((txtbox, msg, rule, evt) =>
+            {
+                try
+                {
+                    SendTheMessageToRichTextBox(txtbox, msg, rule, evt);
+                }
+                catch (Exception ex)
+                {
+                    if (NLog.LogManager.ThrowExceptions)
+                        throw;
+
+                    InternalLogger.Warn(ex, "{0}: Failed to append RichTextBox", this);
+                }
+            });
         }
 
 
-        private delegate void DelSendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent);
+        private delegate void DelSendTheMessageToRichTextBox(RichTextBox textBox, string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent);
 
         private readonly DelSendTheMessageToRichTextBox _sendTheMessageToRichTextBox;
 
@@ -483,7 +496,7 @@ namespace NLog.Windows.Forms
 
                 if (FormName == null)
                 {
-                    InternalLogger.Info("FormName not set, creating acceccory form");
+                    InternalLogger.Info("{0}: FormName not set, creating acceccory form", this);
                     CreateAccessoryForm();
                     return;
                 }
@@ -491,7 +504,7 @@ namespace NLog.Windows.Forms
                 openFormByName = Application.OpenForms[FormName];
                 if (openFormByName == null)
                 {
-                    InternalLogger.Info("Form {0} not found, creating accessory form", FormName);
+                    InternalLogger.Info("{0}: FormName '{1}' not found, creating accessory form", this, FormName);
                     CreateAccessoryForm();
                     return;
                 }
@@ -532,14 +545,14 @@ namespace NLog.Windows.Forms
                 openFormByName = Application.OpenForms[FormName];
                 if (openFormByName == null)
                 {
-                    InternalLogger.Info("Form {0} not found, waiting for ReInitializeAllTextboxes.", FormName);
+                    InternalLogger.Info("{0}: FormName '{1}' not found, waiting for ReInitializeAllTextboxes.", this, FormName);
                     return;
                 }
 
                 targetControl = FormHelper.FindControl<RichTextBox>(ControlName, openFormByName);
                 if (targetControl == null)
                 {
-                    InternalLogger.Info("Rich text box control '{0}' cannot be found on form '{1}'. Waiting for ReInitializeAllTextboxes.", ControlName, FormName);
+                    InternalLogger.Info("{0}: FormName '{1}' does not contain ControlName '{2}'. Waiting for ReInitializeAllTextboxes.", this, FormName, ControlName);
                     return;
                 }
 
@@ -585,7 +598,7 @@ namespace NLog.Windows.Forms
         /// <param name="textboxControl">a new control to attach to</param>
         private void AttachToControl(Form form, RichTextBox textboxControl)
         {
-            InternalLogger.Info("Attaching target {0} to textbox {1}.{2}", this.Name, form.Name, textboxControl.Name);
+            InternalLogger.Info("{0}: Attaching target to textbox {1}.{2}", this, form.Name, textboxControl.Name);
             DetachFromControl();
             this.TargetForm = form;
             this.TargetRichTextBox = textboxControl;
@@ -640,7 +653,7 @@ namespace NLog.Windows.Forms
             if (!match.Success)
             {
                 //could be a link inserted by another RTB control user
-                InternalLogger.Warn("Unexpected link format '{0}', skipping", e.LinkText);
+                InternalLogger.Warn("{0}: Unexpected link format '{1}', skipping", this, e.LinkText);
                 return;
             }
 
@@ -648,7 +661,7 @@ namespace NLog.Windows.Forms
             if (!int.TryParse(match.Groups[1].Value, out id))
             {
                 //still could be a link inserted by another RTB control user
-                InternalLogger.Warn("Unexpected link format '{0}', skipping", e.LinkText);
+                InternalLogger.Warn("{0}: Unexpected link format '{1}', skipping", this, e.LinkText);
                 return;
             }
 
@@ -694,7 +707,7 @@ namespace NLog.Windows.Forms
                 }
                 catch (Exception ex)
                 {
-                    InternalLogger.Warn(ex, "Failed DetachFromControl");
+                    InternalLogger.Warn(ex, "{0}: Failed DetachFromControl", this);
 
                     if (LogManager.ThrowExceptions)
                     {
@@ -732,7 +745,7 @@ namespace NLog.Windows.Forms
                 }
                 else if (messageRetention == RichTextBoxTargetMessageRetentionStrategy.None)
                 {
-                    InternalLogger.Trace("Textbox for target {0} is {1}, skipping logging", this.Name, textbox == null ? "null" : "disposed");
+                    InternalLogger.Trace("{0}: Attached Textbox is {1}, skipping logging", this, textbox == null ? "null" : "disposed");
                     return;
                 }
             }
@@ -783,18 +796,18 @@ namespace NLog.Windows.Forms
                 {
                     if (textbox.InvokeRequired)
                     {
-                        textbox.BeginInvoke(_sendTheMessageToRichTextBox, logMessage, rule, logEvent);
+                        textbox.BeginInvoke(_sendTheMessageToRichTextBox, textbox, logMessage, rule, logEvent);
                     }
                     else
                     {
-                        SendTheMessageToRichTextBox(logMessage, rule, logEvent);
+                        SendTheMessageToRichTextBox(textbox, logMessage, rule, logEvent);
                     }
                     return true;
                 }
             }
             catch (Exception ex)
             {
-                InternalLogger.Warn(ex, "Failed to append RichTextBox");
+                InternalLogger.Warn(ex, "{0}: Failed to append RichTextBox", this);
 
                 if (LogManager.ThrowExceptions)
                 {
@@ -847,10 +860,8 @@ namespace NLog.Windows.Forms
             return Color.FromName(color);
         }
 
-        private void SendTheMessageToRichTextBox(string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
+        private void SendTheMessageToRichTextBox(RichTextBox textBox, string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent)
         {
-            RichTextBox textBox = TargetRichTextBox;
-
             int startIndex = textBox.TextLength;
             textBox.SelectionStart = startIndex;
             textBox.SelectionBackColor = GetColorFromString(rule.BackgroundColor?.Render(logEvent), textBox.BackColor);
