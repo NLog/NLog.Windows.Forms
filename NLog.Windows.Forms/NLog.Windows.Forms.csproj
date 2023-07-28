@@ -25,8 +25,8 @@
 		<RepositoryType>git</RepositoryType>
 		<AssemblyVersion>5.0.0.0</AssemblyVersion>
 		<PackageReleaseNotes>
-- Updated to NLog v5.2 (@snakefoot)
-- Added LogManager.Setup() extension method RegisterWindowsForms() (@snakefoot)
+- Fixed NullReferenceException for RichTextBoxTarget (@snakefoot)
+- Updated to NLog v5.2.2 (@snakefoot)
 
 Remember to register NLog.Windows.Forms in NLog.config
 
@@ -41,7 +41,7 @@ Alternative register from code without reflection of assembly-types:
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="5.2.0" />
+		<PackageReference Include="NLog" Version="5.2.2" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
   
