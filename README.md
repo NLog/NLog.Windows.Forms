@@ -13,20 +13,16 @@ This package provides NLog Targets that redirect logging output to Windows Forms
 See [list](https://nlog-project.org/config/?tab=targets&search=package:nlog.windows.forms)
 
 ## Register Extension
-Install the [NLog.Windows.Forms](https://www.nuget.org/packages/NLog.Windows.Forms/) NuGet package and [register the extension-assembly](https://github.com/NLog/NLog/wiki/Register-your-custom-component):
+Install the [NLog.Windows.Forms](https://www.nuget.org/packages/NLog.Windows.Forms/) NuGet package and [register the extension-assembly](https://github.com/NLog/NLog/wiki/Register-your-custom-component).
 
 NLog will only recognize the extensions when loading from NLog.config-file, by adding the extension to NLog.config-file:
 ```xml
-  <!-- enable NLog.Windows.Forms targets and layoutrenderers -->
-  <extensions>
-    <add assembly="NLog.Windows.Forms"/>
-  </extensions>
+<extensions>
+  <add assembly="NLog.Windows.Forms"/>
+</extensions>
 ```
 
 Alternative register from code using [fluent configuration API](https://github.com/NLog/NLog/wiki/Fluent-Configuration-API):
 ```csharp
 NLog.LogManager.Setup().RegisterWindowsForms();
 ```
-
-## License
-BSD
