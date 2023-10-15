@@ -20,8 +20,9 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
-			- Fixed NullReferenceException for RichTextBoxTarget (@snakefoot)
-			- Updated to NLog v5.2.2 (@snakefoot)
+- Added README.md to nuget-package
+- Fixed NullReferenceException for RichTextBoxTarget (@snakefoot)
+- Updated to NLog v5.2.2 (@snakefoot)
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
