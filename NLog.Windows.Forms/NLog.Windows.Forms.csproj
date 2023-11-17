@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
@@ -29,10 +29,13 @@
 		<AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<IsPackable>true</IsPackable>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<IncludeSymbols>true</IncludeSymbols>
-		<DebugType Condition=" '$(Configuration)' == 'Debug' ">Full</DebugType>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+		<IsTrimmable>true</IsTrimmable>
+		<!-- EmbedUntrackedSources for deterministic build -->
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 	</PropertyGroup>
 
 	<ItemGroup>
