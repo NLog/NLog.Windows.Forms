@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows</TargetFrameworks>
+		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows;net8.0-windows</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
 		<AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
 		<AssemblyVersion>5.0.0.0</AssemblyVersion>
@@ -20,9 +20,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
-- Added README.md to nuget-package
-- Fixed NullReferenceException for RichTextBoxTarget (@snakefoot)
-- Updated to NLog v5.2.2 (@snakefoot)
+- Added NET8 as target-platform
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
@@ -33,7 +31,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-		<IsTrimmable>true</IsTrimmable>
+		<IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
 		<!-- EmbedUntrackedSources for deterministic build -->
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 	</PropertyGroup>
