@@ -287,11 +287,13 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// Gets or sets the form to log to.
         /// </summary>
+        [NLogConfigurationIgnoreProperty]
         public Form TargetForm { get; set; }
 
         /// <summary>
         /// Gets or sets the rich text box to log to.
         /// </summary>
+        [NLogConfigurationIgnoreProperty]
         public RichTextBox TargetRichTextBox { get; set; }
 
         /// <summary>
@@ -307,7 +309,6 @@ namespace NLog.Windows.Forms
         /// </remarks>
         /// <docgen category='Form Options' order='10' />
         public bool AllowAccessoryFormCreation { get; set; } = true;
-
 
         /// <summary>
         /// gets or sets the message retention strategy which determines how the target handles messages when there's no control attached, or when switching between controls
@@ -447,8 +448,6 @@ namespace NLog.Windows.Forms
                 }
             }
         }
-
-
 
         /// <summary>
         /// Internal prefix that is added to the link id in RTF
