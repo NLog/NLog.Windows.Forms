@@ -20,7 +20,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
-- Added NET8 as target-platform
+- Fixed RichTextBoxTarget to skip reflection for TargetForm and TargetRichTextBox
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
