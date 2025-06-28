@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using NLog.Config;
 using NLog.LayoutRenderers;
@@ -22,7 +21,7 @@ namespace NLog.Windows.Forms
         /// Inner layout that actually provides text
         /// </summary>
         [DefaultParameter]
-        public Layout Inner { get; set; }
+        public Layout? Inner { get; set; }
 
         /// <summary>
         /// Implementation of a <see cref="LayoutRenderer.Append" />
@@ -31,18 +30,18 @@ namespace NLog.Windows.Forms
         /// <param name="logEvent"></param>
         protected override void Append(StringBuilder builder, LogEventInfo logEvent)
         {
-            var msg = Inner.Render(logEvent);
-            if (string.IsNullOrEmpty(msg))
+            var msg = Inner?.Render(logEvent);
+            if (msg is null || string.IsNullOrEmpty(msg))
             {
                 return;
             }
 
             //store new linkInfo to be retreived by RichTextBox
-            LinkInfo linkInfo;
-            object linkInfoObj;
+            LinkInfo? linkInfo;
+            object? linkInfoObj;
             lock (logEvent.Properties)
             {
-                if (logEvent.Properties.TryGetValue(LinkInfo.PropertyName, out linkInfoObj))
+                if (logEvent.Properties.TryGetValue(LinkInfo.PropertyName, out linkInfoObj) && linkInfoObj is LinkInfo)
                 {
                     linkInfo = (LinkInfo)linkInfoObj;
                 }
@@ -81,15 +80,13 @@ namespace NLog.Windows.Forms
                 }
             }
 
-            internal string GetValue(string guid)
+            internal string? GetValue(string guid)
             {
-                string result = null;
                 lock (lockObj)
                 {
-                    guidToLinkText.TryGetValue(guid, out result);
+                    guidToLinkText.TryGetValue(guid, out var result);
+                    return result;
                 }
-
-                return result;
             }
         }
     }
