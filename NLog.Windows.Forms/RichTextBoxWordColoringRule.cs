@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Text.RegularExpressions;
 using NLog.Config;
 using NLog.Layouts;
@@ -12,33 +13,35 @@ namespace NLog.Windows.Forms
     [NLogConfigurationItem]
     public class RichTextBoxWordColoringRule
     {
+        private static readonly Layout EmptyColor = Layout.FromLiteral("Empty");
+
         /// <summary>
         /// Gets or sets the regular expression to be matched. You must specify either <c>text</c> or <c>regex</c>.
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        public Layout Regex { get; set; }
+        public Layout? Regex { get; set; }
 
         /// <summary>
         /// Gets or sets the text to be matched. You must specify either <c>text</c> or <c>regex</c>.
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        public Layout Text { get; set; }
+        public Layout? Text { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to match whole words only.
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        public Layout<bool> WholeWords { get; set; }
+        public Layout<bool> WholeWords { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether to ignore case when comparing texts.
         /// 
         /// </summary>
         /// <docgen category="Rule Matching Options" order="10"/>
-        public Layout<bool> IgnoreCase { get; set; }
+        public Layout<bool> IgnoreCase { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the font style of matched text.
@@ -46,7 +49,7 @@ namespace NLog.Windows.Forms
         /// 
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
-        public FontStyle Style { get; set; }
+        public FontStyle Style { get; set; } = FontStyle.Regular;
 
         /// <summary>
         /// Gets the compiled regular expression that matches either Text or Regex property.
@@ -73,7 +76,7 @@ namespace NLog.Windows.Forms
         /// 
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
-        public Layout FontColor { get; set; }
+        public Layout FontColor { get; set; } = EmptyColor;
 
         /// <summary>
         /// Gets or sets the background color.
@@ -81,23 +84,22 @@ namespace NLog.Windows.Forms
         /// 
         /// </summary>
         /// <docgen category="Formatting Options" order="10"/>
-        public Layout BackgroundColor { get; set; }
+        public Layout BackgroundColor { get; set; } = EmptyColor;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:NLog.Targets.RichTextBoxWordColoringRule"/> class.
-        /// 
         /// </summary>
         public RichTextBoxWordColoringRule()
         {
-            this.FontColor = "Empty";
-            this.BackgroundColor = "Empty";
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:NLog.Targets.RichTextBoxWordColoringRule"/> class.
-        /// 
         /// </summary>
-        /// <param name="text">The text to be matched..</param><param name="fontColor">Color of the text.</param><param name="backgroundColor">Color of the background.</param>
+        /// <param name="text">The text to be matched..</param>
+        /// <param name="fontColor">Color of the text.</param>
+        /// <param name="backgroundColor">Color of the background.</param>
+        [Obsolete("Instead use default constructor and assign relevant properties. Marked obsolete with NLog v6")]
         public RichTextBoxWordColoringRule(string text, string fontColor, string backgroundColor)
         {
             this.Text = text;
@@ -107,9 +109,12 @@ namespace NLog.Windows.Forms
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:NLog.Targets.RichTextBoxWordColoringRule"/> class.
-        /// 
         /// </summary>
-        /// <param name="text">The text to be matched..</param><param name="textColor">Color of the text.</param><param name="backgroundColor">Color of the background.</param><param name="fontStyle">The font style.</param>
+        /// <param name="text">The text to be matched..</param>
+        /// <param name="textColor">Color of the text.</param>
+        /// <param name="backgroundColor">Color of the background.</param>
+        /// <param name="fontStyle">The font style.</param>
+        [Obsolete("Instead use default constructor and assign relevant properties. Marked obsolete with NLog v6")]
         public RichTextBoxWordColoringRule(string text, string textColor, string backgroundColor, FontStyle fontStyle)
         {
             this.Text = text;

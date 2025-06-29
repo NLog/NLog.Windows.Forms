@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net461</TargetFramework>
+		<TargetFramework>net462</TargetFramework>
 		<AssemblyTitle>TestApplication</AssemblyTitle>
 		<Product>TestApplication</Product>
 		<OutputPath>bin\$(Configuration)\</OutputPath>
@@ -18,9 +18,6 @@
 		<ProjectReference Include="..\..\NLog.Windows.Forms\NLog.Windows.Forms.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Reference Include="System.Data.DataSetExtensions" />
-		<Reference Include="Microsoft.CSharp" />
-		<Reference Include="System.Deployment" />
 		<Reference Include="System.Windows.Forms" />
 	</ItemGroup>
 </Project>

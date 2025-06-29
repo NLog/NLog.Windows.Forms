@@ -160,7 +160,9 @@ namespace NLog.Windows.Forms.Tests
                     ToolWindow = false,
                     RowColoringRules =
                     {
+#pragma warning disable CS0618 // Type or member is obsolete
                         new RichTextBoxRowColoringRule("starts-with(message, 'B')", "Maroon", "Empty"),
+#pragma warning restore CS0618 // Type or member is obsolete
                     }
                 };
 
@@ -235,8 +237,10 @@ namespace NLog.Windows.Forms.Tests
                     ToolWindow = false,
                     WordColoringRules =
                     {
+#pragma warning disable CS0618 // Type or member is obsolete
                         new RichTextBoxWordColoringRule("zzz", "Red", "Empty"),
                         new RichTextBoxWordColoringRule("aaa", "Green", "Empty"),
+#pragma warning restore CS0618 // Type or member is obsolete
                     }
                 };
 
@@ -301,10 +305,10 @@ namespace NLog.Windows.Forms.Tests
         {
             var target = new RichTextBoxTarget();
             Assert.False(target.UseDefaultRowColoringRules);
-            Assert.Equal(0, target.WordColoringRules.Count);
-            Assert.Equal(0, target.RowColoringRules.Count);
-            Assert.Null(target.FormName);
-            Assert.Null(target.ControlName);
+            Assert.Empty(target.WordColoringRules);
+            Assert.Empty(target.RowColoringRules);
+            Assert.Empty(target.FormName?.ToString());
+            Assert.Empty(target.ControlName?.ToString());
         }
 
         [Fact]
@@ -379,12 +383,14 @@ namespace NLog.Windows.Forms.Tests
         {
             var expectedRules = new[]
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 new RichTextBoxRowColoringRule("level == LogLevel.Fatal", "White", "Red", FontStyle.Bold),
                 new RichTextBoxRowColoringRule("level == LogLevel.Error", "Red", "Empty", FontStyle.Bold | FontStyle.Italic),
                 new RichTextBoxRowColoringRule("level == LogLevel.Warn", "Orange", "Empty", FontStyle.Underline),
                 new RichTextBoxRowColoringRule("level == LogLevel.Info", "Black", "Empty"),
                 new RichTextBoxRowColoringRule("level == LogLevel.Debug", "Gray", "Empty"),
                 new RichTextBoxRowColoringRule("level == LogLevel.Trace", "DarkGray", "Empty", FontStyle.Italic),
+#pragma warning restore CS0618 // Type or member is obsolete
             };
 
             var actualRules = RichTextBoxTarget.DefaultRowColoringRules;
@@ -507,11 +513,11 @@ namespace NLog.Windows.Forms.Tests
                         builder.ForLogger().WriteTo(target);
                     }).LogFactory;
 
-                    Assert.True(false, "Expected exception.");
+                    Assert.Fail("Expected exception.");
                 }
                 catch (NLogConfigurationException ex)
                 {
-                    Assert.Equal("Rich text box control 'Control1' cannot be found on form 'MyForm1'.", ex.Message);
+                    Assert.Equal("RichTextBoxTarget(Name=RichTextBox): Rich text box control 'Control1' cannot be found on form 'MyForm1'.", ex.Message);
                 }
             }
         }
@@ -539,11 +545,12 @@ namespace NLog.Windows.Forms.Tests
                     {
                         builder.ForLogger().WriteTo(target);
                     }).LogFactory;
-                    Assert.True(false, "Expected exception.");
+
+                    Assert.Fail("Expected exception.");
                 }
                 catch (NLogConfigurationException ex)
                 {
-                    Assert.Equal("Rich text box control name must be specified for RichTextBoxTarget.", ex.Message);
+                    Assert.Equal("RichTextBoxTarget(Name=RichTextBox): Rich text box ControlName must be specified.", ex.Message);
                 }
             }
         }

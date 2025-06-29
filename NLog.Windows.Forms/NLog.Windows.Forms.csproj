@@ -3,7 +3,7 @@
 		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows;net8.0-windows</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
 		<AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
-		<AssemblyVersion>5.0.0.0</AssemblyVersion>
+		<AssemblyVersion>6.0.0.0</AssemblyVersion>
 		<Company>NLog</Company>
 		<Product>NLog.Windows.Forms</Product>
 		<Description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </Description>
@@ -20,30 +20,38 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
-- Fixed RichTextBoxTarget to skip reflection for TargetForm and TargetRichTextBox
+- NLog v6.0.1
+- Enabled Nullable API
+- RichTextBoxTarget ControlName and FormName changed to Layout
+- 
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>NLog.snk</AssemblyOriginatorKeyFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
-		<IsPackable>true</IsPackable>
+		<IsPackable>true</IsPackable>   
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-		<IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
 		<!-- EmbedUntrackedSources for deterministic build -->
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <DisableImplicitFrameworkReferences Condition=" '$(TargetFramework)' == 'net35' ">true</DisableImplicitFrameworkReferences>
+    <Nullable>enable</Nullable>
+    <LangVersion Condition="'$(TargetFramework)' == 'net35'">9</LangVersion>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="5.2.2" />
+		<PackageReference Include="NLog" Version="6.0.1" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
 		<Reference Include="System.Windows.Forms" />
-		<Reference Include="System.Data.DataSetExtensions" />
 	</ItemGroup>
 
 	<ItemGroup>

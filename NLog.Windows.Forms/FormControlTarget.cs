@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 using NLog.Common;
-using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
 
@@ -36,7 +35,6 @@ namespace NLog.Windows.Forms
         /// </remarks>
         public FormControlTarget()
         {
-            Append = true;
         }
 
         private delegate void DelSendTheMessageToFormControl(Control control, string logMessage, bool append, bool reverseOrder);
@@ -45,58 +43,71 @@ namespace NLog.Windows.Forms
         /// Gets or sets the name of control to which NLog will log write log text.
         /// </summary>
         /// <docgen category='Form Options' order='10' />
-        [RequiredParameter]
-        public Layout ControlName { get; set; }
+        public Layout ControlName { get; set; } = Layout.Empty;
 
         /// <summary>
         /// Gets or sets a value indicating whether log text should be appended to the text of the control instead of overwriting it. </summary>
         /// <docgen category='Form Options' order='10' />
-        public Layout<bool> Append { get; set; }
+        public Layout<bool> Append { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the name of the Form on which the control is located.
         /// </summary>
         /// <docgen category='Form Options' order='10' />
-        public Layout FormName { get; set; }
+        public Layout? FormName { get; set; }
 
         /// <summary>
         /// Gets or sets whether new log entry are added to the start or the end of the control
         /// </summary>
-        public Layout<bool> ReverseOrder { get; set; }
+        public Layout<bool> ReverseOrder { get; set; } = false;
+
+        /// <inheritdoc />
+        protected override void InitializeTarget()
+        {
+            if (ControlName is null || ReferenceEquals(ControlName, Layout.Empty))
+                throw new NLogConfigurationException("FormControlTarget ControlName-property must be assigned.");
+
+            base.InitializeTarget();
+        }
 
         /// <summary>
         /// Log message to control.
         /// </summary>
-        /// <param name="logEvent">
-        /// The logging event.
-        /// </param>
+        /// <param name="logEvent">The logging event.</param>
         protected override void Write(LogEventInfo logEvent)
         {
             string logMessage = RenderLogEvent(Layout, logEvent);
 
-            Form form = null;
+            Form? form = null;
 
             if (Form.ActiveForm != null)
             {
                 form = Form.ActiveForm;
             }
 
-            string renderedFormName = RenderLogEvent(FormName, logEvent);
-            if (Application.OpenForms[renderedFormName] != null)
+            string formName = RenderLogEvent(FormName, logEvent);
+            if (Application.OpenForms[formName] != null)
             {
-                form = Application.OpenForms[renderedFormName];
+                form = Application.OpenForms[formName];
             }
 
-            if (form == null)
+            if (form is null)
             {
-                InternalLogger.Info("Form {0} not found", FormName);
+                if (string.IsNullOrEmpty(formName))
+                    formName = FormName?.ToString() ?? string.Empty;
+                InternalLogger.Info("Form {0} not found", formName);
                 return;
             }
 
-            Control control = FormHelper.FindControl(RenderLogEvent(ControlName, logEvent), form);
-            if (control == null)
+            var controlName = RenderLogEvent(ControlName, logEvent);
+            var control = FormHelper.FindControl(controlName, form);
+            if (control is null)
             {
-                InternalLogger.Info("Control {0} on Form {1} not found", ControlName, FormName);
+                if (string.IsNullOrEmpty(controlName))
+                    controlName = ControlName?.ToString() ?? string.Empty;
+                if (string.IsNullOrEmpty(formName))
+                    formName = form.Name;
+                InternalLogger.Info("Control {0} on Form {1} not found", controlName, formName);
                 return;
             }
 
@@ -117,7 +128,7 @@ namespace NLog.Windows.Forms
             }
         }
 
-        private void SendTheMessageToFormControl(Control control, string logMessage, bool append, bool reverseOrder)
+        private static void SendTheMessageToFormControl(Control control, string logMessage, bool append, bool reverseOrder)
         {
             //append of replace?
             if (append)

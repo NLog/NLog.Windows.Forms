@@ -36,16 +36,16 @@ namespace NLog.Windows.Forms
         /// <param name="name">Name of the control.</param>
         /// <param name="searchControl">Control in which we're searching for control.</param>
         /// <returns>A value of null if no control has been found.</returns>
-        internal static Control FindControl(string name, Control searchControl)
+        internal static Control? FindControl(string name, Control? searchControl)
         {
-            if (searchControl.Name == name)
+            if (searchControl is null || searchControl.Name == name)
             {
-                return searchControl;    
+                return searchControl;
             }
 
-            foreach (Control childControl in searchControl.Controls)
+            foreach (var childControl in searchControl.Controls)
             {
-                Control foundControl = FindControl(name, childControl);
+                var foundControl = FindControl(name, childControl as Control);
                 if (foundControl != null)
                 {
                     return foundControl;
@@ -61,25 +61,25 @@ namespace NLog.Windows.Forms
         /// <param name="name">Name of the ToolStripItem</param>
         /// <param name="searchCollection">Collection of ToolStripItem we are looking for the item in.</param>
         /// <returns>A value of null of no item has been found.</returns>
-        internal static ToolStripItem FindToolStripItem(string name, ToolStripItemCollection searchCollection)
+        internal static ToolStripItem? FindToolStripItem(string name, ToolStripItemCollection searchCollection)
         {
-            foreach (ToolStripItem childItem in searchCollection)
+            foreach (ToolStripItem? childItem in searchCollection)
             {
-                if(childItem.Name == name)
+                if (childItem?.Name == name)
                 {
                     return childItem;
                 }
-                if(childItem is ToolStripDropDownItem)
-                {
-                    ToolStripDropDownItem childDropDown = childItem as ToolStripDropDownItem;
-                    ToolStripItem foundItem = FindToolStripItem(name, childDropDown.DropDownItems);
 
+                if (childItem is ToolStripDropDownItem childDropDown)
+                {
+                    var foundItem = FindToolStripItem(name, childDropDown.DropDownItems);
                     if (foundItem != null)
                     {
                         return foundItem;
                     }
                 }
             }
+
             return null;
         }
 
@@ -92,22 +92,24 @@ namespace NLog.Windows.Forms
         /// <returns>
         /// A value of null if no control has been found.
         /// </returns>
-        internal static TControl FindControl<TControl>(string name, Control searchControl)
+        internal static TControl? FindControl<TControl>(string name, Control? searchControl)
             where TControl : Control
         {
+            if (searchControl is null)
+                return null;
+
             if (searchControl.Name == name)
             {
-                TControl foundControl = searchControl as TControl;
+                var foundControl = searchControl as TControl;
                 if (foundControl != null)
                 {
                     return foundControl;
                 }
             }
 
-            foreach (Control childControl in searchControl.Controls)
+            foreach (var childControl in searchControl.Controls)
             {
-                TControl foundControl = FindControl<TControl>(name, childControl);
-
+                var foundControl = FindControl<TControl>(name, childControl as Control);
                 if (foundControl != null)
                 {
                     return foundControl;
@@ -171,15 +173,18 @@ namespace NLog.Windows.Forms
             return f;
         }
 
-        private static Icon GetNLogIcon()
+        private static Icon? GetNLogIcon()
         {
             using (var stream = typeof(FormHelper).Assembly.GetManifestResourceStream("NLog.Windows.Forms.Resources.NLog.ico"))
             {
+                if (stream is null)
+                    return null;
+
                 return new Icon(stream);
             }
         }
 
-#region Link support
+        #region Link support
         /// <summary>
         /// Replaces currently selected text in the RTB control with a link
         /// </summary>
@@ -191,9 +196,7 @@ namespace NLog.Windows.Forms
         /// </remarks>
         internal static void ChangeSelectionToLink(RichTextBox textBox, string text, string hyperlink)
         {
-#if NETCOREAPP
-            textBox.SelectedRtf = @"{\rtf1\ansi{\field{\*\fldinst{HYPERLINK """ + text + @"#" + hyperlink + @""" }}{\fldrslt{" + text + @"}}}}";
-#else
+#if NETFRAMEWORK
             int selectionStart = textBox.SelectionStart;
 
             //using \v tag to hide hyperlink part of the text, and \v0 to end hiding. See http://stackoverflow.com/a/14339531/376066
@@ -202,9 +205,12 @@ namespace NLog.Windows.Forms
 
             textBox.Select(selectionStart, text.Length + 1 + hyperlink.Length); //now select both visible and invisible part
             SetSelectionStyle(textBox, CFM_LINK, CFE_LINK);                     //and turn into a link
+#else
+            textBox.SelectedRtf = @"{\rtf1\ansi{\field{\*\fldinst{HYPERLINK """ + text + @"#" + hyperlink + @""" }}{\fldrslt{" + text + @"}}}}";
 #endif
         }
 
+#if NETFRAMEWORK
         /// <summary>
         /// Sets selection style for RichTextBox
         /// https://msdn.microsoft.com/en-us/library/windows/desktop/bb787883(v=vs.85).aspx
@@ -269,6 +275,7 @@ namespace NLog.Windows.Forms
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+#endif
 #endregion
     }
 }
