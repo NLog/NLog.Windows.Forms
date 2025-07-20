@@ -20,10 +20,9 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
-- NLog v6.0.1
-- Enabled Nullable API
-- RichTextBoxTarget ControlName and FormName changed to Layout
-- 
+Changelog:
+      
+- NLog v6.0.2
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
@@ -43,7 +42,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="6.0.1" />
+		<PackageReference Include="NLog" Version="6.0.2" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
