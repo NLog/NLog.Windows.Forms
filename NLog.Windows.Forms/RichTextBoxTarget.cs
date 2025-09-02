@@ -416,7 +416,7 @@ namespace NLog.Windows.Forms
         /// <seealso cref="DelLinkClicked"/>
         /// </summary>
         public event DelLinkClicked? LinkClicked;
-        
+
         /// <summary>
         /// Actual value of the <see cref="LinkClicked"/> property
         /// </summary>

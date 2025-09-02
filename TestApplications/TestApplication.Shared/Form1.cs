@@ -20,7 +20,7 @@ namespace TestApplication
             logger.Info("Init {Application}", file);
 
             RichTextBoxTarget.ReInitializeAllTextboxes(this);
-            
+
 
             logger.Log(LogLevel.Trace, "Log Trace");
             logger.Log(LogLevel.Debug, "Log Debug");
