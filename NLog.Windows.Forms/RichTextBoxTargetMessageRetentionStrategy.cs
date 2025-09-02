@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace NLog.Windows.Forms
+﻿namespace NLog.Windows.Forms
 {
     /// <summary>
     /// How to handle messages when switching between target controls or no control is attached at all

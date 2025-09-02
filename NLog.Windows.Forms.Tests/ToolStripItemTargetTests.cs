@@ -1,10 +1,4 @@
-﻿using NLog.Config;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Xunit;
 
 namespace NLog.Windows.Forms.Tests
@@ -54,23 +48,23 @@ namespace NLog.Windows.Forms.Tests
                 logger.Fatal("Test");   // Send log
                 Application.DoEvents(); // Do events to allow the invoked method is completed.
                 Assert.Equal("Fatal NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text); // Test if method worked.
-                
+
                 logger.Error("Foo");
                 Application.DoEvents();
                 Assert.Equal("Error NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
-                
+
                 logger.Warn("Bar");
                 Application.DoEvents();
                 Assert.Equal("Warn NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);
-                
+
                 logger.Info("Test");
                 Application.DoEvents();
                 Assert.Equal("Info NLog.UnitTests.Targets.ToolStripItemTargetTests Test", testItem.Text);
-                
+
                 logger.Debug("Foo");
                 Application.DoEvents();
                 Assert.Equal("Debug NLog.UnitTests.Targets.ToolStripItemTargetTests Foo", testItem.Text);
-                
+
                 logger.Trace("Bar");
                 Application.DoEvents();
                 Assert.Equal("Trace NLog.UnitTests.Targets.ToolStripItemTargetTests Bar", testItem.Text);

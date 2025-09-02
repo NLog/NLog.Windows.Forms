@@ -1,12 +1,12 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using NLog.Config;
 using Xunit;
-using System;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace NLog.Windows.Forms.Tests
 {
