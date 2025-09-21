@@ -4,6 +4,7 @@ clone_folder: c:\projects\nlog
 configuration: Release
 platform: Any CPU
 skip_tags: true
+skip_branch_with_pr: true
 nuget:
   disable_publish_on_pr: true
 build_script:	
