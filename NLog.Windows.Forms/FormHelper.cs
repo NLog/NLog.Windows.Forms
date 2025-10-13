@@ -8,7 +8,7 @@ namespace NLog.Windows.Forms
     /// <summary>
     /// Form helper methods.
     /// </summary>
-    internal class FormHelper
+    internal static class FormHelper
     {
         /// <summary>
         /// Creates RichTextBox and docks in parentForm.
