@@ -92,12 +92,11 @@ namespace NLog.Windows.Forms
         }
 
         /// <summary>
-        /// Checks whether the specified log event matches the condition (if any).
+        /// Checks whether the specified log event matches the condition.
         /// </summary>
         /// <param name="logEvent">Log event.</param>
         /// <returns>
-        /// A value of <see langword="true"/> if the condition is not defined or
-        ///             if it matches, <see langword="false"/> otherwise.
+        /// A value of <see langword="true"/> if the condition matches, <see langword="false"/> otherwise.
         /// </returns>
         public bool CheckCondition(LogEventInfo logEvent)
         {
