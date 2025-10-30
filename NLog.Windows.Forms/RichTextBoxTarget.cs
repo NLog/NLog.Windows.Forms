@@ -188,12 +188,21 @@ namespace NLog.Windows.Forms
                     InternalLogger.Warn(ex, "{0}: Failed to append RichTextBox", this);
                 }
             });
+            _sendTheMessagesToRichTextBox = new DelSendTheMessagesToRichTextBox((txtbox, msgs) =>
+            {
+                foreach (var msg in msgs)
+                {
+                    if (msg.LogEvent != null)
+                        _sendTheMessageToRichTextBox.Invoke(txtbox, msg.Message, msg.Rule, msg.LogEvent);
+                }
+            });
         }
 
-
         private delegate void DelSendTheMessageToRichTextBox(RichTextBox textBox, string logMessage, RichTextBoxRowColoringRule rule, LogEventInfo logEvent);
+        private delegate void DelSendTheMessagesToRichTextBox(RichTextBox textBox, MessageInfo[] messages);
 
         private readonly DelSendTheMessageToRichTextBox _sendTheMessageToRichTextBox;
+        private readonly DelSendTheMessagesToRichTextBox _sendTheMessagesToRichTextBox;
 
         private delegate void FormCloseDelegate();
 
@@ -740,6 +749,65 @@ namespace NLog.Windows.Forms
             DetachFromControl();
         }
 
+        /// <inheritdoc />
+        protected override void Write(IList<AsyncLogEventInfo> logEvents)
+        {
+            var textbox = TargetRichTextBox;
+            if (logEvents.Count < 10 || textbox is null || textbox.IsDisposed || !textbox.InvokeRequired)
+            {
+                base.Write(logEvents);
+            }
+            else
+            {
+                // Single array-allocation instead of flooding the message-pump with BeginInvoke-calls
+                var logMessages = new MessageInfo[logEvents.Count];
+                for (int i = 0; i < logEvents.Count; i++)
+                {
+                    var logEvent = logEvents[i];
+                    try
+                    {
+                        string logMessage = RenderLogEvent(Layout, logEvent.LogEvent);
+                        RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent.LogEvent);
+                        logMessages[i] = new MessageInfo(logMessage, matchingRule, logEvent.LogEvent);
+                    }
+                    catch (Exception ex)
+                    {
+                        InternalLogger.Warn(ex, "{0}: Failed to render log event", this);
+                        if (LogManager.ThrowExceptions)
+                            throw;
+                        logEvent.Continuation(ex);
+                    }
+                }
+
+                bool messageSent = false;
+
+                try
+                {
+                    // Single BeginInvoke with single method-parameters-allocation
+                    textbox.BeginInvoke(_sendTheMessagesToRichTextBox, textbox, logMessages);
+                    messageSent = true;
+                    for (int i = 0; i < logEvents.Count; i++)
+                        logEvents[i].Continuation(null);
+                }
+                catch (Exception ex)
+                {
+                    InternalLogger.Warn(ex, "{0}: Failed to append RichTextBox", this);
+                    if (LogManager.ThrowExceptions)
+                        throw;
+                    for (int i = 0; i < logEvents.Count; i++)
+                        logEvents[i].Continuation(ex);
+                }
+                finally
+                {
+                    foreach (var logMessage in logMessages)
+                    {
+                        if (logMessage.LogEvent != null)
+                            HandleMessageRetension(textbox, logMessage.LogEvent, logMessage.Message, logMessage.Rule, messageSent);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Log message to RichTextBox.
         /// </summary>
@@ -766,9 +834,13 @@ namespace NLog.Windows.Forms
 
             string logMessage = RenderLogEvent(Layout, logEvent);
             RichTextBoxRowColoringRule matchingRule = FindMatchingRule(logEvent);
-
             bool messageSent = DoSendMessageToTextbox(logMessage, matchingRule, logEvent);
 
+            HandleMessageRetension(textbox, logEvent, logMessage, matchingRule, messageSent);
+        }
+
+        private void HandleMessageRetension(RichTextBox? textbox, LogEventInfo logEvent, string logMessage, RichTextBoxRowColoringRule matchingRule, bool messageSent)
+        {
             if (messageSent)
             {
                 //remember last logged text box
@@ -892,8 +964,8 @@ namespace NLog.Windows.Forms
                 {
                     var wordRulePattern = wordRule.Regex?.Render(logEvent) ?? string.Empty;
                     var wordRuleText = wordRule.Text?.Render(logEvent) ?? string.Empty;
-                    var wordRuleWholeWords = wordRule.WholeWords.RenderValue(logEvent);
-                    var wordRuleIgnoreCase = wordRule.IgnoreCase.RenderValue(logEvent);
+                    var wordRuleWholeWords = wordRule.WholeWords?.RenderValue(logEvent) ?? false;
+                    var wordRuleIgnoreCase = wordRule.IgnoreCase?.RenderValue(logEvent) ?? false;
 
                     var matches = wordRule.ResolveRegEx(wordRulePattern, wordRuleText, wordRuleWholeWords, wordRuleIgnoreCase).Matches(textBox.Text, startIndex);
                     foreach (Match? match in matches)
