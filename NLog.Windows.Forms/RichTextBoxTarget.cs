@@ -153,7 +153,7 @@ namespace NLog.Windows.Forms
             return loggingConfiguration.AllTargets.OfType<RichTextBoxTarget>();
         }
 
-        private static ReadOnlyCollection<RichTextBoxRowColoringRule> CreateDefaultColoringRules()
+        private static List<RichTextBoxRowColoringRule> CreateDefaultColoringRules()
         {
             return new List<RichTextBoxRowColoringRule>()
             {
@@ -163,7 +163,7 @@ namespace NLog.Windows.Forms
                 new RichTextBoxRowColoringRule() { Condition = "level == LogLevel.Info", FontColor  = "Black" },
                 new RichTextBoxRowColoringRule() { Condition = "level == LogLevel.Debug", FontColor  = "Gray" },
                 new RichTextBoxRowColoringRule() { Condition = "level == LogLevel.Trace", FontColor  = "DarkGray", Style = FontStyle.Italic },
-            }.AsReadOnly();
+            };
         }
 
         /// <summary>
@@ -209,7 +209,9 @@ namespace NLog.Windows.Forms
         /// <summary>
         /// Gets the default set of row coloring rules which applies when <see cref="UseDefaultRowColoringRules"/> is set to true.
         /// </summary>
-        public static ReadOnlyCollection<RichTextBoxRowColoringRule> DefaultRowColoringRules { get; } = CreateDefaultColoringRules();
+        public static ReadOnlyCollection<RichTextBoxRowColoringRule> DefaultRowColoringRules => _defaultRowColoringRules ?? (_defaultRowColoringRules = _defaultRowColoringRuleList.AsReadOnly());
+        private static ReadOnlyCollection<RichTextBoxRowColoringRule>? _defaultRowColoringRules;
+        private static readonly List<RichTextBoxRowColoringRule> _defaultRowColoringRuleList = CreateDefaultColoringRules();
 
         /// <summary>
         /// Gets or sets the Name of RichTextBox to which Nlog will write.
@@ -235,14 +237,16 @@ namespace NLog.Windows.Forms
         /// </summary>
         /// <docgen category='Highlighting Options' order='10' />
         [ArrayParameter(typeof(RichTextBoxRowColoringRule), "row-coloring")]
-        public IList<RichTextBoxRowColoringRule> RowColoringRules { get; } = new List<RichTextBoxRowColoringRule>();
+        public IList<RichTextBoxRowColoringRule> RowColoringRules => _rowColoringRules;
+        private readonly List<RichTextBoxRowColoringRule> _rowColoringRules = new List<RichTextBoxRowColoringRule>();
 
         /// <summary>
         /// Gets the word highlighting rules.
         /// </summary>
         /// <docgen category='Highlighting Options' order='10' />
         [ArrayParameter(typeof(RichTextBoxWordColoringRule), "word-coloring")]
-        public IList<RichTextBoxWordColoringRule> WordColoringRules { get; } = new List<RichTextBoxWordColoringRule>();
+        public IList<RichTextBoxWordColoringRule> WordColoringRules => _wordColoringRules;
+        private readonly List<RichTextBoxWordColoringRule> _wordColoringRules = new List<RichTextBoxWordColoringRule>();
 
         /// <summary>
         /// Gets or sets a value indicating whether the created window will be a tool window.
@@ -911,9 +915,9 @@ namespace NLog.Windows.Forms
         private RichTextBoxRowColoringRule FindMatchingRule(LogEventInfo logEvent)
         {
             //custom rules first
-            if (RowColoringRules.Count > 0)
+            if (_rowColoringRules.Count > 0)
             {
-                foreach (RichTextBoxRowColoringRule coloringRule in RowColoringRules)
+                foreach (RichTextBoxRowColoringRule coloringRule in _rowColoringRules)
                 {
                     if (coloringRule.CheckCondition(logEvent))
                     {
@@ -922,9 +926,9 @@ namespace NLog.Windows.Forms
                 }
             }
 
-            if (UseDefaultRowColoringRules && DefaultRowColoringRules != null)
+            if (UseDefaultRowColoringRules)
             {
-                foreach (RichTextBoxRowColoringRule coloringRule in DefaultRowColoringRules)
+                foreach (RichTextBoxRowColoringRule coloringRule in _defaultRowColoringRuleList)
                 {
                     if (coloringRule.CheckCondition(logEvent))
                     {
@@ -957,10 +961,10 @@ namespace NLog.Windows.Forms
             textBox.AppendText(logMessage + "\n");
             textBox.SelectionLength = textBox.TextLength - textBox.SelectionStart;
 
-            if (WordColoringRules.Count > 0)
+            if (_wordColoringRules.Count > 0)
             {
                 // find word to color
-                foreach (RichTextBoxWordColoringRule wordRule in WordColoringRules)
+                foreach (RichTextBoxWordColoringRule wordRule in _wordColoringRules)
                 {
                     var wordRulePattern = wordRule.Regex?.Render(logEvent) ?? string.Empty;
                     var wordRuleText = wordRule.Text?.Render(logEvent) ?? string.Empty;
