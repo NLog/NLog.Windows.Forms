@@ -22,7 +22,9 @@
 		<PackageReleaseNotes>
 Changelog:
       
-- NLog v6.0.2
+- Updated NLog v6.0.3
+- Optimize RichTextBox target when used together with AsyncWrapper target
+- Optimize RichTextBox target to reduce enumerator allocation for row and word highlighting
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
@@ -42,7 +44,7 @@ Changelog:
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="6.0.2" />
+		<PackageReference Include="NLog" Version="6.0.3" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
