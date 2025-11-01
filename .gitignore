@@ -183,3 +183,4 @@ UpgradeLog*.htm
 FakesAssemblies/
 .vs
 /NLog.Windows.Forms/N.png
+NLog.xsd
