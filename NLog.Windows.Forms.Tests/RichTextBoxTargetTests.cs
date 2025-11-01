@@ -379,6 +379,49 @@ namespace NLog.Windows.Forms.Tests
 
         [Fact]
         [LogManagerReset]
+        public void BatchWriteTest()
+        {
+            try
+            {
+                RichTextBoxTarget target = new RichTextBoxTarget()
+                {
+                    ControlName = "Control1",
+                    Layout = "${message}",
+                    ToolWindow = false,
+                    AutoScroll = true,
+                };
+
+                Assert.Equal(0, target.MaxLines);
+                target.MaxLines = 7;
+
+                ManualResetEvent manualResetEvent = new ManualResetEvent(false);
+
+                var form = target.TargetForm;
+                NLog.LogManager.Setup().LoadConfiguration(cfg => cfg.ForLogger().WriteTo(target).WithBuffering());
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    for (int i = 0; i < 100; ++i)
+                    {
+                        logger.Info("Test {0}", i);
+                    }
+                    NLog.LogManager.Flush();
+                    manualResetEvent.Set();
+                });
+                manualResetEvent.WaitOne(10000);
+
+                Application.DoEvents();
+                string expectedText = "Test 93\nTest 94\nTest 95\nTest 96\nTest 97\nTest 98\nTest 99\n";
+
+                Assert.Equal(expectedText, target.TargetRichTextBox.Text);
+            }
+            finally
+            {
+                LogManager.Configuration = null;
+            }
+        }
+
+        [Fact]
+        [LogManagerReset]
         public void ColoringRuleDefaults()
         {
             var expectedRules = new[]
