@@ -9,6 +9,10 @@ namespace NLog.Windows.Forms
     /// <summary>
     /// Logs text to Windows.Forms.Control.Text property control of specified Name.
     /// </summary>
+    /// <remarks>
+    /// <a href="https://github.com/NLog/NLog.Windows.Forms/wiki/FormControlTarget">See NLog Wiki</a>
+    /// </remarks>
+    /// <seealso href="https://github.com/NLog/NLog.Windows.Forms/wiki/FormControlTarget">Documentation on NLog Wiki</seealso>
     /// <example>
     /// <p>
     /// To set up the target in the <a href="config.html">configuration file</a>, 
