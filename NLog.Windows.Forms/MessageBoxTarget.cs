@@ -11,7 +11,10 @@ namespace NLog.Windows.Forms
     /// <summary>
     /// Pops up log messages as message boxes.
     /// </summary>
-    /// <seealso href="https://github.com/nlog/nlog/wiki/MessageBox-target">Documentation on NLog Wiki</seealso>
+    /// <remarks>
+    /// <a href="https://github.com/NLog/NLog.Windows.Forms/wiki/MessageBoxTarget">See NLog Wiki</a>
+    /// </remarks>
+    /// <seealso href="https://github.com/NLog/NLog.Windows.Forms/wiki/MessageBoxTarget">Documentation on NLog Wiki</seealso>
     /// <example>
     /// <p>
     /// To set up the target in the <a href="config.html">configuration file</a>, 

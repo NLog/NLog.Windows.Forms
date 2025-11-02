@@ -10,6 +10,7 @@ namespace NLog.Windows.Forms
     /// <summary>
     /// Strings rendered with this rendrer would convert to links in the control. <see cref="RichTextBoxTarget.SupportLinks" />
     /// </summary>
+    /// <seealso href="https://github.com/NLog/NLog.Windows.Forms/wiki/RTB-Link-Layout-Renderer">Documentation on NLog Wiki</seealso>
     /// <remarks>
     /// Internally this renderer replaces the rendered text with a GUID and stores the info in <see cref="LogEventInfo.Properties" /> by <see cref="LinkInfo.PropertyName" /> as a key
     /// Actual rendering is done in <see cref="RichTextBoxTarget.SendTheMessageToRichTextBox" />
