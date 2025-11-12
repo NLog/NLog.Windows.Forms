@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows;net8.0-windows</TargetFrameworks>
+		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows;net8.0-windows;net10.0-windows</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
 		<AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
 		<AssemblyVersion>6.0.0.0</AssemblyVersion>
@@ -22,9 +22,7 @@
 		<PackageReleaseNotes>
 Changelog:
       
-- Updated NLog v6.0.3
-- Optimize RichTextBox target when used together with AsyncWrapper target
-- Optimize RichTextBox target to reduce enumerator allocation for row and word highlighting
+- Added NET10 targetframework
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
