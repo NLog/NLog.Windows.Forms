@@ -22,7 +22,7 @@
 		<PackageReleaseNotes>
 Changelog:
       
-- Added NET10 targetframework
+- Updated NLog version 6.1.1
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
@@ -42,7 +42,7 @@ Changelog:
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="6.0.3" />
+		<PackageReference Include="NLog" Version="6.1.1" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
