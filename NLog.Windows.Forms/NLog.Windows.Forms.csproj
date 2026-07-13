@@ -22,7 +22,7 @@
 		<PackageReleaseNotes>
 Changelog:
       
-- Updated NLog version 6.1.1
+- Updated NLog version 6.1.4
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
@@ -42,7 +42,7 @@ Changelog:
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="6.1.1" />
+		<PackageReference Include="NLog" Version="6.1.4" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
