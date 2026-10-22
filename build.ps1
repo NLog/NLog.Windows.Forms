@@ -10,7 +10,7 @@ if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
     $versionSuffix = "PR" + $env:APPVEYOR_PULL_REQUEST_NUMBER
 }
 
-dotnet build /p:Configuration=Release /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg /maxcpucount /p:VersionPrefix=$versionPrefix /p:VersionSuffix=$versionSuffix /p:FileVersion=$versionFile /p:ContinuousIntegrationBuild=true /p:EmbedUntrackedSources=true /verbosity:minimal
+dotnet build /p:Configuration=Release /p:IncludeSymbols=true /p:SymbolPackageFormat=snupkg /maxcpucount /p:VersionPrefix=$versionPrefix /p:VersionSuffix=$versionSuffix /p:FileVersion=$versionFile /p:ContinuousIntegrationBuild=true /p:EmbedUntrackedSources=true /p:PublishRepositoryUrl=true /verbosity:minimal
 if (-Not $LastExitCode -eq 0) {
     exit $LastExitCode 
 }
