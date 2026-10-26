@@ -43,7 +43,6 @@ Changelog:
 
 	<ItemGroup>
 		<PackageReference Include="NLog" Version="6.1.4" />
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
