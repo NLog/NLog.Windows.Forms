@@ -14,23 +14,24 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            3.1.x
-            6.0.x
-            8.0.x
-            10.0.x
       - name: Restore solution
         run: dotnet restore NLog.Windows.Forms.sln
       - name: Build solution and packages
-        run: dotnet build NLog.Windows.Forms.sln --no-restore --configuration Release --verbosity minimal --property:IncludeSymbols=true --property:SymbolPackageFormat=snupkg --property:ContinuousIntegrationBuild=true --property:PublishRepositoryUrl=true
+        run: dotnet build NLog.Windows.Forms.sln --no-restore --configuration Release --verbosity minimal --property:GeneratePackageOnBuild=false --property:ContinuousIntegrationBuild=true --property:PublishRepositoryUrl=true
+
+  create-package:
+    needs: [build, test]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create NuGet packages
+        run: dotnet pack NLog.Windows.Forms/NLog.Windows.Forms.csproj --configuration Release --verbosity minimal --property:IncludeSymbols=true --property:SymbolPackageFormat=snupkg --property:GeneratePackageOnBuild=false --property:ContinuousIntegrationBuild=true --property:PublishRepositoryUrl=true
       - uses: actions/upload-artifact@v4
         with:
           name: packages
           path: |
-            **/NLog.*.nupkg
-            **/NLog.*.snupkg
+            NLog.Windows.Forms/bin/Release/*.nupkg
+            NLog.Windows.Forms/bin/Release/*.snupkg
           if-no-files-found: error
 
   test:
@@ -47,13 +48,6 @@ jobs:
           - net10.0-windows
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            3.1.x
-            6.0.x
-            8.0.x
-            10.0.x
       - name: Test ${{ matrix.framework }}
         run: dotnet test NLog.Windows.Forms.Tests/NLog.Windows.Forms.Tests.csproj --framework ${{ matrix.framework }} --configuration Release --logger GitHubActions --collect:"XPlat Code Coverage"
       - uses: actions/upload-artifact@v4
