@@ -1,14 +1,8 @@
 How to release a new version
 ===
 
-1. Change `version` and `assembly_informational_version` in [appveyor.yml](appveyor.yml), according to [semver](semver.org). 
- - Only change `assembly_version` which each major version! 
-2. Wait for build completion on [AppVeyor](https://ci.appveyor.com).
-3. Push to NuGet by in AppVeyor:
-  1. Chooser "deployments"
-  2. Hover "Nuget.org & SymbolSource.org" and press "update"
-  3. Hover proper build and press "publish"
-4. Check/update changelog in NuGet (if you have proper rights)   
-5. Create a GitHub release.   (tag should start with `v`). Copy (and edit) changelog from NuGet
-6. Close GitHub milestone
-7. Optional: Twitter
+1. Update `VersionPrefix` and package release notes in [NLog.Windows.Forms.csproj](NLog.Windows.Forms/NLog.Windows.Forms.csproj) according to semantic versioning. Change `AssemblyVersion` only for a major release.
+2. Wait for the GitHub Actions workflow to pass.
+3. Build and publish the NuGet package through the project's release process; CI does not publish packages.
+4. Create a GitHub release with a tag starting with `v` and include the changelog.
+5. Close the GitHub milestone.

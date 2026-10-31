@@ -2,8 +2,10 @@
 	<PropertyGroup>
 		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows;net8.0-windows;net10.0-windows</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
+		<VersionPrefix>6.1.4</VersionPrefix>
 		<AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
 		<AssemblyVersion>6.0.0.0</AssemblyVersion>
+		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<Company>NLog</Company>
 		<Product>NLog.Windows.Forms</Product>
 		<Description>Extend NLog with targets for Windows Forms applications. For example: writing to a richtextbox or raising alert popups. </Description>
@@ -39,6 +41,12 @@ Changelog:
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+	</PropertyGroup>
+	<PropertyGroup>
+		<NuGetAudit>true</NuGetAudit>
+		<NuGetAuditMode>all</NuGetAuditMode>
+		<NuGetAuditLevel>low</NuGetAuditLevel>
+		<WarningsAsErrors>$(WarningsAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904</WarningsAsErrors>
 	</PropertyGroup>
 
 	<ItemGroup>

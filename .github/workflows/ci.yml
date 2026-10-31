@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+            8.0.x
+            10.0.x
+      - name: Restore solution
+        run: dotnet restore NLog.Windows.Forms.sln
+      - name: Build solution and packages
+        run: dotnet build NLog.Windows.Forms.sln --no-restore --configuration Release --verbosity minimal --property:IncludeSymbols=true --property:SymbolPackageFormat=snupkg --property:ContinuousIntegrationBuild=true --property:PublishRepositoryUrl=true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            **/NLog.*.nupkg
+            **/NLog.*.snupkg
+          if-no-files-found: error
+
+  test:
+    needs: build
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        framework:
+          - net462
+          - netcoreapp3.1
+          - net6.0-windows
+          - net8.0-windows
+          - net10.0-windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+            8.0.x
+            10.0.x
+      - name: Test ${{ matrix.framework }}
+        run: dotnet test NLog.Windows.Forms.Tests/NLog.Windows.Forms.Tests.csproj --framework ${{ matrix.framework }} --configuration Release --logger GitHubActions --collect:"XPlat Code Coverage"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.framework }}
+          path: NLog.Windows.Forms.Tests/TestResults/**/coverage.cobertura.xml
+          if-no-files-found: error
+
+  coverage:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage
+          merge-multiple: true
+      - uses: codecov/codecov-action@v5
+        with:
+          files: coverage/**/coverage.cobertura.xml
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}

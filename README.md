@@ -1,6 +1,6 @@
 # NLog.Windows.Forms
 [![Version](https://badge.fury.io/nu/NLog.Windows.Forms.svg)](https://www.nuget.org/packages/NLog.Windows.Forms)
-[![AppVeyor](https://img.shields.io/appveyor/ci/nlog/nlog-windows-forms/master.svg)](https://ci.appveyor.com/project/nlog/nlog-windows-forms/branch/master)
+[![CI](https://github.com/NLog/NLog.Windows.Forms/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/NLog/NLog.Windows.Forms/actions/workflows/ci.yml)
 [![codecov.io](https://codecov.io/github/NLog/NLog.Windows.Forms/coverage.svg?branch=master)](https://codecov.io/github/NLog/NLog.Windows.Forms?branch=master)
 
 This package provides NLog targets for displaying log output in Windows Forms applications.
