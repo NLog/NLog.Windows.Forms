@@ -2,72 +2,163 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
   pull_request:
-    branches: [master]
+  workflow_dispatch:
+    inputs:
+      force_nuget_publish:
+        description: Force NuGet publish for non-master builds
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+env:
+  SOLUTION: NLog.Windows.Forms.sln
+
 jobs:
   build:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Restore solution
-        run: dotnet restore NLog.Windows.Forms.sln
-      - name: Build solution and packages
-        run: dotnet build NLog.Windows.Forms.sln --no-restore --configuration Release --verbosity minimal --property:GeneratePackageOnBuild=false --property:ContinuousIntegrationBuild=true --property:PublishRepositoryUrl=true
-
-  create-package:
-    needs: [build, test]
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create NuGet packages
-        run: dotnet pack NLog.Windows.Forms/NLog.Windows.Forms.csproj --configuration Release --verbosity minimal --property:IncludeSymbols=true --property:SymbolPackageFormat=snupkg --property:GeneratePackageOnBuild=false --property:ContinuousIntegrationBuild=true --property:PublishRepositoryUrl=true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: packages
-          path: |
-            NLog.Windows.Forms/bin/Release/*.nupkg
-            NLog.Windows.Forms/bin/Release/*.snupkg
-          if-no-files-found: error
-
-  test:
-    needs: build
-    runs-on: windows-latest
+    name: ${{ matrix.name }}
     strategy:
       fail-fast: false
       matrix:
-        framework:
-          - net462
-          - netcoreapp3.1
-          - net6.0-windows
-          - net8.0-windows
-          - net10.0-windows
+        include:
+          - framework: net462
+            name: Build & test (net462)
+            test_args: -- RunConfiguration.DisableAppDomain=true
+          - framework: netcoreapp3.1
+            name: Build & test (netcoreapp3.1)
+            test_args: ''
+          - framework: net6.0-windows
+            name: Build & test (net6.0-windows)
+            test_args: ''
+          - framework: net8.0-windows
+            name: Build & test (net8.0-windows)
+            test_args: ''
+          - framework: net10.0-windows
+            name: Build & test (net10.0-windows)
+            test_args: ''
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Test ${{ matrix.framework }}
-        run: dotnet test NLog.Windows.Forms.Tests/NLog.Windows.Forms.Tests.csproj --framework ${{ matrix.framework }} --configuration Release --logger GitHubActions --collect:"XPlat Code Coverage"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v7
+
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION }} --configuration Release --no-restore --property:GeneratePackageOnBuild=false --property:ContinuousIntegrationBuild=true --property:PublishRepositoryUrl=true
+
+      - name: Test
+        run: dotnet test NLog.Windows.Forms.Tests/NLog.Windows.Forms.Tests.csproj --framework ${{ matrix.framework }} --configuration Release --no-restore --no-build --collect:"XPlat Code Coverage" --logger GitHubActions ${{ matrix.test_args }}
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.framework }}
           path: NLog.Windows.Forms.Tests/TestResults/**/coverage.cobertura.xml
           if-no-files-found: error
 
   coverage:
-    needs: test
+    name: Upload coverage to Codecov
+    needs: build
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v7
         with:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
-      - uses: codecov/codecov-action@v5
+
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/**/coverage.cobertura.xml
           fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
+
+  pack:
+    name: Create NuGet package
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION }}
+
+      - name: Determine version suffix
+        id: version
+        shell: pwsh
+        env:
+          REF: ${{ github.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          if ($env:REF -eq "refs/heads/master") {
+            echo "suffix=" >> $env:GITHUB_OUTPUT
+          } elseif ($env:PR_NUMBER) {
+            echo "suffix=pr.$($env:PR_NUMBER).ci.$($env:RUN_NUMBER)" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "suffix=ci.$($env:RUN_NUMBER)" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Create NuGet package
+        shell: pwsh
+        env:
+          VERSION_SUFFIX: ${{ steps.version.outputs.suffix }}
+        run: |
+          $packArguments = @(
+            "NLog.Windows.Forms/NLog.Windows.Forms.csproj",
+            "--no-restore",
+            "--configuration", "Release",
+            "--output", "artifacts",
+            "-p:IncludeSymbols=true",
+            "-p:SymbolPackageFormat=snupkg",
+            "-p:EmbedUntrackedSources=true",
+            "-p:ContinuousIntegrationBuild=true",
+            "-p:PublishRepositoryUrl=true",
+            "-p:GeneratePackageOnBuild=false"
+          )
+          if ($env:VERSION_SUFFIX) {
+            $packArguments += @("--version-suffix", $env:VERSION_SUFFIX)
+          }
+          dotnet pack @packArguments
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: NuGetPackages
+          path: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+          if-no-files-found: error
+
+  publish:
+    name: Publish NuGet package
+    needs: [build, pack]
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_dispatch' && inputs.force_nuget_publish)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download NuGet package
+        uses: actions/download-artifact@v7
+        with:
+          name: NuGetPackages
+          path: artifacts
+
+      - name: NuGet login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to NuGet.org
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
