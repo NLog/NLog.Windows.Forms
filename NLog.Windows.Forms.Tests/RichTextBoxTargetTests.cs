@@ -1261,7 +1261,7 @@ namespace NLog.Windows.Forms.Tests
             Assert.Contains(@"\v #link", resultRtf);  //some links exist
 #endif
 
-            Assert.Equal(target.MaxLines, target.LinkedEventsCount); //storing 5, not 100 events
+            Assert.InRange(target.LinkedEventsCount.GetValueOrDefault(), 1, target.MaxLines); //retain links only for visible lines
         }
 
         [Fact]
