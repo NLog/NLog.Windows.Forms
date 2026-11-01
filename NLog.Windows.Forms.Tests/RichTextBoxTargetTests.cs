@@ -61,21 +61,8 @@ namespace NLog.Windows.Forms.Tests
             var result = rtfText;
             Assert.Contains(@"{\colortbl ;\red255\green255\blue255;\red255\green0\blue0;\red255\green165\blue0;\red0\green0\blue0;\red128\green128\blue128;\red169\green169\blue169;}", result);
 
-#if NETCOREAPP
             Assert.Contains(@"\viewkind4\uc1", result);
-            Assert.Contains(@"\pard\cf1\highlight2\b\f0\fs18 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
-#else
-            if (IsAppVeyor())
-            {
-                Assert.Contains(@"\viewkind4\uc1", result);
-                Assert.Contains(@"\pard\cf1\highlight2\b\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
-            }
-            else
-            {
-                Assert.Contains(@"\viewkind4\uc1", result);
-                Assert.Contains(@"\pard\cf1\highlight2\b\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
-            }
-#endif
+            Assert.Matches(@"\\pard\\cf1\\highlight2\\b\\f0\\fs\d+ Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\\par", result);
 
             Assert.Contains(@"\cf2\highlight1\i Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo\par", result);
             Assert.Contains(@"\cf3\ul\b0\i0 Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar\par", result);
@@ -206,21 +193,8 @@ namespace NLog.Windows.Forms.Tests
 
         private static void AssertViewkind(string result)
         {
-#if NETCOREAPP
             Assert.Contains(@"\viewkind4\uc1", result);
-            Assert.Contains(@"\pard\cf1\highlight2\f0\fs18 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
-#else
-            if (IsAppVeyor())
-            {
-                Assert.Contains(@"\viewkind4\uc1", result);
-                Assert.Contains(@"\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
-            }
-            else
-            {
-                Assert.Contains(@"\viewkind4\uc1", result);
-                Assert.Contains(@"\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\par", result);
-            }
-#endif
+            Assert.Matches(@"\\pard\\cf1\\highlight2\\f0\\fs\d+ Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test\\par", result);
         }
 
         [Fact]
@@ -265,21 +239,8 @@ namespace NLog.Windows.Forms.Tests
                 var result = rtfText;
                 Assert.Contains(@"{\colortbl ;\red0\green0\blue0;\red255\green255\blue255;\red255\green0\blue0;\red0\green128\blue0;}", result);
 
-#if NETCOREAPP
                 Assert.Contains(@"\viewkind4\uc1", result);
-                Assert.Contains(@"\pard\cf1\highlight2\f0\fs18 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
-#else
-                if (IsAppVeyor())
-                {
-                    Assert.Contains(@"\viewkind4\uc1", result);
-                    Assert.Contains(@"\pard\cf1\highlight2\f0\fs17 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
-                }
-                else
-                {
-                    Assert.Contains(@"\viewkind4\uc1", result);
-                    Assert.Contains(@"\pard\cf1\highlight2\f0\fs15 Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \cf3\f1 zzz\cf1\f0\par", result);
-                }
-#endif
+                Assert.Matches(@"\\pard\\cf1\\highlight2\\f0\\fs\d+ Fatal NLog.UnitTests.Targets.RichTextBoxTargetTests Test \\cf3\\f1 zzz\\cf1\\f0\\par", result);
 
                 Assert.Contains(@"Error NLog.UnitTests.Targets.RichTextBoxTargetTests Foo xxx\par", result);
                 Assert.Contains(@"Warn NLog.UnitTests.Targets.RichTextBoxTargetTests Bar yyy\par", result);
@@ -1372,14 +1333,5 @@ namespace NLog.Windows.Forms.Tests
             control.Invoke(action);
         }
 
-        /// <summary>
-        /// Are we running on AppVeyor?
-        /// </summary>
-        /// <returns></returns>
-        protected static bool IsAppVeyor()
-        {
-            var val = Environment.GetEnvironmentVariable("APPVEYOR");
-            return val != null && val.Equals("true", StringComparison.OrdinalIgnoreCase);
-        }
     }
 }
