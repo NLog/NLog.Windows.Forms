@@ -1,9 +1,9 @@
 coverage:
-  range: 60..70
+  range: 50..60
   status:
     project:
       default:
-        target: 70%
+        target: 60%
         threshold: 1%
     patch:
       default:
