@@ -1261,7 +1261,7 @@ namespace NLog.Windows.Forms.Tests
             Assert.Contains(@"\v #link", resultRtf);  //some links exist
 #endif
 
-            Assert.True(target.LinkedEventsCount == target.MaxLines); //storing 5, not 100 events
+            Assert.Equal(target.MaxLines, target.LinkedEventsCount); //storing 5, not 100 events
         }
 
         [Fact]
