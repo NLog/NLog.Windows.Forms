@@ -28,12 +28,6 @@ jobs:
           - framework: net462
             name: Build & test (net462)
             test_args: -- RunConfiguration.DisableAppDomain=true
-          - framework: netcoreapp3.1
-            name: Build & test (netcoreapp3.1)
-            test_args: ''
-          - framework: net6.0-windows
-            name: Build & test (net6.0-windows)
-            test_args: ''
           - framework: net8.0-windows
             name: Build & test (net8.0-windows)
             test_args: ''
