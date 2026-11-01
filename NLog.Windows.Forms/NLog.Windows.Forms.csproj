@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows;net8.0-windows;net10.0-windows</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
-		<VersionPrefix>6.1.4</VersionPrefix>
+		<VersionPrefix>6.2.2</VersionPrefix>
 		<AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
 		<AssemblyVersion>6.0.0.0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
@@ -24,7 +24,7 @@
 		<PackageReleaseNotes>
 Changelog:
       
-- Updated NLog version 6.1.4
+- Updated NLog version 6.2.2
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
@@ -50,7 +50,7 @@ Changelog:
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="6.1.4" />
+		<PackageReference Include="NLog" Version="6.2.2" />
 	</ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
