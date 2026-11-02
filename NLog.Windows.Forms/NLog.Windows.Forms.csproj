@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net35;netcoreapp3.1;net6.0-windows;net8.0-windows;net10.0-windows</TargetFrameworks>
+		<TargetFrameworks>net35;net46;netcoreapp3.1;net6.0-windows;net8.0-windows;net10.0-windows</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
 		<VersionPrefix>6.2.2</VersionPrefix>
 		<AssemblyTitle>NLog.Windows.Forms</AssemblyTitle>
@@ -23,8 +23,8 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
 Changelog:
-      
-- Updated NLog version 6.2.2
+
+- Added TargetFramework .NET Framework 4.6
 		</PackageReleaseNotes>
 
 		<SignAssembly>true</SignAssembly>
@@ -35,13 +35,14 @@ Changelog:
 		<!-- EmbedUntrackedSources for deterministic build -->
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 
-    <DisableImplicitFrameworkReferences Condition=" '$(TargetFramework)' == 'net35' ">true</DisableImplicitFrameworkReferences>
-    <Nullable>enable</Nullable>
-    <LangVersion Condition="'$(TargetFramework)' == 'net35'">9</LangVersion>
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
-	</PropertyGroup>
+		<DisableImplicitFrameworkReferences Condition="'$(TargetFramework)'=='net35' Or '$(TargetFramework)'=='net46'">true</DisableImplicitFrameworkReferences>
+		<Nullable>enable</Nullable>
+		<LangVersion Condition="'$(TargetFramework)'=='net35' Or '$(TargetFramework)'=='net46'">8</LangVersion>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+		<IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+  </PropertyGroup>
+
 	<PropertyGroup>
 		<NuGetAudit>true</NuGetAudit>
 		<NuGetAuditMode>all</NuGetAuditMode>
